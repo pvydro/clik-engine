@@ -49,11 +49,32 @@ export type { MigrationFn } from './save/migration';
 // Physics
 export { PhysicsHelper } from './physics/PhysicsHelper';
 
+// FSM
+export { StateMachine } from './fsm/StateMachine';
+export type { StateHooks, TransitionRule } from './fsm/State';
+
+// Tween
+export { tween, tweenSequence, TweenPresets } from './tween/TweenHelper';
+export { Ease } from './tween/easings';
+export type { EaseName } from './tween/easings';
+
+// Camera
+export { CameraManager } from './camera/CameraManager';
+export type { FollowConfig } from './camera/CameraManager';
+
+// Particles
+export { ParticleManager, ParticlePresets } from './particles/ParticleManager';
+export type { ParticlePresetConfig } from './particles/ParticleManager';
+
 // Scaling
 export { ResponsiveManager } from './scaling/ResponsiveManager';
 
 // Utils
 export { clamp, lerp, randomRange, randomInt } from './utils/math';
+export { Vector2 } from './utils/vector';
+export type { Vec2 } from './utils/vector';
+export { Color } from './utils/color';
+export { pick, shuffle, weightedRandom, SeededRandom } from './utils/random';
 export { ObjectPool } from './utils/pool';
 export { delay, interval } from './utils/timer';
 
