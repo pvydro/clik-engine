@@ -1,4 +1,4 @@
-name: Deploy Docs
+name: Deploy Docs + Playable Games
 
 on:
   push:
@@ -17,6 +17,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      PAGES: "true"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -24,14 +26,24 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+
+      # Generate API docs
       - run: npm run docs --workspace=packages/clik-engine
 
-      # Combine: landing page (docs/) + API reference (docs/api/)
+      # Build example games
+      - run: npm run build --workspace=examples/2048
+      - run: npm run build --workspace=examples/shooter
+      - run: npm run build --workspace=examples/cards
+
+      # Assemble site
       - name: Assemble site
         run: |
-          mkdir -p _site/api
+          mkdir -p _site/api _site/play/2048 _site/play/shooter _site/play/cards
           cp docs/index.html _site/index.html
           cp -r packages/clik-engine/docs/* _site/api/
+          cp -r examples/2048/dist/* _site/play/2048/
+          cp -r examples/shooter/dist/* _site/play/shooter/
+          cp -r examples/cards/dist/* _site/play/cards/
 
       - uses: actions/upload-pages-artifact@v3
         with:
