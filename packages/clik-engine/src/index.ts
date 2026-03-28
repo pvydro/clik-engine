@@ -70,6 +70,7 @@ export type { MigrationFn } from './save/migration';
 export { PhysicsHelper } from './physics/PhysicsHelper';
 export { Raycast } from './physics/Raycast';
 export type { RaycastHit } from './physics/Raycast';
+export { MatterHelper } from './physics/MatterHelper';
 
 // FSM
 export { StateMachine } from './fsm/StateMachine';
@@ -108,6 +109,11 @@ export { Movement } from './entity/components/Movement';
 export { Timer as TimerComponent } from './entity/components/Timer';
 export { Collectible } from './entity/components/Collectible';
 export { Spawner } from './entity/components/Spawner';
+export { DragDrop } from './entity/components/DragDrop';
+
+// Analytics
+export { AnalyticsManager } from './analytics/AnalyticsManager';
+export type { AnalyticsEvent, AnalyticsBackend } from './analytics/AnalyticsManager';
 
 // i18n
 export { I18nManager } from './i18n/I18nManager';
