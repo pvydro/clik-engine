@@ -54,6 +54,8 @@ export { TabBar } from './ui/TabBar';
 export type { TabConfig, TabBarConfig } from './ui/TabBar';
 export { Slider } from './ui/Slider';
 export type { SliderConfig } from './ui/Slider';
+export { ListView } from './ui/ListView';
+export type { ListViewConfig } from './ui/ListView';
 export { Toggle } from './ui/Toggle';
 export type { ToggleConfig } from './ui/Toggle';
 export { Toast } from './ui/Toast';
@@ -96,6 +98,8 @@ export type { EaseName } from './tween/easings';
 // Camera
 export { CameraManager } from './camera/CameraManager';
 export type { FollowConfig } from './camera/CameraManager';
+export { MultiCamera } from './camera/MultiCamera';
+export type { SplitScreenConfig, MinimapConfig } from './camera/MultiCamera';
 
 // Particles
 export { ParticleManager, ParticlePresets } from './particles/ParticleManager';
@@ -103,11 +107,14 @@ export type { ParticlePresetConfig } from './particles/ParticleManager';
 
 // Effects
 export { ShaderManager } from './effects/ShaderManager';
+export { EffectPresets } from './effects/EffectPresets';
 
 // Animation
 export { AnimationHelper, AnimationStateController } from './animation/AnimationManager';
 export type { AnimationDef, AnimationSet } from './animation/AnimationManager';
 export { SpriteAnimator } from './animation/SpriteAnimator';
+export { AnimationEventSystem } from './animation/AnimationEvents';
+export type { AnimationEventDef } from './animation/AnimationEvents';
 
 // Tilemap
 export { TilemapManager } from './tilemap/TilemapManager';

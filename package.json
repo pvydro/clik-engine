@@ -6,12 +6,14 @@
     "packages/create-clik-game",
     "dev-harness",
     "examples/2048",
-    "examples/shooter"
+    "examples/shooter",
+    "examples/cards"
   ],
   "scripts": {
     "dev": "npm run dev --workspace=dev-harness",
     "dev:2048": "npm run dev --workspace=examples/2048",
     "dev:shooter": "npm run dev --workspace=examples/shooter",
+    "dev:cards": "npm run dev --workspace=examples/cards",
     "build": "npm run build --workspace=packages/clik-engine",
     "build:cli": "npm run build --workspace=packages/create-clik-game",
     "test": "npm run test --workspace=packages/clik-engine"

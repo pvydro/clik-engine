@@ -18,6 +18,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev", "--workspace=examples/shooter"],
       "port": 5175
+    },
+    {
+      "name": "example-cards",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--workspace=examples/cards"],
+      "port": 5176
     }
   ]
 }
