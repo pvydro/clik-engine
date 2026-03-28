@@ -167,7 +167,10 @@ TweenPresets.float(this, sprite, 8, 2000); // continuous
 
 ### UI Components
 ```typescript
-import { Button, Slider, Toggle, Toast, Dialog, ProgressBar, Label } from 'clik-engine';
+import { Button, Slider, Toggle, Toast, Dialog, ProgressBar, Label,
+         TextInput, ScrollContainer, GridLayout, TabBar, ListView,
+         NumberInput, ConfirmDialog, Tooltip, Notification,
+         FocusManager, Anchor, UIAnimator } from 'clik-engine';
 
 new Button(this, { x: 400, y: 300, text: 'Play', onClick: () => {} });
 new Slider(this, { x: 100, y: 50, width: 200, value: 0.5, onChange: v => {} });
@@ -197,6 +200,49 @@ const gestures = new GestureDetector(this);
 gestures.on('swipe_left', (e) => moveLeft());
 gestures.on('double_tap', (e) => specialAttack());
 gestures.on('long_press', (e) => openMenu());
+```
+
+### Additional Systems
+```typescript
+// Scene stack (push/pop for menus)
+import { SceneStack } from 'clik-engine';
+const stack = new SceneStack(this.game);
+stack.push('pause-menu');
+stack.pop();
+
+// Event bus (decoupled communication)
+import { eventBus } from 'clik-engine';
+eventBus.on('player:death', () => showGameOver());
+eventBus.emit('score:changed', newScore);
+
+// Entity factory (prefabs)
+import { EntityFactory } from 'clik-engine';
+const factory = new EntityFactory();
+factory.register('coin', (scene, x, y) => { /* build entity */ });
+factory.create('coin', this, 100, 200);
+
+// Timers and cooldowns
+import { GameTimer, Cooldown } from 'clik-engine';
+const cd = new Cooldown(500);
+if (cd.use()) { /* fire weapon */ }
+cd.update(delta);
+
+// Collision groups
+import { CollisionGroups } from 'clik-engine';
+const groups = new CollisionGroups();
+groups.create('player'); groups.create('enemy'); groups.create('bullet');
+groups.setCollides('bullet', ['enemy']);
+
+// Screen transitions
+import { ScreenTransition } from 'clik-engine';
+await ScreenTransition.fadeThrough(this, () => this.scene.start('next'));
+
+// Confirm dialog
+const confirmed = await ConfirmDialog.show({ scene: this, title: 'Quit?', message: 'Are you sure?' });
+
+// Manifest validation
+import { validateManifest } from 'clik-engine';
+const result = validateManifest(manifest); // errors, warnings, stats
 ```
 
 ## Key Conventions

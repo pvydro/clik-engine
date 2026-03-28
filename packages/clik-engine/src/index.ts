@@ -23,6 +23,7 @@ export type { InspectorConfig } from './debug/SceneInspector';
 export { HotState } from './debug/HotState';
 export type { HotStateConfig } from './debug/HotState';
 export { LeakDetector, leakDetector } from './debug/LeakDetector';
+export { VisualTest } from './debug/VisualTest';
 
 // Input
 export { InputManager } from './input/InputManager';
@@ -73,6 +74,8 @@ export type { NotificationConfig } from './ui/Notification';
 export { Anchor } from './ui/Anchor';
 export type { AnchorPosition, AnchorConfig } from './ui/Anchor';
 export { ConfirmDialog } from './ui/ConfirmDialog';
+export { NumberInput } from './ui/NumberInput';
+export type { NumberInputConfig } from './ui/NumberInput';
 export type { ConfirmDialogConfig } from './ui/ConfirmDialog';
 export { setTheme, getTheme, DarkTheme, LightTheme, RetroTheme, NeonTheme } from './ui/Theme';
 export type { Theme, ThemeColors } from './ui/Theme';
@@ -80,6 +83,8 @@ export type { Theme, ThemeColors } from './ui/Theme';
 // Assets
 export { Preloader } from './assets/Preloader';
 export { loadManifestTier, getAllEntries, loadDeferred } from './assets/AssetManifest';
+export { validateManifest } from './assets/ManifestValidator';
+export type { ValidationResult } from './assets/ManifestValidator';
 
 // Audio
 export { AudioManager } from './audio/AudioManager';

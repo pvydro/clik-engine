@@ -129,6 +129,56 @@ export class AnimationHelper {
   getCurrentKey(sprite: Phaser.GameObjects.Sprite): string | null {
     return sprite.anims.currentAnim?.key ?? null;
   }
+
+  /**
+   * Auto-detect and register animations from an atlas based on frame name prefixes.
+   * If atlas has frames: "idle_00", "idle_01", "run_00", "run_01" etc.,
+   * this creates animations "idle" and "run" automatically.
+   *
+   * @param atlasKey The texture atlas key
+   * @param frameRate Default frame rate for all detected animations
+   * @param repeat Default repeat (-1 = loop)
+   */
+  autoDetect(atlasKey: string, frameRate = 10, repeat = -1): string[] {
+    const texture = this.scene.textures.get(atlasKey);
+    if (!texture) {
+      ConsoleReporter.error(`Animation autoDetect: texture '${atlasKey}' not found`);
+      return [];
+    }
+
+    const frameNames = texture.getFrameNames();
+    const groups = new Map<string, string[]>();
+
+    for (const name of frameNames) {
+      // Split on last underscore or last digit sequence
+      const match = name.match(/^(.+?)_?\d+$/);
+      if (match) {
+        const prefix = match[1];
+        if (!groups.has(prefix)) groups.set(prefix, []);
+        groups.get(prefix)!.push(name);
+      }
+    }
+
+    const created: string[] = [];
+    for (const [prefix, frames] of groups) {
+      if (frames.length < 2) continue; // Skip single-frame "animations"
+
+      const key = `${atlasKey}-${prefix}`;
+      if (this.scene.anims.exists(key)) continue;
+
+      frames.sort(); // Ensure frame order
+      this.scene.anims.create({
+        key,
+        frames: frames.map(f => ({ key: atlasKey, frame: f })),
+        frameRate,
+        repeat,
+      });
+      created.push(key);
+      ConsoleReporter.engine(`Animation auto-detected: ${key} (${frames.length} frames)`);
+    }
+
+    return created;
+  }
 }
 
 /**
