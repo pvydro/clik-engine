@@ -136,6 +136,8 @@ export { DragDrop } from './entity/components/DragDrop';
 export { Follower } from './entity/components/Follower';
 export { Lifetime } from './entity/components/Lifetime';
 export { Oscillator } from './entity/components/Oscillator';
+export { Interactable } from './entity/components/Interactable';
+export type { InteractableConfig } from './entity/components/Interactable';
 export { FlashOnHit } from './entity/components/FlashOnHit';
 export { Patrol } from './entity/components/Patrol';
 export type { PatrolPoint } from './entity/components/Patrol';
@@ -173,6 +175,7 @@ export type { LobbyRoom } from './network/Lobby';
 
 // Scaling
 export { ResponsiveManager } from './scaling/ResponsiveManager';
+export { Letterbox } from './scaling/Letterbox';
 export type { Breakpoint, BreakpointConfig } from './scaling/ResponsiveManager';
 
 // Utils
@@ -187,6 +190,7 @@ export { Grid2D, PriorityQueue } from './utils/structures';
 export { findPath } from './utils/pathfinding';
 export type { PathNode } from './utils/pathfinding';
 export { SpatialHash } from './utils/spatial';
+export { GameTimer } from './utils/GameTimer';
 export { formatNumber, formatCompact, formatTime, formatTimePrecise, truncate, padRight, pluralize, ordinal } from './utils/format';
 
 // Types
