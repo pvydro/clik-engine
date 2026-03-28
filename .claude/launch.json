@@ -6,6 +6,18 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev", "--workspace=dev-harness"],
       "port": 5173
+    },
+    {
+      "name": "example-2048",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--workspace=examples/2048"],
+      "port": 5174
+    },
+    {
+      "name": "example-shooter",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--workspace=examples/shooter"],
+      "port": 5175
     }
   ]
 }
