@@ -36,7 +36,7 @@ export type { ProgressBarConfig } from './ui/ProgressBar';
 
 // Assets
 export { Preloader } from './assets/Preloader';
-export { loadManifestTier, getAllEntries } from './assets/AssetManifest';
+export { loadManifestTier, getAllEntries, loadDeferred } from './assets/AssetManifest';
 
 // Audio
 export { AudioManager } from './audio/AudioManager';

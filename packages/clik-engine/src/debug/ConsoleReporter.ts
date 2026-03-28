@@ -10,6 +10,7 @@ export enum ClikLogChannel {
 }
 
 let enabled = true;
+const disabledChannels = new Set<ClikLogChannel>();
 
 export const ConsoleReporter = {
   enable(): void {
@@ -20,8 +21,30 @@ export const ConsoleReporter = {
     enabled = false;
   },
 
+  enableChannel(channel: ClikLogChannel): void {
+    disabledChannels.delete(channel);
+  },
+
+  disableChannel(channel: ClikLogChannel): void {
+    disabledChannels.add(channel);
+  },
+
+  setChannels(channels: ClikLogChannel[], enabledState: boolean): void {
+    for (const ch of channels) {
+      if (enabledState) {
+        disabledChannels.delete(ch);
+      } else {
+        disabledChannels.add(ch);
+      }
+    }
+  },
+
+  isChannelEnabled(channel: ClikLogChannel): boolean {
+    return enabled && !disabledChannels.has(channel);
+  },
+
   log(channel: ClikLogChannel, message: string, data?: unknown): void {
-    if (!enabled) return;
+    if (!enabled || disabledChannels.has(channel)) return;
     const prefix = `[${channel}]`;
     if (data !== undefined) {
       console.log(prefix, message, data);
@@ -43,6 +66,7 @@ export const ConsoleReporter = {
   },
 
   error(message: string, suggestion?: string): void {
+    // Errors always log regardless of channel filter
     const prefix = `[${ClikLogChannel.ERROR}]`;
     console.error(prefix, message);
     if (suggestion) {

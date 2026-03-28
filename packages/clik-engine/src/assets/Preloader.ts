@@ -6,17 +6,20 @@ import type { AssetManifest } from '../utils/types';
 export class Preloader extends Phaser.Scene {
   protected manifest: AssetManifest | null = null;
   protected nextScene = '';
+  private failedAssets: string[] = [];
 
   private progressBar!: Phaser.GameObjects.Graphics;
   private progressBox!: Phaser.GameObjects.Graphics;
   private loadingText!: Phaser.GameObjects.Text;
   private percentText!: Phaser.GameObjects.Text;
+  private fileText!: Phaser.GameObjects.Text;
 
   constructor(config?: string | Phaser.Types.Scenes.SettingsConfig) {
     super(config ?? { key: 'preload' });
   }
 
   init(data?: { manifest?: AssetManifest; nextScene?: string }): void {
+    this.failedAssets = [];
     if (data?.manifest) this.manifest = data.manifest;
     if (data?.nextScene) this.nextScene = data.nextScene;
     ConsoleReporter.asset('Preloader init', { hasManifest: !!this.manifest, nextScene: this.nextScene });
@@ -47,6 +50,12 @@ export class Preloader extends Phaser.Scene {
       color: '#888888',
     }).setOrigin(0.5);
 
+    this.fileText = this.add.text(width / 2, barY + barHeight + 36, '', {
+      fontSize: '11px',
+      fontFamily: 'monospace',
+      color: '#555555',
+    }).setOrigin(0.5);
+
     this.load.on('progress', (value: number) => {
       this.progressBar.clear();
       this.progressBar.fillStyle(0x00ff88, 1);
@@ -54,16 +63,32 @@ export class Preloader extends Phaser.Scene {
       this.percentText.setText(`${Math.round(value * 100)}%`);
     });
 
+    this.load.on(Phaser.Loader.Events.FILE_PROGRESS, (file: Phaser.Loader.File) => {
+      this.fileText.setText(file.key);
+    });
+
     this.load.on('complete', () => {
-      ConsoleReporter.asset('All assets loaded');
+      if (this.failedAssets.length > 0) {
+        ConsoleReporter.error(
+          `${this.failedAssets.length} asset(s) failed to load: ${this.failedAssets.join(', ')}`,
+          'Check file paths in your AssetManifest.'
+        );
+      }
+      ConsoleReporter.asset('Asset loading complete', {
+        loaded: (this.load.totalComplete ?? 0) - this.failedAssets.length,
+        failed: this.failedAssets.length,
+      });
     });
 
     if (this.manifest) {
+      const onError = (key: string) => {
+        this.failedAssets.push(key);
+      };
       if (this.manifest.boot) {
-        loadManifestTier(this.load, this.manifest.boot);
+        loadManifestTier(this.load, this.manifest.boot, onError);
       }
       if (this.manifest.main) {
-        loadManifestTier(this.load, this.manifest.main);
+        loadManifestTier(this.load, this.manifest.main, onError);
       }
     }
   }
@@ -73,6 +98,7 @@ export class Preloader extends Phaser.Scene {
     this.progressBox.destroy();
     this.loadingText.destroy();
     this.percentText.destroy();
+    this.fileText.destroy();
 
     if (this.nextScene) {
       ConsoleReporter.scene(`Preloader complete, starting: ${this.nextScene}`);

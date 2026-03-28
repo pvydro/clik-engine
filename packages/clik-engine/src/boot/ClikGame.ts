@@ -9,6 +9,22 @@ import { GridOverlay } from '../debug/GridOverlay';
 export function createGame(config: ClikGameConfig): Phaser.Game {
   ConsoleReporter.engine(`Creating game: ${config.name}`);
 
+  // Startup validation
+  if (!config.scenes.length) {
+    ConsoleReporter.error('No scenes defined in ClikGameConfig', 'Add at least one scene to the scenes array.');
+  }
+  const sceneKeys = config.scenes.map(s => s.key);
+  const duplicateKeys = sceneKeys.filter((k, i) => sceneKeys.indexOf(k) !== i);
+  if (duplicateKeys.length > 0) {
+    ConsoleReporter.error(`Duplicate scene keys: ${duplicateKeys.join(', ')}`, 'Each scene must have a unique key.');
+  }
+  if (config.devStartScene && !sceneKeys.includes(config.devStartScene)) {
+    ConsoleReporter.error(
+      `devStartScene '${config.devStartScene}' not found in scenes`,
+      `Available scenes: ${sceneKeys.join(', ')}`
+    );
+  }
+
   const scalePreset = config.scale ?? 'auto';
   const scaleConfig = getScaleConfig(scalePreset);
   const debug = config.debug ?? false;
@@ -59,6 +75,11 @@ export function createGame(config: ClikGameConfig): Phaser.Game {
 
   // Store clik config on the game instance for access from scenes
   (game as ClikGameInstance).__clikConfig = config;
+
+  // Expose game globally in dev for debugging
+  if (debug) {
+    (globalThis as Record<string, unknown>).__CLIK_GAME = game;
+  }
 
   game.events.once(Phaser.Core.Events.READY, () => {
     // Launch debug overlay scenes in parallel (they render on top)

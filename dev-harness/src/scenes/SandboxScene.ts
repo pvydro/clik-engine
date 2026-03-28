@@ -1,9 +1,8 @@
-import { BaseScene, ConsoleReporter } from 'clik-engine';
+import { BaseScene, ConsoleReporter, Button, Transitions } from 'clik-engine';
 import Phaser from 'phaser';
 
 export class SandboxScene extends BaseScene {
   private title!: Phaser.GameObjects.Text;
-  private info!: Phaser.GameObjects.Text;
   private frameCount = 0;
 
   constructor() {
@@ -15,33 +14,55 @@ export class SandboxScene extends BaseScene {
 
     const { width, height } = this.scale;
 
-    this.title = this.add.text(width / 2, height / 2 - 40, 'clik-engine', {
+    this.cameras.main.setBackgroundColor('#000000');
+
+    this.title = this.add.text(width / 2, 80, 'clik-engine', {
       fontSize: '48px',
       fontFamily: 'monospace',
       color: '#00ff88',
       fontStyle: 'bold',
     }).setOrigin(0.5);
 
-    this.info = this.add.text(width / 2, height / 2 + 30, 'dev harness running', {
+    this.add.text(width / 2, 130, 'dev harness running', {
       fontSize: '20px',
       fontFamily: 'monospace',
       color: '#888888',
     }).setOrigin(0.5);
 
-    const versionText = this.add.text(width / 2, height / 2 + 70, 'v0.1.0 | sandbox scene', {
+    this.add.text(width / 2, 160, 'v0.1.0 | sandbox scene', {
       fontSize: '14px',
       fontFamily: 'monospace',
       color: '#555555',
     }).setOrigin(0.5);
 
+    // Transition test buttons
+    new Button(this, {
+      x: width / 2, y: height / 2 + 20,
+      text: 'Fade Transition',
+      onClick: () => this.director.go('sandbox', 'transition-test', Transitions.fade(600)),
+    });
+
+    new Button(this, {
+      x: width / 2, y: height / 2 + 80,
+      text: 'Slide Left',
+      onClick: () => this.director.go('sandbox', 'transition-test', Transitions.slideLeft(500)),
+    });
+
+    new Button(this, {
+      x: width / 2, y: height / 2 + 140,
+      text: 'Zoom Transition',
+      onClick: () => this.director.go('sandbox', 'transition-test', Transitions.zoom(700)),
+    });
+
+    this.inspectState('sandbox', () => ({
+      frames: this.frameCount,
+    }));
+
     ConsoleReporter.scene('SandboxScene ready');
-    ConsoleReporter.state('sandbox.status', 'running');
   }
 
   update(time: number, delta: number): void {
+    super.update(time, delta);
     this.frameCount++;
-    if (this.frameCount % 300 === 0) {
-      ConsoleReporter.state('sandbox.frames', this.frameCount);
-    }
   }
 }
