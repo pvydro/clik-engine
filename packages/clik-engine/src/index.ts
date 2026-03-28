@@ -112,6 +112,14 @@ export type { TranslationData } from './i18n/I18nManager';
 export { DialogueManager } from './dialogue/DialogueManager';
 export type { DialogueLine, DialogueTree, DialogueDisplayConfig } from './dialogue/DialogueManager';
 
+// Accessibility
+export { A11yManager } from './accessibility/A11yManager';
+export type { A11yConfig, ColorBlindMode } from './accessibility/A11yManager';
+
+// Platform
+export { PlatformManager } from './platform/PlatformManager';
+export type { SafeArea } from './platform/PlatformManager';
+
 // Network
 export { NetworkManager } from './network/NetworkManager';
 export type { NetworkConfig, ConnectionState } from './network/NetworkManager';
