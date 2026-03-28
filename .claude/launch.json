@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dev-harness",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--workspace=dev-harness"],
+      "port": 5173
+    }
+  ]
+}

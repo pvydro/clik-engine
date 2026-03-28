@@ -1,0 +1,17 @@
+import { ClikGameConfig, ScalePreset } from 'clik-engine';
+import { GameScene } from './scenes/GameScene';
+
+export const config: ClikGameConfig = {
+  name: '{{name}}',
+  scale: ScalePreset.AUTO,
+  physics: 'arcade',
+  debug: import.meta.env.DEV,
+  devStartScene: 'game',
+  scenes: [
+    { key: 'game', class: GameScene, default: true },
+  ],
+  input: {
+    actions: {},
+  },
+  save: { slots: 1, version: 1 },
+};

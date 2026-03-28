@@ -1,0 +1,12 @@
+{
+  "name": "create-clik-game",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "create-clik-game": "dist/index.js"
+  },
+  "scripts": {
+    "build": "echo 'TODO: build CLI'"
+  }
+}

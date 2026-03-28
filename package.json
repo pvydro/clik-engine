@@ -1,0 +1,14 @@
+{
+  "name": "clik-monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/clik-engine",
+    "packages/create-clik-game",
+    "dev-harness"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=dev-harness",
+    "build": "npm run build --workspace=packages/clik-engine",
+    "build:cli": "npm run build --workspace=packages/create-clik-game"
+  }
+}
