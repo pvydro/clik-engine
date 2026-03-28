@@ -66,6 +66,21 @@ export type { FollowConfig } from './camera/CameraManager';
 export { ParticleManager, ParticlePresets } from './particles/ParticleManager';
 export type { ParticlePresetConfig } from './particles/ParticleManager';
 
+// Animation
+export { AnimationHelper, AnimationStateController } from './animation/AnimationManager';
+export type { AnimationDef, AnimationSet } from './animation/AnimationManager';
+
+// Tilemap
+export { TilemapManager } from './tilemap/TilemapManager';
+export type { TilemapConfig, SpawnPoint } from './tilemap/TilemapManager';
+
+// Entity
+export { Entity } from './entity/Entity';
+export { Component } from './entity/Component';
+export { EntityRegistry } from './entity/EntityRegistry';
+export { Health } from './entity/components/Health';
+export { Movement } from './entity/components/Movement';
+
 // Scaling
 export { ResponsiveManager } from './scaling/ResponsiveManager';
 
