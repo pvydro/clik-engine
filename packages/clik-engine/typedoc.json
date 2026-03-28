@@ -1,0 +1,14 @@
+{
+  "entryPoints": ["src/index.ts"],
+  "out": "docs",
+  "name": "clik-engine API",
+  "readme": "none",
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeInternal": true,
+  "skipErrorChecking": true,
+  "theme": "default",
+  "navigationLinks": {
+    "GitHub": "https://github.com/pvydro/clik-engine"
+  }
+}

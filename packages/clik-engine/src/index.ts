@@ -10,6 +10,7 @@ export { Transitions } from './scenes/transitions';
 export type { TransitionConfig } from './scenes/transitions';
 export { SceneUtils } from './scenes/SceneUtils';
 export { ScreenTransition } from './scenes/ScreenTransition';
+export { SceneStack } from './scenes/SceneStack';
 
 // Debug
 export { ConsoleReporter, ClikLogChannel } from './debug/ConsoleReporter';
@@ -71,6 +72,8 @@ export { Notification } from './ui/Notification';
 export type { NotificationConfig } from './ui/Notification';
 export { Anchor } from './ui/Anchor';
 export type { AnchorPosition, AnchorConfig } from './ui/Anchor';
+export { ConfirmDialog } from './ui/ConfirmDialog';
+export type { ConfirmDialogConfig } from './ui/ConfirmDialog';
 export { setTheme, getTheme, DarkTheme, LightTheme, RetroTheme, NeonTheme } from './ui/Theme';
 export type { Theme, ThemeColors } from './ui/Theme';
 
@@ -94,6 +97,7 @@ export { MatterHelper } from './physics/MatterHelper';
 export { MovingPlatform } from './physics/MovingPlatform';
 export type { PlatformWaypoint } from './physics/MovingPlatform';
 export { PhysicsPool } from './physics/PhysicsPool';
+export { CollisionGroups } from './physics/CollisionGroups';
 
 // FSM
 export { StateMachine } from './fsm/StateMachine';
@@ -133,6 +137,8 @@ export type { TilemapConfig, SpawnPoint } from './tilemap/TilemapManager';
 export { Entity } from './entity/Entity';
 export { Component } from './entity/Component';
 export { EntityRegistry } from './entity/EntityRegistry';
+export { EntityFactory } from './entity/EntityFactory';
+export type { EntityBuilder } from './entity/EntityFactory';
 export { Health } from './entity/components/Health';
 export { Movement } from './entity/components/Movement';
 export { Timer as TimerComponent } from './entity/components/Timer';
@@ -168,6 +174,7 @@ export type { A11yConfig, ColorBlindMode } from './accessibility/A11yManager';
 // Platform
 export { PlatformManager } from './platform/PlatformManager';
 export type { SafeArea } from './platform/PlatformManager';
+export { CapacitorHelper } from './platform/CapacitorHelper';
 
 // Network
 export { NetworkManager } from './network/NetworkManager';
