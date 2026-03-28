@@ -112,6 +112,12 @@ export type { TranslationData } from './i18n/I18nManager';
 export { DialogueManager } from './dialogue/DialogueManager';
 export type { DialogueLine, DialogueTree, DialogueDisplayConfig } from './dialogue/DialogueManager';
 
+// Network
+export { NetworkManager } from './network/NetworkManager';
+export type { NetworkConfig, ConnectionState } from './network/NetworkManager';
+export { Room } from './network/Room';
+export type { RoomPlayer } from './network/Room';
+
 // Scaling
 export { ResponsiveManager } from './scaling/ResponsiveManager';
 
