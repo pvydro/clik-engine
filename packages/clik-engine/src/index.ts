@@ -58,6 +58,8 @@ export type { ToastConfig } from './ui/Toast';
 export { UIAnimator } from './ui/UIAnimator';
 export type { UIAnimationType, UIAnimationConfig } from './ui/UIAnimator';
 export { FocusManager } from './ui/FocusManager';
+export { Anchor } from './ui/Anchor';
+export type { AnchorPosition, AnchorConfig } from './ui/Anchor';
 export { setTheme, getTheme, DarkTheme, LightTheme, RetroTheme, NeonTheme } from './ui/Theme';
 export type { Theme, ThemeColors } from './ui/Theme';
 
@@ -102,6 +104,7 @@ export { ShaderManager } from './effects/ShaderManager';
 // Animation
 export { AnimationHelper, AnimationStateController } from './animation/AnimationManager';
 export type { AnimationDef, AnimationSet } from './animation/AnimationManager';
+export { SpriteAnimator } from './animation/SpriteAnimator';
 
 // Tilemap
 export { TilemapManager } from './tilemap/TilemapManager';
@@ -166,6 +169,7 @@ export { Grid2D, PriorityQueue } from './utils/structures';
 export { findPath } from './utils/pathfinding';
 export type { PathNode } from './utils/pathfinding';
 export { SpatialHash } from './utils/spatial';
+export { formatNumber, formatCompact, formatTime, formatTimePrecise, truncate, padRight, pluralize, ordinal } from './utils/format';
 
 // Types
 export type {
