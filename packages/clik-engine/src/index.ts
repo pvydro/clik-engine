@@ -64,6 +64,10 @@ export type { ToastConfig } from './ui/Toast';
 export { UIAnimator } from './ui/UIAnimator';
 export type { UIAnimationType, UIAnimationConfig } from './ui/UIAnimator';
 export { FocusManager } from './ui/FocusManager';
+export { Tooltip } from './ui/Tooltip';
+export type { TooltipConfig } from './ui/Tooltip';
+export { Notification } from './ui/Notification';
+export type { NotificationConfig } from './ui/Notification';
 export { Anchor } from './ui/Anchor';
 export type { AnchorPosition, AnchorConfig } from './ui/Anchor';
 export { setTheme, getTheme, DarkTheme, LightTheme, RetroTheme, NeonTheme } from './ui/Theme';
@@ -191,6 +195,7 @@ export { findPath } from './utils/pathfinding';
 export type { PathNode } from './utils/pathfinding';
 export { SpatialHash } from './utils/spatial';
 export { GameTimer } from './utils/GameTimer';
+export { Cooldown } from './utils/Cooldown';
 export { formatNumber, formatCompact, formatTime, formatTimePrecise, truncate, padRight, pluralize, ordinal } from './utils/format';
 
 // Types
