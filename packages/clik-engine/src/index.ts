@@ -158,6 +158,8 @@ export { Room } from './network/Room';
 export type { RoomPlayer } from './network/Room';
 export { StateSync } from './network/StateSync';
 export type { SyncedEntity, StateSyncConfig } from './network/StateSync';
+export { Lobby } from './network/Lobby';
+export type { LobbyRoom } from './network/Lobby';
 
 // Scaling
 export { ResponsiveManager } from './scaling/ResponsiveManager';
