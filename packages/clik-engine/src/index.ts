@@ -15,6 +15,10 @@ export { DebugOverlay } from './debug/DebugOverlay';
 export { StateInspector } from './debug/StateInspector';
 export { GridOverlay } from './debug/GridOverlay';
 export { Profiler, profiler } from './debug/Profiler';
+export { SceneInspector } from './debug/SceneInspector';
+export type { InspectorConfig } from './debug/SceneInspector';
+export { HotState } from './debug/HotState';
+export type { HotStateConfig } from './debug/HotState';
 
 // Input
 export { InputManager } from './input/InputManager';
@@ -143,9 +147,12 @@ export { NetworkManager } from './network/NetworkManager';
 export type { NetworkConfig, ConnectionState } from './network/NetworkManager';
 export { Room } from './network/Room';
 export type { RoomPlayer } from './network/Room';
+export { StateSync } from './network/StateSync';
+export type { SyncedEntity, StateSyncConfig } from './network/StateSync';
 
 // Scaling
 export { ResponsiveManager } from './scaling/ResponsiveManager';
+export type { Breakpoint, BreakpointConfig } from './scaling/ResponsiveManager';
 
 // Utils
 export { clamp, lerp, randomRange, randomInt } from './utils/math';
@@ -158,6 +165,7 @@ export { delay, interval } from './utils/timer';
 export { Grid2D, PriorityQueue } from './utils/structures';
 export { findPath } from './utils/pathfinding';
 export type { PathNode } from './utils/pathfinding';
+export { SpatialHash } from './utils/spatial';
 
 // Types
 export type {

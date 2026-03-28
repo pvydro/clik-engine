@@ -136,4 +136,60 @@ export const PhysicsHelper = {
   createStaticGroup(scene: Phaser.Scene): Phaser.Physics.Arcade.StaticGroup {
     return scene.physics.add.staticGroup();
   },
+
+  // --- One-Way Platforms ---
+
+  /**
+   * Make a platform one-way (passable from below, solid from above).
+   * Call this in the collider's process callback.
+   */
+  oneWayPlatformCheck(
+    player: Phaser.GameObjects.GameObject,
+    platform: Phaser.GameObjects.GameObject,
+  ): boolean {
+    const playerBody = (player as Phaser.Types.Physics.Arcade.GameObjectWithBody).body as Phaser.Physics.Arcade.Body;
+    const platBody = (platform as Phaser.Types.Physics.Arcade.GameObjectWithBody).body as Phaser.Physics.Arcade.Body;
+    if (!playerBody || !platBody) return false;
+
+    // Only collide if player is falling and above the platform
+    return playerBody.velocity.y >= 0 && playerBody.bottom <= platBody.top + 10;
+  },
+
+  /** Check if body is touching a wall on left */
+  isOnLeftWall(obj: Phaser.GameObjects.GameObject): boolean {
+    const body = (obj as Phaser.Types.Physics.Arcade.GameObjectWithBody).body as Phaser.Physics.Arcade.Body;
+    return body?.blocked?.left ?? false;
+  },
+
+  /** Check if body is touching a wall on right */
+  isOnRightWall(obj: Phaser.GameObjects.GameObject): boolean {
+    const body = (obj as Phaser.Types.Physics.Arcade.GameObjectWithBody).body as Phaser.Physics.Arcade.Body;
+    return body?.blocked?.right ?? false;
+  },
+
+  /** Check if body is touching ceiling */
+  isOnCeiling(obj: Phaser.GameObjects.GameObject): boolean {
+    const body = (obj as Phaser.Types.Physics.Arcade.GameObjectWithBody).body as Phaser.Physics.Arcade.Body;
+    return body?.blocked?.up ?? false;
+  },
+
+  /** Apply an impulse (instant velocity change) */
+  impulse(obj: Phaser.GameObjects.GameObject, x: number, y: number): void {
+    const body = (obj as Phaser.Types.Physics.Arcade.GameObjectWithBody).body as Phaser.Physics.Arcade.Body;
+    if (body) {
+      body.velocity.x += x;
+      body.velocity.y += y;
+    }
+  },
+
+  /** Set body as kinematic (moves via velocity, not affected by collisions) */
+  setAllowGravity(obj: Phaser.GameObjects.GameObject, allow: boolean): void {
+    const body = (obj as Phaser.Types.Physics.Arcade.GameObjectWithBody).body as Phaser.Physics.Arcade.Body;
+    if (body) body.allowGravity = allow;
+  },
+
+  /** Get the physics body of a game object */
+  getBody(obj: Phaser.GameObjects.GameObject): Phaser.Physics.Arcade.Body | null {
+    return ((obj as Phaser.Types.Physics.Arcade.GameObjectWithBody).body as Phaser.Physics.Arcade.Body) ?? null;
+  },
 };
