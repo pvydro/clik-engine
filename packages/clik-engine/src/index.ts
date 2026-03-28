@@ -49,6 +49,8 @@ export { Toggle } from './ui/Toggle';
 export type { ToggleConfig } from './ui/Toggle';
 export { Toast } from './ui/Toast';
 export type { ToastConfig } from './ui/Toast';
+export { UIAnimator } from './ui/UIAnimator';
+export type { UIAnimationType, UIAnimationConfig } from './ui/UIAnimator';
 export { setTheme, getTheme, DarkTheme, LightTheme, RetroTheme, NeonTheme } from './ui/Theme';
 export type { Theme, ThemeColors } from './ui/Theme';
 
@@ -85,6 +87,9 @@ export type { FollowConfig } from './camera/CameraManager';
 // Particles
 export { ParticleManager, ParticlePresets } from './particles/ParticleManager';
 export type { ParticlePresetConfig } from './particles/ParticleManager';
+
+// Effects
+export { ShaderManager } from './effects/ShaderManager';
 
 // Animation
 export { AnimationHelper, AnimationStateController } from './animation/AnimationManager';
