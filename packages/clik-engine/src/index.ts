@@ -20,6 +20,9 @@ export { InputManager } from './input/InputManager';
 export { ActionMap } from './input/ActionMap';
 export { VirtualControls } from './input/VirtualControls';
 export type { VirtualControlsConfig } from './input/VirtualControls';
+export { GestureDetector } from './input/GestureDetector';
+export type { GestureType, GestureEvent, GestureConfig } from './input/GestureDetector';
+export { InputRecorder } from './input/InputRecorder';
 
 // UI
 export { UIScene } from './ui/UIScene';
@@ -33,6 +36,14 @@ export { Label } from './ui/Label';
 export type { LabelConfig } from './ui/Label';
 export { ProgressBar } from './ui/ProgressBar';
 export type { ProgressBarConfig } from './ui/ProgressBar';
+export { Slider } from './ui/Slider';
+export type { SliderConfig } from './ui/Slider';
+export { Toggle } from './ui/Toggle';
+export type { ToggleConfig } from './ui/Toggle';
+export { Toast } from './ui/Toast';
+export type { ToastConfig } from './ui/Toast';
+export { setTheme, getTheme, DarkTheme, LightTheme, RetroTheme, NeonTheme } from './ui/Theme';
+export type { Theme, ThemeColors } from './ui/Theme';
 
 // Assets
 export { Preloader } from './assets/Preloader';
