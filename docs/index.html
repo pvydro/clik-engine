@@ -3,487 +3,376 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>clik-engine — Claude-Native Game Engine</title>
+  <title>clik-engine docs</title>
   <style>
-    :root {
-      --bg: #0d1117;
-      --surface: #161b22;
-      --border: #30363d;
-      --text: #e6edf3;
-      --text-secondary: #8b949e;
-      --accent: #00ff88;
-      --accent-dim: #00cc6a;
-      --link: #58a6ff;
-      --code-bg: #1c2128;
-    }
+    :root { --bg: #111; --text: #ccc; --dim: #777; --accent: #0a0; --border: #222; --code: #1a1a1a; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-    }
-    a { color: var(--link); text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    code {
-      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-      background: var(--code-bg);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 0.9em;
-    }
-    pre {
-      background: var(--code-bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 16px;
-      overflow-x: auto;
-      font-size: 0.85em;
-      line-height: 1.5;
-    }
+    body { font-family: monospace; background: var(--bg); color: var(--text); line-height: 1.7; font-size: 14px; }
+    a { color: var(--accent); }
+    code { background: var(--code); padding: 1px 5px; border-radius: 3px; font-size: 13px; }
+    pre { background: var(--code); border: 1px solid var(--border); border-radius: 4px; padding: 12px 16px; overflow-x: auto; margin: 12px 0; font-size: 13px; line-height: 1.5; }
     pre code { background: none; padding: 0; }
-
-    /* Header */
-    .header {
-      border-bottom: 1px solid var(--border);
-      padding: 16px 0;
-      position: sticky;
-      top: 0;
-      background: var(--bg);
-      z-index: 100;
-    }
-    .header-inner {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .header h1 {
-      font-size: 20px;
-      font-weight: 600;
-      color: var(--accent);
-      font-family: monospace;
-    }
-    .header nav { display: flex; gap: 20px; }
-    .header nav a {
-      color: var(--text-secondary);
-      font-size: 14px;
-      font-weight: 500;
-    }
-    .header nav a:hover { color: var(--text); text-decoration: none; }
-
-    /* Hero */
-    .hero {
-      text-align: center;
-      padding: 80px 24px 60px;
-      border-bottom: 1px solid var(--border);
-    }
-    .hero h2 {
-      font-size: 48px;
-      font-weight: 700;
-      margin-bottom: 16px;
-    }
-    .hero h2 span { color: var(--accent); }
-    .hero p {
-      font-size: 20px;
-      color: var(--text-secondary);
-      max-width: 600px;
-      margin: 0 auto 32px;
-    }
-    .hero-stats {
-      display: flex;
-      justify-content: center;
-      gap: 32px;
-      flex-wrap: wrap;
-      margin-bottom: 32px;
-    }
-    .stat {
-      text-align: center;
-    }
-    .stat-value {
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--accent);
-      font-family: monospace;
-    }
-    .stat-label {
-      font-size: 12px;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    .hero-actions {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-    .btn {
-      display: inline-block;
-      padding: 10px 24px;
-      border-radius: 6px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px solid var(--border);
-    }
-    .btn-primary {
-      background: var(--accent);
-      color: #000;
-      border-color: var(--accent);
-    }
-    .btn-secondary { background: var(--surface); color: var(--text); }
-
-    /* Content */
-    .content {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
-    section {
-      padding: 60px 0;
-      border-bottom: 1px solid var(--border);
-    }
-    section:last-child { border-bottom: none; }
-    section h3 {
-      font-size: 28px;
-      font-weight: 600;
-      margin-bottom: 24px;
-    }
-    section h4 {
-      font-size: 18px;
-      font-weight: 600;
-      margin: 24px 0 12px;
-      color: var(--accent);
-    }
-    section p {
-      color: var(--text-secondary);
-      margin-bottom: 16px;
-      max-width: 800px;
-    }
-
-    /* Systems grid */
-    .systems-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 16px;
-    }
-    .system-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 16px;
-    }
-    .system-card h5 {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--accent);
-      margin-bottom: 6px;
-      font-family: monospace;
-    }
-    .system-card p {
-      font-size: 13px;
-      color: var(--text-secondary);
-      margin: 0;
-    }
-
-    /* Table */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 16px 0;
-    }
-    th, td {
-      text-align: left;
-      padding: 10px 14px;
-      border-bottom: 1px solid var(--border);
-      font-size: 14px;
-    }
-    th {
-      color: var(--text-secondary);
-      font-weight: 600;
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    td code { font-size: 13px; }
-
-    /* Footer */
-    .footer {
-      text-align: center;
-      padding: 40px 24px;
-      color: var(--text-secondary);
-      font-size: 14px;
-    }
-
-    @media (max-width: 640px) {
-      .hero h2 { font-size: 32px; }
-      .hero-stats { gap: 16px; }
-      .stat-value { font-size: 22px; }
-      .systems-grid { grid-template-columns: 1fr; }
-    }
+    h1 { font-size: 18px; color: var(--accent); margin-bottom: 4px; }
+    h2 { font-size: 15px; color: #eee; margin: 40px 0 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+    h3 { font-size: 14px; color: var(--accent); margin: 20px 0 4px; }
+    p { margin: 6px 0; }
+    ul { margin: 6px 0 6px 20px; }
+    li { margin: 2px 0; }
+    table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+    th, td { text-align: left; padding: 4px 10px; border-bottom: 1px solid var(--border); font-size: 13px; }
+    th { color: var(--dim); }
+    .wrap { max-width: 800px; margin: 0 auto; padding: 24px 20px 60px; }
+    .nav { display: flex; gap: 16px; margin: 8px 0 30px; font-size: 13px; flex-wrap: wrap; }
+    .nav a { color: var(--dim); }
+    .nav a:hover { color: var(--text); }
+    .dim { color: var(--dim); }
+    .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
+    @media (max-width: 600px) { .cols { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
+<div class="wrap">
 
-<div class="header">
-  <div class="header-inner">
-    <h1>clik-engine</h1>
-    <nav>
-      <a href="#systems">Systems</a>
-      <a href="#quickstart">Quick Start</a>
-      <a href="#examples">Examples</a>
-      <a href="./api/">API Reference</a>
-      <a href="https://github.com/pvydro/clik-engine">GitHub</a>
-    </nav>
-  </div>
+<h1>clik-engine</h1>
+<p class="dim">PhaserJS game engine for building games with Claude. 111 modules, 212 tests.</p>
+
+<div class="nav">
+  <a href="#install">Install</a>
+  <a href="#config">Config</a>
+  <a href="#scenes">Scenes</a>
+  <a href="#systems">Systems</a>
+  <a href="#input">Input</a>
+  <a href="#ui">UI</a>
+  <a href="#entities">Entities</a>
+  <a href="#physics">Physics</a>
+  <a href="#debug">Debug</a>
+  <a href="#network">Network</a>
+  <a href="./api/">API Reference</a>
+  <a href="https://github.com/pvydro/clik-engine">GitHub</a>
 </div>
 
-<div class="hero">
-  <h2>Build games with <span>Claude</span></h2>
-  <p>A PhaserJS game engine designed from the ground up for AI-assisted game development. Every system is visible, loggable, and debuggable through screenshots and console output.</p>
-  <div class="hero-stats">
-    <div class="stat"><div class="stat-value">111</div><div class="stat-label">Build Modules</div></div>
-    <div class="stat"><div class="stat-value">212</div><div class="stat-label">Tests</div></div>
-    <div class="stat"><div class="stat-value">114</div><div class="stat-label">Source Files</div></div>
-    <div class="stat"><div class="stat-value">25</div><div class="stat-label">Systems</div></div>
-    <div class="stat"><div class="stat-value">11K+</div><div class="stat-label">Lines</div></div>
-  </div>
-  <div class="hero-actions">
-    <a href="#quickstart" class="btn btn-primary">Get Started</a>
-    <a href="./api/" class="btn btn-secondary">API Reference</a>
-    <a href="https://github.com/pvydro/clik-engine" class="btn btn-secondary">GitHub</a>
-  </div>
-</div>
+<h2 id="install">Install</h2>
 
-<div class="content">
-
-<section id="why">
-  <h3>Why clik-engine?</h3>
-  <p>Traditional game engines aren't designed for AI-assisted development. clik-engine is built around three principles:</p>
-  <div class="systems-grid">
-    <div class="system-card">
-      <h5>Everything on Canvas</h5>
-      <p>Claude sees the game through screenshots. Every UI component, debug overlay, and error message renders on the Phaser canvas — no invisible DOM elements.</p>
-    </div>
-    <div class="system-card">
-      <h5>Structured Logging</h5>
-      <p>Every system logs with [CLIK:*] prefixes. Claude filters these programmatically via preview_console_logs to understand game state without screenshots.</p>
-    </div>
-    <div class="system-card">
-      <h5>Declarative Config</h5>
-      <p>A single createGame() call with a flat config object defines the entire game. Claude reads one file and understands the full architecture.</p>
-    </div>
-  </div>
-</section>
-
-<section id="quickstart">
-  <h3>Quick Start</h3>
-  <h4>Create a new game</h4>
-  <pre><code>npx create-clik-game my-game
+<h3>New game</h3>
+<pre><code>npx create-clik-game my-game
 npx create-clik-game my-game --template=platformer
-npx create-clik-game my-game --template=puzzle</code></pre>
-  <h4>Run it</h4>
-  <pre><code>cd my-game
+npx create-clik-game my-game --template=puzzle
+cd my-game && npm install && npm run dev</code></pre>
+
+<h3>From source</h3>
+<pre><code>git clone git@github.com:pvydro/clik-engine.git
+cd clik-engine
 npm install
-npm run dev</code></pre>
-  <h4>Game config</h4>
-  <pre><code>import { createGame, ScalePreset } from 'clik-engine';
+npm run dev          # dev harness on :5173
+npm run test         # 212 tests
+npm run build        # library build</code></pre>
+
+<h2 id="config">Game Config</h2>
+<p>One object. That's the whole game setup.</p>
+<pre><code>import { createGame, ScalePreset } from 'clik-engine';
 
 createGame({
   name: 'my-game',
   scale: ScalePreset.AUTO,
   physics: 'arcade',
   debug: import.meta.env.DEV,
-  devStartScene: 'game',
+  devStartScene: 'game',       // skip menus in dev
   scenes: [
     { key: 'game', class: GameScene, default: true },
   ],
   input: {
     actions: {
-      move_left:  { keys: ['LEFT', 'A'], touch: 'swipe_left' },
-      jump:       { keys: ['SPACE'], touch: 'tap', gamepad: '0' },
+      left:  { keys: ['LEFT', 'A'], touch: 'swipe_left' },
+      right: { keys: ['RIGHT', 'D'], touch: 'swipe_right' },
+      jump:  { keys: ['SPACE'], touch: 'tap', gamepad: '0' },
     },
   },
   save: { slots: 3, version: 1 },
 });</code></pre>
-  <h4>Scene pattern</h4>
-  <pre><code>import { BaseScene } from 'clik-engine';
+
+<h2 id="scenes">Scenes</h2>
+<p>Extend <code>BaseScene</code>. Call <code>super.create()</code> and <code>super.update()</code>. Everything else is wired for you.</p>
+<pre><code>import { BaseScene } from 'clik-engine';
 
 export class GameScene extends BaseScene {
-  create(): void {
-    super.create(); // Required — wires input, audio, save, director
+  create() {
+    super.create();
+    // this.actions  — input (keyboard/touch/gamepad)
+    // this.director — scene transitions
+    // this.audio    — music/sfx
+    // this.save     — localStorage persistence
 
-    this.inspectState('game', () => ({
-      score: this.score,  // Visible in debug overlay
-    }));
+    this.inspectState('game', () => ({ score: this.score }));
   }
 
-  update(time: number, delta: number): void {
-    super.update(time, delta); // Required — polls input
-
+  update(time: number, delta: number) {
+    super.update(time, delta);
     if (this.actions.justPressed('jump')) { /* ... */ }
+    const { x, y } = this.actions.axis('left', 'right', 'up', 'down');
   }
 }</code></pre>
-</section>
 
-<section id="systems">
-  <h3>Engine Systems</h3>
-  <p>25 system directories, 111 build modules covering everything you need for 2D game development.</p>
-  <div class="systems-grid">
-    <div class="system-card">
-      <h5>Scenes</h5>
-      <p>BaseScene, SceneDirector (7 transitions), SceneStack (push/pop menus), SceneUtils (hitStop, slowMotion, countdown), ScreenTransition (fade, iris, pixelate)</p>
-    </div>
-    <div class="system-card">
-      <h5>Input</h5>
-      <p>InputManager (keyboard/touch/gamepad), ActionMap (rebinding), GestureDetector (tap, swipe, pinch), VirtualControls (floating joystick), ComboDetector, InputRecorder</p>
-    </div>
-    <div class="system-card">
-      <h5>UI (22 components)</h5>
-      <p>Button, Label, Panel, Dialog, ProgressBar, Slider, Toggle, Toast, TextInput, ScrollContainer, GridLayout, TabBar, ListView, NumberInput, ConfirmDialog, Tooltip, Notification, FocusManager, Anchor, UIAnimator, Theme</p>
-    </div>
-    <div class="system-card">
-      <h5>Entity/Component</h5>
-      <p>Entity, Component, EntityRegistry, EntityFactory (prefabs). 12 built-in components: Health, Movement, Timer, Collectible, Spawner, DragDrop, Follower, Lifetime, Oscillator, FlashOnHit, Patrol, Interactable</p>
-    </div>
-    <div class="system-card">
-      <h5>Physics</h5>
-      <p>PhysicsHelper (full Arcade), MatterHelper, Raycast (line-of-sight, area queries), MovingPlatform, PhysicsPool (recycling), CollisionGroups (bitfield categories)</p>
-    </div>
-    <div class="system-card">
-      <h5>Animation</h5>
-      <p>AnimationHelper (declarative, auto-detect from atlas), SpriteAnimator, AnimationStateController (FSM integration), AnimationEventSystem (frame callbacks for hitboxes, SFX)</p>
-    </div>
-    <div class="system-card">
-      <h5>Camera</h5>
-      <p>CameraManager (follow, deadzone, zoom, pan, shake presets, flash, fade, path), MultiCamera (2/4-player split screen, minimap, picture-in-picture)</p>
-    </div>
-    <div class="system-card">
-      <h5>Networking</h5>
-      <p>NetworkManager (WebSocket, auto-reconnect), Room (player tracking, ready state), StateSync (interpolation, prediction), Lobby (quick match). Plus clik-server for hosting.</p>
-    </div>
-    <div class="system-card">
-      <h5>Audio</h5>
-      <p>AudioManager with music crossfade, per-channel muting, loop count, auto-unlock on first interaction.</p>
-    </div>
-    <div class="system-card">
-      <h5>Tilemap</h5>
-      <p>TilemapManager for Tiled JSON maps — layers, collision, spawn points, parallax scroll factors, tile replacement, property queries.</p>
-    </div>
-    <div class="system-card">
-      <h5>FSM + Tweens</h5>
-      <p>StateMachine (states, transitions, guards, history). TweenHelper (promise-based), Ease constants, presets (popIn, shake, pulse, float, bounceIn).</p>
-    </div>
-    <div class="system-card">
-      <h5>Effects</h5>
-      <p>ShaderManager (blur, bloom, vignette, pixelate, CRT barrel). EffectPresets: dream, underwater, frozen, night vision, damage, retro.</p>
-    </div>
-    <div class="system-card">
-      <h5>Save + Assets</h5>
-      <p>SaveManager (versioned localStorage slots, migration). AssetManifest (tiered: boot/main/deferred), Preloader with progress, ManifestValidator.</p>
-    </div>
-    <div class="system-card">
-      <h5>i18n + Dialogue</h5>
-      <p>I18nManager (locales, dot-notation keys, interpolation). DialogueManager (branching trees, typewriter effect, choices, emotions).</p>
-    </div>
-    <div class="system-card">
-      <h5>Platform + A11y</h5>
-      <p>PlatformManager (OS, lifecycle, safe area, fullscreen). CapacitorHelper (mobile native). A11yManager (color blind modes, font scale, reduced motion).</p>
-    </div>
-    <div class="system-card">
-      <h5>Debug</h5>
-      <p>DebugOverlay, StateInspector, ConsoleReporter (per-channel), Profiler, SceneInspector (DOM editor), HotState (HMR), LeakDetector, VisualTest (regression).</p>
-    </div>
-    <div class="system-card">
-      <h5>Utilities</h5>
-      <p>Vector2, Color, SeededRandom, ObjectPool, Grid2D, PriorityQueue, SpatialHash, A* pathfinding, GameTimer, Cooldown, EventBus, format helpers.</p>
-    </div>
-    <div class="system-card">
-      <h5>Analytics + Scaling</h5>
-      <p>AnalyticsManager (events, pluggable backends, sessions). ResponsiveManager (breakpoints, DPI), Letterbox (cinematic bars).</p>
-    </div>
-  </div>
-</section>
+<h3>Transitions</h3>
+<pre><code>// 7 built-in types
+this.director.go('game', 'menu', Transitions.fade(500));
+this.director.go('menu', 'game', Transitions.slideLeft(400));
+this.director.go('a', 'b', Transitions.zoom(600));
 
-<section id="examples">
-  <h3>Example Games</h3>
-  <div class="systems-grid">
-    <div class="system-card">
-      <h5>2048</h5>
-      <p>Full grid logic, merge mechanics, swipe and keyboard input, score persistence with best score, game over detection. Uses SaveManager, Toast, input actions.</p>
-    </div>
-    <div class="system-card">
-      <h5>Space Shooter</h5>
-      <p>Player movement, shooting, enemy spawning with difficulty scaling, explosions with particle-like effects, starfield parallax, lives system. Uses PhysicsHelper, groups, collision.</p>
-    </div>
-    <div class="system-card">
-      <h5>Card Match</h5>
-      <p>Memory matching with card flip animations, match detection, move counter, win detection, best score save. Uses tweens, Toast, SaveManager.</p>
-    </div>
-  </div>
-</section>
+// Full-screen overlays
+await ScreenTransition.fadeThrough(this, () => this.scene.start('next'));
+await ScreenTransition.irisWipe(this, callback);
+await ScreenTransition.pixelate(this, callback);
 
-<section id="debug">
-  <h3>Console Log Channels</h3>
-  <p>Every engine system logs with structured prefixes for programmatic filtering:</p>
-  <table>
-    <thead><tr><th>Prefix</th><th>Purpose</th></tr></thead>
-    <tbody>
-      <tr><td><code>[CLIK:ENGINE]</code></td><td>Engine lifecycle, config, camera, particles</td></tr>
-      <tr><td><code>[CLIK:SCENE]</code></td><td>Scene init / create / shutdown / transitions</td></tr>
-      <tr><td><code>[CLIK:STATE]</code></td><td>Game state changes (score, health, FSM)</td></tr>
-      <tr><td><code>[CLIK:INPUT]</code></td><td>Actions, gestures, combos, button clicks</td></tr>
-      <tr><td><code>[CLIK:ERROR]</code></td><td>Errors with fix suggestions</td></tr>
-      <tr><td><code>[CLIK:ASSET]</code></td><td>Asset loading progress</td></tr>
-      <tr><td><code>[CLIK:AUDIO]</code></td><td>Music / SFX events</td></tr>
-      <tr><td><code>[CLIK:SAVE]</code></td><td>Save / load operations</td></tr>
-    </tbody>
-  </table>
-</section>
+// Push/pop stack (menus, inventory)
+const stack = new SceneStack(this.game);
+stack.push('pause-menu');
+stack.pop();</code></pre>
 
-<section id="skills">
-  <h3>Claude Skills</h3>
-  <table>
-    <thead><tr><th>Skill</th><th>Purpose</th></tr></thead>
-    <tbody>
-      <tr><td><code>/clik-scaffold</code></td><td>Generate scenes, entities, input configs, UI layouts following engine conventions</td></tr>
-      <tr><td><code>/clik-playtest</code></td><td>Boot game via Preview, play-test autonomously, find and fix bugs</td></tr>
-      <tr><td><code>/clik-build</code></td><td>Production build, bundle optimization, Capacitor mobile deployment</td></tr>
-      <tr><td><code>/clik-debug</code></td><td>Diagnose issues via console logs, screenshots, state inspection</td></tr>
-    </tbody>
-  </table>
-</section>
+<h2 id="systems">All Systems</h2>
 
-<section id="multiplayer">
-  <h3>Multiplayer</h3>
-  <h4>Client</h4>
-  <pre><code>import { NetworkManager, Room, Lobby } from 'clik-engine';
+<div class="cols">
+<div>
+<h3>Core</h3>
+<ul>
+  <li><code>createGame()</code> — boot</li>
+  <li><code>BaseScene</code> — scene base class</li>
+  <li><code>SceneDirector</code> — transitions</li>
+  <li><code>SceneStack</code> — push/pop</li>
+  <li><code>SceneUtils</code> — hitStop, slowMotion</li>
+  <li><code>ScreenTransition</code> — fade, iris, pixelate</li>
+  <li><code>StateMachine</code> — FSM</li>
+  <li><code>EventBus</code> — global events</li>
+</ul>
 
-const network = new NetworkManager({ url: 'ws://localhost:8080' });
-network.connect();
+<h3>Rendering</h3>
+<ul>
+  <li><code>CameraManager</code> — follow, zoom, shake</li>
+  <li><code>MultiCamera</code> — split screen, minimap</li>
+  <li><code>ParticleManager</code> — emitters + presets</li>
+  <li><code>ShaderManager</code> — post-FX</li>
+  <li><code>EffectPresets</code> — CRT, dream, frozen</li>
+  <li><code>Letterbox</code> — cinematic bars</li>
+</ul>
 
-const lobby = new Lobby(network);
+<h3>Animation</h3>
+<ul>
+  <li><code>AnimationHelper</code> — declarative + auto-detect</li>
+  <li><code>SpriteAnimator</code> — play/chain/face</li>
+  <li><code>AnimationStateController</code> — FSM mapping</li>
+  <li><code>AnimationEventSystem</code> — frame callbacks</li>
+</ul>
+</div>
+<div>
+<h3>Data</h3>
+<ul>
+  <li><code>SaveManager</code> — versioned slots</li>
+  <li><code>SaveMigrator</code> — migration chain</li>
+  <li><code>AssetManifest</code> — tiered loading</li>
+  <li><code>ManifestValidator</code> — boot validation</li>
+  <li><code>I18nManager</code> — localization</li>
+  <li><code>AnalyticsManager</code> — event tracking</li>
+</ul>
+
+<h3>Platform</h3>
+<ul>
+  <li><code>PlatformManager</code> — OS, lifecycle</li>
+  <li><code>CapacitorHelper</code> — mobile native</li>
+  <li><code>A11yManager</code> — accessibility</li>
+  <li><code>ResponsiveManager</code> — breakpoints</li>
+</ul>
+
+<h3>Utilities</h3>
+<ul>
+  <li><code>Vector2</code>, <code>Color</code>, <code>SeededRandom</code></li>
+  <li><code>Grid2D</code>, <code>PriorityQueue</code>, <code>SpatialHash</code></li>
+  <li><code>findPath</code> — A* pathfinding</li>
+  <li><code>ObjectPool</code>, <code>GameTimer</code>, <code>Cooldown</code></li>
+  <li><code>formatNumber</code>, <code>formatTime</code>, <code>pluralize</code></li>
+</ul>
+</div>
+</div>
+
+<h2 id="input">Input</h2>
+<p>Action-based. Never read raw keys. Supports keyboard, touch gestures, and gamepad through one API.</p>
+<pre><code>// Defined in config, used in scenes:
+this.actions.isDown('move_left')
+this.actions.justPressed('jump')
+this.actions.justReleased('shoot')
+this.actions.axis('left', 'right', 'up', 'down') // { x, y }
+
+// Gestures
+const gestures = new GestureDetector(this);
+gestures.on('swipe_left', (e) => { /* ... */ });
+gestures.on('pinch', (e) => cam.zoomTo(e.scale));
+gestures.on('double_tap', (e) => { /* ... */ });
+
+// Combos (fighting games, cheat codes)
+const combos = new ComboDetector();
+combos.addCombo({ name: 'hadouken', sequence: ['down', 'right', 'punch'] });
+combos.onCombo('hadouken', () => fireball());
+
+// Rebind at runtime
+this.actions.getActionMap().rebind('jump', { keys: ['W', 'UP'] });</code></pre>
+
+<h2 id="ui">UI Components</h2>
+<p>22 components. All Phaser-native (canvas-rendered, visible in screenshots). No DOM.</p>
+<pre><code>new Button(this, { x: 400, y: 300, text: 'Play', onClick: () => {} });
+new Slider(this, { x: 100, y: 50, width: 200, onChange: v => {} });
+new Toggle(this, { x: 100, y: 100, label: 'Music', value: true });
+new TextInput(this, { x: 200, y: 150, placeholder: 'Enter name...' });
+new NumberInput(this, { x: 200, y: 200, min: 1, max: 10, value: 5 });
+Toast.show(this, { message: 'Level Complete!' });
+Tooltip.attach(this, button, { text: 'Start the game' });
+Notification.show(this, { title: 'Achievement!', message: 'First kill' });
+
+const confirmed = await ConfirmDialog.show({
+  scene: this, title: 'Quit?', message: 'Progress will be lost.'
+});
+
+// Layouts
+new GridLayout(this, { columns: 3, cellWidth: 100, cellHeight: 100, ... });
+new ScrollContainer(this, { width: 300, height: 400, ... });
+new TabBar(this, { tabs: [{ key: 'inv', label: 'Inventory' }, ...] });
+
+// Themes
+setTheme(NeonTheme());  // DarkTheme, LightTheme, RetroTheme
+
+// Animation
+await UIAnimator.animate(this, panel, 'slideInLeft');
+await UIAnimator.stagger(this, listItems, 'fadeIn', 50);</code></pre>
+
+<h2 id="entities">Entity / Component</h2>
+<pre><code>import { Entity, Health, Movement, Follower, EntityFactory } from 'clik-engine';
+
+// Build entities
+const player = new Entity(this, 100, 200);
+player.entityType = 'player';
+player.addComponent('health', new Health(100).onDeath(() => gameOver()));
+player.addComponent('movement', new Movement(200));
+
+// 12 built-in components:
+// Health, Movement, Timer, Collectible, Spawner, DragDrop,
+// Follower, Lifetime, Oscillator, FlashOnHit, Patrol, Interactable
+
+// Prefab factory
+const factory = new EntityFactory();
+factory.register('coin', (scene, x, y) => {
+  const e = new Entity(scene, x, y);
+  e.addComponent('collectible', new Collectible('coin', 10));
+  return e;
+});
+factory.create('coin', this, 300, 400);
+
+// Registry
+const registry = new EntityRegistry();
+registry.register(player);
+registry.getByType('enemy');
+registry.getByTag('boss');
+registry.updateAll(delta);</code></pre>
+
+<h2 id="physics">Physics</h2>
+<pre><code>// Arcade
+PhysicsHelper.enableBody(this, sprite);
+PhysicsHelper.setVelocity(sprite, 200, 0);
+PhysicsHelper.setBounce(sprite, 0.5);
+PhysicsHelper.setCollideWorldBounds(sprite);
+PhysicsHelper.addCollider(this, player, enemies, onHit);
+PhysicsHelper.isOnFloor(player);
+PhysicsHelper.oneWayPlatformCheck(player, platform);
+
+// Raycasting
+const hit = Raycast.cast(this, x, y, dirX, dirY, 500, obstacles);
+const canSee = Raycast.lineOfSight(this, x1, y1, x2, y2, walls);
+const nearby = Raycast.queryCircle(enemies, x, y, 200);
+
+// Moving platforms
+const plat = new MovingPlatform(this, 100, 300, 120, 16, [
+  { x: 100, y: 300 }, { x: 400, y: 300, pauseMs: 1000 },
+], 80);
+
+// Object pooling
+const pool = new PhysicsPool(this, (s) => s.add.circle(0,0,3,0xffff00), 50);
+pool.spawn(player.x, player.y);
+pool.cullOffscreen();
+
+// Collision groups
+const groups = new CollisionGroups();
+groups.create('player'); groups.create('enemy'); groups.create('bullet');
+groups.setCollides('bullet', ['enemy']);</code></pre>
+
+<h2 id="debug">Debug</h2>
+<p>Set <code>debug: true</code> in config. Everything shows on canvas. Game instance at <code>window.__CLIK_GAME</code>.</p>
+
+<h3>Log channels</h3>
+<table>
+  <tr><td><code>[CLIK:SCENE]</code></td><td>Scene lifecycle</td></tr>
+  <tr><td><code>[CLIK:STATE]</code></td><td>Game state changes</td></tr>
+  <tr><td><code>[CLIK:INPUT]</code></td><td>Actions, gestures, combos</td></tr>
+  <tr><td><code>[CLIK:ERROR]</code></td><td>Errors + fix suggestions</td></tr>
+  <tr><td><code>[CLIK:ASSET]</code></td><td>Loading progress</td></tr>
+  <tr><td><code>[CLIK:AUDIO]</code></td><td>Music/SFX</td></tr>
+  <tr><td><code>[CLIK:SAVE]</code></td><td>Save/load</td></tr>
+  <tr><td><code>[CLIK:ENGINE]</code></td><td>Engine internals</td></tr>
+</table>
+
+<pre><code>// Per-channel filtering
+ConsoleReporter.disableChannel(ClikLogChannel.INPUT);
+
+// Profiler
+profiler.begin('physics');
+// ...
+profiler.end('physics');
+profiler.getTimingSummary();
+
+// Leak detection
+leakDetector.created('bullet');
+leakDetector.destroyed('bullet');
+leakDetector.logSummary();
+
+// Scene inspector (DOM overlay)
+new SceneInspector(game).toggle();
+
+// Visual regression
+VisualTest.saveBaseline('menu-screen');
+const { match } = await VisualTest.compareToBaseline('menu-screen');</code></pre>
+
+<h2 id="network">Multiplayer</h2>
+<pre><code>// Client
+const net = new NetworkManager({ url: 'ws://localhost:8080' });
+net.connect();
+
+const lobby = new Lobby(net);
 lobby.quickMatch('my-game');
 
-const room = new Room(network);
-room.onPlayerJoin(player => console.log(player.name + ' joined'));
-room.sendAction('move', { x: 100, y: 200 });</code></pre>
-  <h4>Server</h4>
-  <pre><code>cd packages/clik-server
-npm install
-npm start  # WebSocket server on port 8080</code></pre>
-  <p>Features: room creation/joining, player tracking, host migration, state synchronization, lobby with quick match.</p>
-</section>
+const room = new Room(net);
+room.onPlayerJoin(p => console.log(p.name));
+room.sendAction('move', { x, y });
+
+// State sync with interpolation
+const sync = new StateSync(net);
+sync.registerLocal({ id: 'player1', x, y });
+sync.update(delta);
+const state = sync.getInterpolatedState('player2');</code></pre>
+
+<pre><code># Server
+cd packages/clik-server && npm install && npm start</code></pre>
+
+<h2 id="more">Also included</h2>
+<ul>
+  <li><code>TilemapManager</code> — Tiled JSON, collision, spawn points, parallax</li>
+  <li><code>DialogueManager</code> — branching trees, typewriter, choices</li>
+  <li><code>AudioManager</code> — crossfade, per-channel mute, loop count</li>
+  <li><code>TweenHelper</code> — promise-based tweens, presets (popIn, shake, pulse, float)</li>
+  <li><code>I18nManager</code> — locales, interpolation, browser detection</li>
+  <li><code>A11yManager</code> — color blind modes, font scale, reduced motion</li>
+  <li><code>Capacitor</code> — template config, haptics, status bar, splash screen</li>
+  <li>3 example games: <a href="https://github.com/pvydro/clik-engine/tree/main/examples/2048">2048</a>, <a href="https://github.com/pvydro/clik-engine/tree/main/examples/shooter">Shooter</a>, <a href="https://github.com/pvydro/clik-engine/tree/main/examples/cards">Cards</a></li>
+  <li>3 CLI templates: default, platformer, puzzle</li>
+  <li>4 Claude skills: <code>/clik-scaffold</code>, <code>/clik-playtest</code>, <code>/clik-build</code>, <code>/clik-debug</code></li>
+</ul>
+
+<p style="margin-top: 40px;" class="dim"><a href="./api/">Full API Reference (TypeDoc)</a> &middot; <a href="https://github.com/pvydro/clik-engine">Source on GitHub</a> &middot; MIT License</p>
 
 </div>
-
-<div class="footer">
-  <p>clik-engine — MIT License — Built for Claude</p>
-</div>
-
 </body>
 </html>
