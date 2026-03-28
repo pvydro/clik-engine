@@ -5,8 +5,13 @@ export interface DialogueLine {
   speaker?: string;
   text: string;
   portrait?: string;
+  emotion?: string;
   choices?: { text: string; next: string }[];
   next?: string;
+  /** Auto-advance after this many ms (0 = wait for input) */
+  autoAdvance?: number;
+  /** Callback key to trigger game events from dialogue */
+  event?: string;
 }
 
 export type DialogueTree = Record<string, DialogueLine>;

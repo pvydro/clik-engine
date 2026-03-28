@@ -114,6 +114,37 @@ Look for:
 - Destroy unused game objects
 - Move deferred assets to `deferred` manifest tier
 
+### Camera Issues
+**Symptoms**: Can't see the player, view stuck, zoom wrong
+**Diagnosis**:
+1. Check if CameraManager.follow() was called
+2. Check camera bounds — may be too small
+3. Check zoom level
+**Common fixes**:
+- Call `cam.follow(player)` in create
+- Set `cam.setBounds()` matching tilemap world bounds
+- Reset camera with `cam.reset()`
+
+### Entity Component Issues
+**Symptoms**: Components not updating, entity not moving
+**Diagnosis**:
+1. Check `entityRegistry.updateAll(delta)` is called in scene update
+2. Check component `enabled` flag
+3. Verify component was added with `entity.addComponent()`
+**Common fixes**:
+- Call `super.update(time, delta)` AND `registry.updateAll(delta)` in update loop
+- Components need `enabled = true` (default)
+
+### Networking Issues
+**Symptoms**: Not connecting, state not syncing
+**Diagnosis**:
+1. Check `[CLIK:ENGINE]` for connection logs
+2. Verify WebSocket URL is correct
+3. Check for CORS or SSL issues in browser console
+**Common fixes**:
+- Use `wss://` for production, `ws://` for local dev
+- NetworkManager auto-reconnects with exponential backoff
+
 ## Log Prefix Reference
 
 | Prefix | Purpose | When Emitted |

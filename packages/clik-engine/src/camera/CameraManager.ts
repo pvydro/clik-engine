@@ -109,4 +109,63 @@ export class CameraManager {
   getPosition(): { x: number; y: number } {
     return { x: this.main.scrollX + this.main.width / 2, y: this.main.scrollY + this.main.height / 2 };
   }
+
+  /** Set camera rotation */
+  setRotation(radians: number): this {
+    this.main.setRotation(radians);
+    return this;
+  }
+
+  /** Reset camera to default state */
+  reset(): this {
+    this.main.setScroll(0, 0);
+    this.main.setZoom(1);
+    this.main.setRotation(0);
+    this.main.setAlpha(1);
+    this.stopFollow();
+    return this;
+  }
+
+  /** Cinematic: move camera along a path of points */
+  async followPath(points: { x: number; y: number; duration?: number; ease?: string }[]): Promise<void> {
+    for (const point of points) {
+      await this.panTo(point.x, point.y, point.duration ?? 1000, point.ease ?? 'Sine.easeInOut');
+    }
+  }
+
+  // --- Shake Presets ---
+
+  /** Light shake — UI feedback, minor hit */
+  async shakeLight(): Promise<void> {
+    await this.shake(100, 0.005);
+  }
+
+  /** Medium shake — damage taken, explosion nearby */
+  async shakeMedium(): Promise<void> {
+    await this.shake(200, 0.01);
+  }
+
+  /** Heavy shake — big explosion, boss attack */
+  async shakeHeavy(): Promise<void> {
+    await this.shake(350, 0.02);
+  }
+
+  /** Get the visible world bounds of the camera */
+  getVisibleBounds(): { x: number; y: number; width: number; height: number } {
+    return {
+      x: this.main.scrollX,
+      y: this.main.scrollY,
+      width: this.main.width / this.main.zoom,
+      height: this.main.height / this.main.zoom,
+    };
+  }
+
+  /** Check if a world position is visible in the camera */
+  isVisible(worldX: number, worldY: number, margin = 0): boolean {
+    const bounds = this.getVisibleBounds();
+    return worldX >= bounds.x - margin &&
+           worldX <= bounds.x + bounds.width + margin &&
+           worldY >= bounds.y - margin &&
+           worldY <= bounds.y + bounds.height + margin;
+  }
 }

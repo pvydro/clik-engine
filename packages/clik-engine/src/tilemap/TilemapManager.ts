@@ -195,4 +195,58 @@ export class TilemapManager {
     if (!layer) return null;
     return layer.getTileAtWorldXY(worldX, worldY);
   }
+
+  /**
+   * Set parallax scroll factor on a layer for depth effect.
+   * Values < 1 scroll slower (background), > 1 scroll faster (foreground).
+   */
+  setParallax(layerName: string, scrollFactorX: number, scrollFactorY?: number): void {
+    const layer = this.layers.get(layerName);
+    if (!layer) {
+      ConsoleReporter.error(`Layer '${layerName}' not found for parallax`);
+      return;
+    }
+    layer.setScrollFactor(scrollFactorX, scrollFactorY ?? scrollFactorX);
+    ConsoleReporter.engine(`Parallax set on '${layerName}': ${scrollFactorX}`);
+  }
+
+  /** Set depth (z-order) on a layer */
+  setLayerDepth(layerName: string, depth: number): void {
+    const layer = this.layers.get(layerName);
+    if (layer) layer.setDepth(depth);
+  }
+
+  /** Set alpha on a layer */
+  setLayerAlpha(layerName: string, alpha: number): void {
+    const layer = this.layers.get(layerName);
+    if (layer) layer.setAlpha(alpha);
+  }
+
+  /** Get all layer names */
+  getLayerNames(): string[] {
+    return Array.from(this.layers.keys());
+  }
+
+  /** Replace a tile at a grid position */
+  replaceTile(layerName: string, tileX: number, tileY: number, newIndex: number): void {
+    const layer = this.layers.get(layerName);
+    if (layer) {
+      layer.putTileAt(newIndex, tileX, tileY);
+    }
+  }
+
+  /** Remove a tile at a grid position */
+  removeTile(layerName: string, tileX: number, tileY: number): void {
+    const layer = this.layers.get(layerName);
+    if (layer) {
+      layer.removeTileAt(tileX, tileY);
+    }
+  }
+
+  /** Check if a tile at a position has a specific property */
+  tileHasProperty(layerName: string, worldX: number, worldY: number, property: string): boolean {
+    const tile = this.getTileAt(layerName, worldX, worldY);
+    if (!tile) return false;
+    return tile.properties?.[property] === true;
+  }
 }
