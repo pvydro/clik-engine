@@ -10,8 +10,9 @@ npm run dev                                          # Dev harness (port 5173)
 npm run dev:cards                                    # Card Match example (port 5176)
 npm run dev:2048                                     # 2048 example (port 5174)
 npm run dev:shooter                                  # Space Shooter example (port 5175)
-npm run test                                         # Run 178 unit tests
-npm run build                                        # Build engine library (103 modules)
+npm run test                                         # Run 200 unit tests
+npm run build                                        # Build engine library (108 modules)
+npm run docs --workspace=packages/clik-engine        # Generate API docs (TypeDoc)
 ```
 
 ## Project Structure
@@ -55,6 +56,7 @@ clik/
 ├── packages/create-clik-game/   # CLI: npx create-clik-game <name> [--template=...]
 │   └── templates/               # default, platformer, puzzle
 │
+├── packages/clik-server/         # WebSocket matchmaking server (Node.js)
 ├── dev-harness/                 # Engine playground (SandboxScene, TransitionTest, KitchenSink)
 │
 ├── examples/
@@ -82,7 +84,7 @@ clik/
 - Set `devStartScene` in config to skip menus during development
 - Game instance exposed as `window.__CLIK_GAME` when `debug: true`
 
-## Engine Systems (25 directories, 103 build modules)
+## Engine Systems (25 directories, 108 build modules)
 
 ### Boot & Scenes
 - `createGame(config)` — single declarative config object creates entire game
@@ -229,7 +231,7 @@ profiler.getTimingSummary(); // { physics: "0.5ms avg, 1.2ms max" }
 ## Testing
 
 ```bash
-npm run test                                         # Run all 178 tests
+npm run test                                         # Run all 200 tests
 npm run test:watch --workspace=packages/clik-engine  # Watch mode
 ```
 
