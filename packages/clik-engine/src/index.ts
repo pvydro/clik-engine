@@ -113,6 +113,10 @@ export { Timer as TimerComponent } from './entity/components/Timer';
 export { Collectible } from './entity/components/Collectible';
 export { Spawner } from './entity/components/Spawner';
 export { DragDrop } from './entity/components/DragDrop';
+export { Follower } from './entity/components/Follower';
+export { Lifetime } from './entity/components/Lifetime';
+export { Oscillator } from './entity/components/Oscillator';
+export type { OscillateAxis } from './entity/components/Oscillator';
 
 // Analytics
 export { AnalyticsManager } from './analytics/AnalyticsManager';

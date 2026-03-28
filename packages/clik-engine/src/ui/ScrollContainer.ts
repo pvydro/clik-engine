@@ -12,7 +12,7 @@ export interface ScrollContainerConfig {
 }
 
 export class ScrollContainer extends Phaser.GameObjects.Container {
-  private mask!: Phaser.Display.Masks.GeometryMask;
+  private scrollMask!: Phaser.Display.Masks.GeometryMask;
   private content: Phaser.GameObjects.Container;
   private scrollY = 0;
   private maxScrollY = 0;
@@ -38,8 +38,8 @@ export class ScrollContainer extends Phaser.GameObjects.Container {
     // Create mask for clipping
     const maskShape = scene.make.graphics({});
     maskShape.fillRect(config.x, config.y, config.width, config.height);
-    this.mask = maskShape.createGeometryMask();
-    this.content.setMask(this.mask);
+    this.scrollMask = maskShape.createGeometryMask();
+    this.content.setMask(this.scrollMask);
 
     // Drag to scroll
     this.bg.on('pointerdown', (pointer: Phaser.Input.Pointer) => {

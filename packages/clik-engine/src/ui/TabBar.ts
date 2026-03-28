@@ -45,7 +45,7 @@ export class TabBar extends Phaser.GameObjects.Container {
         color: i === 0 ? (config.activeTextColor ?? '#000000') : (config.textColor ?? '#cccccc'),
       }).setOrigin(0.5);
 
-      bg.on('pointerup', () => this.setActive(tab.key));
+      bg.on('pointerup', () => this.setActiveTab(tab.key));
 
       this.add([bg, text]);
       this.tabs.push({ key: tab.key, bg, text });
@@ -54,7 +54,7 @@ export class TabBar extends Phaser.GameObjects.Container {
     scene.add.existing(this);
   }
 
-  setActive(key: string): void {
+  setActiveTab(key: string): void {
     if (this.activeTab === key) return;
     this.activeTab = key;
 

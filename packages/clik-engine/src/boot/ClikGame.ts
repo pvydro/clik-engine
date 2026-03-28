@@ -29,7 +29,7 @@ export function createGame(config: ClikGameConfig): Phaser.Game {
   const scaleConfig = getScaleConfig(scalePreset);
   const debug = config.debug ?? false;
 
-  const scenes: (new (...args: unknown[]) => Phaser.Scene)[] = config.scenes.map(entry => entry.class);
+  const scenes = config.scenes.map(entry => entry.class) as unknown as Phaser.Types.Scenes.SceneType[];
 
   // Add debug scenes when debug mode is on
   if (debug) {

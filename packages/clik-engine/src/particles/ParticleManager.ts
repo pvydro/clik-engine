@@ -53,7 +53,7 @@ export class ParticleManager {
       return;
     }
     emitter.setPosition(x, y);
-    emitter.explode(count ?? emitter.quantity);
+    emitter.explode(count ?? (emitter.quantity as number));
   }
 
   /** Start continuous emission at position */
@@ -68,7 +68,7 @@ export class ParticleManager {
   attachTo(name: string, target: Phaser.GameObjects.GameObject): void {
     const emitter = this.emitters.get(name);
     if (!emitter) return;
-    emitter.startFollow(target);
+    emitter.startFollow(target as unknown as Phaser.Types.Math.Vector2Like);
   }
 
   stop(name: string): void {

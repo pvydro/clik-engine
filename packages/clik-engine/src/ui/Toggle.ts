@@ -16,7 +16,7 @@ export interface ToggleConfig {
 
 export class Toggle extends Phaser.GameObjects.Container {
   private bg: Phaser.GameObjects.Rectangle;
-  private thumb: Phaser.GameObjects.Circle;
+  private thumb: Phaser.GameObjects.Arc;
   private labelText: Phaser.GameObjects.Text | null = null;
   private _value: boolean;
   private toggleConfig: ToggleConfig;

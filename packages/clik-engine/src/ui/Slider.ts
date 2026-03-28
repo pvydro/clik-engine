@@ -18,7 +18,7 @@ export interface SliderConfig {
 export class Slider extends Phaser.GameObjects.Container {
   private track: Phaser.GameObjects.Rectangle;
   private fill: Phaser.GameObjects.Rectangle;
-  private thumb: Phaser.GameObjects.Circle;
+  private thumb: Phaser.GameObjects.Arc;
   private sliderConfig: SliderConfig;
   private _value: number;
   private dragging = false;

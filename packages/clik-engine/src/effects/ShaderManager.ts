@@ -99,7 +99,7 @@ export class ShaderManager {
     shadow: (x?: number, y?: number, decay?: number, power?: number) => void;
     clear: () => void;
   } {
-    const go = obj as Phaser.GameObjects.Components.FX;
+    const go = obj as unknown as { preFX?: Phaser.FX.Controller; postFX?: { addBlur: Function; addBloom: Function; addGlow: Function; addShadow: Function; clear: Function } };
     if (!go.preFX && !go.postFX) {
       ConsoleReporter.error('Object does not support FX');
       return { blur: () => {}, bloom: () => {}, glow: () => {}, shadow: () => {}, clear: () => {} };

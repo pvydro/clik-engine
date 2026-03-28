@@ -71,10 +71,10 @@ export const Raycast = {
   ): Phaser.GameObjects.GameObject[] {
     const r2 = radius * radius;
     return objects.filter(obj => {
-      const go = obj as Phaser.GameObjects.Components.Transform;
-      if (!go.x || !go.y) return false;
-      const dx = (go as unknown as { x: number }).x - cx;
-      const dy = (go as unknown as { y: number }).y - cy;
+      const go = obj as unknown as { x: number; y: number };
+      if (go.x === undefined) return false;
+      const dx = go.x - cx;
+      const dy = go.y - cy;
       return dx * dx + dy * dy <= r2;
     });
   },

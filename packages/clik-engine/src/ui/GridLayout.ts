@@ -63,7 +63,7 @@ export class GridLayout extends Phaser.GameObjects.Container {
       const x = padding + col * (cellWidth + gap) + cellWidth / 2;
       const y = padding + row * (cellHeight + gap) + cellHeight / 2;
 
-      const go = this.items[i] as Phaser.GameObjects.Components.Transform;
+      const go = this.items[i] as unknown as Phaser.GameObjects.Components.Transform;
       if (go.setPosition) {
         go.setPosition(x, y);
       }
