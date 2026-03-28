@@ -20,6 +20,7 @@ export { SceneInspector } from './debug/SceneInspector';
 export type { InspectorConfig } from './debug/SceneInspector';
 export { HotState } from './debug/HotState';
 export type { HotStateConfig } from './debug/HotState';
+export { LeakDetector, leakDetector } from './debug/LeakDetector';
 
 // Input
 export { InputManager } from './input/InputManager';
@@ -85,6 +86,8 @@ export { PhysicsHelper } from './physics/PhysicsHelper';
 export { Raycast } from './physics/Raycast';
 export type { RaycastHit } from './physics/Raycast';
 export { MatterHelper } from './physics/MatterHelper';
+export { MovingPlatform } from './physics/MovingPlatform';
+export type { PlatformWaypoint } from './physics/MovingPlatform';
 
 // FSM
 export { StateMachine } from './fsm/StateMachine';

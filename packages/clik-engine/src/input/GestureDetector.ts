@@ -34,6 +34,8 @@ export class GestureDetector {
   private lastTapTime = 0;
   private longPressTimer: Phaser.Time.TimerEvent | null = null;
   private isDown = false;
+  private pinchStartDist = 0;
+  private pinchActive = false;
 
   constructor(scene: Phaser.Scene, config?: GestureConfig) {
     this.scene = scene;
@@ -135,6 +137,41 @@ export class GestureDetector {
           this.lastTapTime = now;
         }
       }
+    });
+
+    // Pinch-to-zoom (multi-touch)
+    this.scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      if (this.scene.input.pointer1.isDown && this.scene.input.pointer2.isDown) {
+        const p1 = this.scene.input.pointer1;
+        const p2 = this.scene.input.pointer2;
+        this.pinchStartDist = Phaser.Math.Distance.Between(p1.x, p1.y, p2.x, p2.y);
+        this.pinchActive = true;
+      }
+    });
+
+    this.scene.input.on('pointermove', () => {
+      if (!this.pinchActive) return;
+      if (!this.scene.input.pointer1.isDown || !this.scene.input.pointer2.isDown) return;
+
+      const p1 = this.scene.input.pointer1;
+      const p2 = this.scene.input.pointer2;
+      const currentDist = Phaser.Math.Distance.Between(p1.x, p1.y, p2.x, p2.y);
+      const scale = currentDist / this.pinchStartDist;
+      const cx = (p1.x + p2.x) / 2;
+      const cy = (p1.y + p2.y) / 2;
+
+      this.emit({
+        type: 'pinch',
+        x: cx,
+        y: cy,
+        scale,
+        distance: currentDist,
+        duration: 0,
+      });
+    });
+
+    this.scene.input.on('pointerup', () => {
+      this.pinchActive = false;
     });
   }
 
