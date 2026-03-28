@@ -8,6 +8,7 @@ export { BaseScene } from './scenes/BaseScene';
 export { SceneDirector } from './scenes/SceneDirector';
 export { Transitions } from './scenes/transitions';
 export type { TransitionConfig } from './scenes/transitions';
+export { SceneUtils } from './scenes/SceneUtils';
 
 // Debug
 export { ConsoleReporter, ClikLogChannel } from './debug/ConsoleReporter';
@@ -27,6 +28,8 @@ export { VirtualControls } from './input/VirtualControls';
 export type { VirtualControlsConfig } from './input/VirtualControls';
 export { GestureDetector } from './input/GestureDetector';
 export type { GestureType, GestureEvent, GestureConfig } from './input/GestureDetector';
+export { ComboDetector } from './input/ComboDetector';
+export type { ComboDefinition } from './input/ComboDetector';
 export { InputRecorder } from './input/InputRecorder';
 
 // UI
@@ -123,6 +126,9 @@ export { DragDrop } from './entity/components/DragDrop';
 export { Follower } from './entity/components/Follower';
 export { Lifetime } from './entity/components/Lifetime';
 export { Oscillator } from './entity/components/Oscillator';
+export { FlashOnHit } from './entity/components/FlashOnHit';
+export { Patrol } from './entity/components/Patrol';
+export type { PatrolPoint } from './entity/components/Patrol';
 export type { OscillateAxis } from './entity/components/Oscillator';
 
 // Analytics
