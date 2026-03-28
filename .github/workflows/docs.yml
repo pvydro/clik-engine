@@ -1,4 +1,4 @@
-name: Deploy API Docs
+name: Deploy Docs
 
 on:
   push:
@@ -25,9 +25,17 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run docs --workspace=packages/clik-engine
+
+      # Combine: landing page (docs/) + API reference (docs/api/)
+      - name: Assemble site
+        run: |
+          mkdir -p _site/api
+          cp docs/index.html _site/index.html
+          cp -r packages/clik-engine/docs/* _site/api/
+
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: packages/clik-engine/docs
+          path: _site
 
   deploy:
     needs: build
