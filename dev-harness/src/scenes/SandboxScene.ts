@@ -54,6 +54,12 @@ export class SandboxScene extends BaseScene {
       onClick: () => this.director.go('sandbox', 'transition-test', Transitions.zoom(700)),
     });
 
+    new Button(this, {
+      x: width / 2, y: height / 2 + 200,
+      text: 'Kitchen Sink',
+      onClick: () => this.director.go('sandbox', 'kitchen-sink'),
+    });
+
     this.inspectState('sandbox', () => ({
       frames: this.frameCount,
     }));
