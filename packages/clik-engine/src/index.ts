@@ -14,6 +14,7 @@ export { ConsoleReporter, ClikLogChannel } from './debug/ConsoleReporter';
 export { DebugOverlay } from './debug/DebugOverlay';
 export { StateInspector } from './debug/StateInspector';
 export { GridOverlay } from './debug/GridOverlay';
+export { Profiler, profiler } from './debug/Profiler';
 
 // Input
 export { InputManager } from './input/InputManager';
@@ -91,6 +92,14 @@ export { Component } from './entity/Component';
 export { EntityRegistry } from './entity/EntityRegistry';
 export { Health } from './entity/components/Health';
 export { Movement } from './entity/components/Movement';
+
+// i18n
+export { I18nManager } from './i18n/I18nManager';
+export type { TranslationData } from './i18n/I18nManager';
+
+// Dialogue
+export { DialogueManager } from './dialogue/DialogueManager';
+export type { DialogueLine, DialogueTree, DialogueDisplayConfig } from './dialogue/DialogueManager';
 
 // Scaling
 export { ResponsiveManager } from './scaling/ResponsiveManager';
