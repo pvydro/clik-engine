@@ -51,6 +51,7 @@ export { Toast } from './ui/Toast';
 export type { ToastConfig } from './ui/Toast';
 export { UIAnimator } from './ui/UIAnimator';
 export type { UIAnimationType, UIAnimationConfig } from './ui/UIAnimator';
+export { FocusManager } from './ui/FocusManager';
 export { setTheme, getTheme, DarkTheme, LightTheme, RetroTheme, NeonTheme } from './ui/Theme';
 export type { Theme, ThemeColors } from './ui/Theme';
 
@@ -148,6 +149,9 @@ export { Color } from './utils/color';
 export { pick, shuffle, weightedRandom, SeededRandom } from './utils/random';
 export { ObjectPool } from './utils/pool';
 export { delay, interval } from './utils/timer';
+export { Grid2D, PriorityQueue } from './utils/structures';
+export { findPath } from './utils/pathfinding';
+export type { PathNode } from './utils/pathfinding';
 
 // Types
 export type {
