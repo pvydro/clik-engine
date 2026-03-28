@@ -48,6 +48,32 @@ npx create-clik-game my-game --template=puzzle        # Grid-based puzzle game
 
 Each template includes a `.claude/launch.json` for instant Preview MCP integration.
 
+## Installing as a Dependency
+
+The engine is published as `@pvydro/clik-engine` on GitHub Packages.
+
+**1. Authenticate (once per machine):**
+```bash
+npm login --registry=https://npm.pkg.github.com
+# Username: your-github-username
+# Password: GitHub personal access token (classic, with read:packages scope)
+```
+
+**2. Add `.npmrc` to your project root:**
+```
+@pvydro:registry=https://npm.pkg.github.com
+```
+
+**3. Install:**
+```bash
+npm install @pvydro/clik-engine
+```
+
+**4. Import:**
+```typescript
+import { createGame, BaseScene, ScalePreset } from '@pvydro/clik-engine';
+```
+
 ## Architecture
 
 ```
