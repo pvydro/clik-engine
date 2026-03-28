@@ -37,6 +37,12 @@ export { Label } from './ui/Label';
 export type { LabelConfig } from './ui/Label';
 export { ProgressBar } from './ui/ProgressBar';
 export type { ProgressBarConfig } from './ui/ProgressBar';
+export { ScrollContainer } from './ui/ScrollContainer';
+export type { ScrollContainerConfig } from './ui/ScrollContainer';
+export { GridLayout } from './ui/GridLayout';
+export type { GridLayoutConfig } from './ui/GridLayout';
+export { TabBar } from './ui/TabBar';
+export type { TabConfig, TabBarConfig } from './ui/TabBar';
 export { Slider } from './ui/Slider';
 export type { SliderConfig } from './ui/Slider';
 export { Toggle } from './ui/Toggle';
@@ -60,6 +66,8 @@ export type { MigrationFn } from './save/migration';
 
 // Physics
 export { PhysicsHelper } from './physics/PhysicsHelper';
+export { Raycast } from './physics/Raycast';
+export type { RaycastHit } from './physics/Raycast';
 
 // FSM
 export { StateMachine } from './fsm/StateMachine';
@@ -92,6 +100,9 @@ export { Component } from './entity/Component';
 export { EntityRegistry } from './entity/EntityRegistry';
 export { Health } from './entity/components/Health';
 export { Movement } from './entity/components/Movement';
+export { Timer as TimerComponent } from './entity/components/Timer';
+export { Collectible } from './entity/components/Collectible';
+export { Spawner } from './entity/components/Spawner';
 
 // i18n
 export { I18nManager } from './i18n/I18nManager';
