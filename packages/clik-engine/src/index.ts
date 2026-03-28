@@ -27,6 +27,8 @@ export { InputRecorder } from './input/InputRecorder';
 
 // UI
 export { UIScene } from './ui/UIScene';
+export { TextInput } from './ui/TextInput';
+export type { TextInputConfig } from './ui/TextInput';
 export { Button } from './ui/Button';
 export type { ButtonConfig } from './ui/Button';
 export { Panel } from './ui/Panel';
