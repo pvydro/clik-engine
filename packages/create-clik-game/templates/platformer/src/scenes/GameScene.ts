@@ -1,4 +1,4 @@
-import { BaseScene, PhysicsHelper, ConsoleReporter } from 'clik-engine';
+import { BaseScene, PhysicsHelper, ConsoleReporter } from '@pvydro/clik-engine';
 import Phaser from 'phaser';
 
 export class GameScene extends BaseScene {

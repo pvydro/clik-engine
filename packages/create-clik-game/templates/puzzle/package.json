@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "clik-engine": "^0.1.0"
+    "@pvydro/clik-engine": "^0.1.0"
   },
   "devDependencies": {
     "typescript": "^5.7.0",

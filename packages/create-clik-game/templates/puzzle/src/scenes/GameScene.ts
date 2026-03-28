@@ -1,4 +1,4 @@
-import { BaseScene, Label, Button, Toast, ConsoleReporter } from 'clik-engine';
+import { BaseScene, Label, Button, Toast, ConsoleReporter } from '@pvydro/clik-engine';
 
 const GRID_SIZE = 4;
 const CELL_SIZE = 120;

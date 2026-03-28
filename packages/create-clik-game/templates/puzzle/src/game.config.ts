@@ -1,4 +1,4 @@
-import { ClikGameConfig, ScalePreset } from 'clik-engine';
+import { ClikGameConfig, ScalePreset } from '@pvydro/clik-engine';
 import { GameScene } from './scenes/GameScene';
 
 export const config: ClikGameConfig = {
