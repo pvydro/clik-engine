@@ -9,6 +9,7 @@ export { SceneDirector } from './scenes/SceneDirector';
 export { Transitions } from './scenes/transitions';
 export type { TransitionConfig } from './scenes/transitions';
 export { SceneUtils } from './scenes/SceneUtils';
+export { ScreenTransition } from './scenes/ScreenTransition';
 
 // Debug
 export { ConsoleReporter, ClikLogChannel } from './debug/ConsoleReporter';
@@ -92,6 +93,7 @@ export type { RaycastHit } from './physics/Raycast';
 export { MatterHelper } from './physics/MatterHelper';
 export { MovingPlatform } from './physics/MovingPlatform';
 export type { PlatformWaypoint } from './physics/MovingPlatform';
+export { PhysicsPool } from './physics/PhysicsPool';
 
 // FSM
 export { StateMachine } from './fsm/StateMachine';
@@ -196,6 +198,7 @@ export type { PathNode } from './utils/pathfinding';
 export { SpatialHash } from './utils/spatial';
 export { GameTimer } from './utils/GameTimer';
 export { Cooldown } from './utils/Cooldown';
+export { EventBus, eventBus } from './utils/EventBus';
 export { formatNumber, formatCompact, formatTime, formatTimePrecise, truncate, padRight, pluralize, ordinal } from './utils/format';
 
 // Types

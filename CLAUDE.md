@@ -7,10 +7,11 @@ Claude-native game engine built on PhaserJS. Designed for building games collabo
 ```bash
 npm install                                          # Install all workspace dependencies
 npm run dev                                          # Dev harness (port 5173)
+npm run dev:cards                                    # Card Match example (port 5176)
 npm run dev:2048                                     # 2048 example (port 5174)
 npm run dev:shooter                                  # Space Shooter example (port 5175)
-npm run test                                         # Run 136 unit tests
-npm run build                                        # Build engine library (166KB)
+npm run test                                         # Run 178 unit tests
+npm run build                                        # Build engine library (103 modules)
 ```
 
 ## Project Structure
@@ -58,7 +59,8 @@ clik/
 │
 ├── examples/
 │   ├── 2048/                    # Full 2048 game (grid logic, scoring, save, swipe)
-│   └── shooter/                 # Space shooter (physics, spawning, explosions, difficulty)
+│   ├── shooter/                 # Space shooter (physics, spawning, explosions, difficulty)
+│   └── cards/                   # Card matching game (flip, match, moves, save best)
 │
 └── .claude/
     ├── launch.json              # Preview MCP configs for all dev servers
@@ -80,13 +82,14 @@ clik/
 - Set `devStartScene` in config to skip menus during development
 - Game instance exposed as `window.__CLIK_GAME` when `debug: true`
 
-## Engine Systems (25 directories, 88 build modules)
+## Engine Systems (25 directories, 103 build modules)
 
 ### Boot & Scenes
 - `createGame(config)` — single declarative config object creates entire game
 - `BaseScene` — wires up input, audio, save, director automatically
 - `SceneDirector` — 7 transition types (fade, slideLeft/Right/Up/Down, zoom, wipe, custom)
 - `SceneUtils` — hitStop, slowMotion, countdown, screenFlash, wipe helpers
+- `ScreenTransition` — fadeThrough, irisWipe, pixelate (scene change overlays)
 - Scale presets: `MOBILE_PORTRAIT`, `MOBILE_LANDSCAPE`, `DESKTOP`, `AUTO`
 
 ### Input (6 modules)
@@ -110,7 +113,10 @@ clik/
 - `ScrollContainer` — drag/wheel scrolling with momentum
 - `GridLayout` — auto-position items in columns
 - `TabBar` — tabbed navigation
+- `ListView` — virtualized scrolling list (handles 1000+ items)
 - `FocusManager` — keyboard/gamepad UI navigation
+- `Tooltip` — hover-triggered tooltip with delay
+- `Notification` — slide-in notification panel (4 corners)
 - `Anchor` — responsive screen positioning (9 anchor points)
 - `UIAnimator` — 8 animation types + staggered lists
 - `Theme` — 4 built-in themes (dark, light, retro, neon)
@@ -130,19 +136,24 @@ clik/
   - `Oscillator` — sinusoidal bob/sway
   - `FlashOnHit` — tint-flash damage feedback
   - `Patrol` — waypoint movement with wait times
+  - `Interactable` — hover/click/proximity interaction for NPCs/items
 
-### Physics (3 modules)
+### Physics (5 modules)
 - `PhysicsHelper` — full Arcade wrapper (velocity, drag, bounce, bodies, groups, one-way platforms, impulse)
 - `MatterHelper` — Matter.js bodies, constraints, pins, sensors, collision filters
 - `Raycast` — ray casting, line-of-sight, circle/rect queries, nearest-object, debug draw
+- `MovingPlatform` — waypoint-based platforms with rider support
+- `PhysicsPool` — recycling physics group with auto-spawn/despawn
 
-### Animation (3 modules)
+### Animation (4 modules)
 - `AnimationHelper` — declarative registration from atlas/spritesheet
 - `AnimationStateController` — map FSM states to animations
 - `SpriteAnimator` — simplified play/chain/face API
+- `AnimationEventSystem` — frame callbacks (hitbox timing, footstep sounds)
 
 ### Camera
 - `CameraManager` — follow (lerp, deadzone), zoom, pan, shake (3 presets), flash, fade, path following, visible bounds check, rotation
+- `MultiCamera` — split screen (2/4 player), minimap, picture-in-picture
 
 ### Networking (4 modules)
 - `NetworkManager` — WebSocket with auto-reconnect (exponential backoff), heartbeat
@@ -167,6 +178,8 @@ clik/
 - `Profiler` — per-section timing, slow frame detection, memory tracking
 - `SceneInspector` — DOM-based hierarchy browser with property editor
 - `HotState` — sessionStorage state preservation across HMR reloads
+- `LeakDetector` — track object creation/destruction, threshold warnings
+- `EffectPresets` — CRT, dream, underwater, night vision, frozen, retro, damage
 
 ### Utilities
 - `Vector2` — full 2D math (normalize, distance, angle, rotate, lerp)
@@ -177,6 +190,9 @@ clik/
 - `PriorityQueue` — min-heap for pathfinding
 - `SpatialHash` — broad-phase collision indexing
 - `findPath` — A* pathfinding on Grid2D
+- `GameTimer` — frame-rate independent countdown/cooldown with pause, extend, repeat
+- `Cooldown` — use/isReady pattern for abilities and weapons
+- `EventBus` — global decoupled event system (singleton: `eventBus`)
 - Format: `formatNumber`, `formatCompact`, `formatTime`, `truncate`, `pluralize`, `ordinal`
 
 ## Debug & Development
@@ -213,11 +229,11 @@ profiler.getTimingSummary(); // { physics: "0.5ms avg, 1.2ms max" }
 ## Testing
 
 ```bash
-npm run test                                         # Run all 136 tests
+npm run test                                         # Run all 178 tests
 npm run test:watch --workspace=packages/clik-engine  # Watch mode
 ```
 
-Test coverage: math, Vector2, Color, Random, ObjectPool, Grid2D, PriorityQueue, SpatialHash, A* pathfinding, StateMachine, SaveManager, SaveMigrator, I18nManager, AnalyticsManager, ConsoleReporter, InputRecorder, ComboDetector, format utils.
+Test coverage: math, Vector2, Color, Random, ObjectPool, Grid2D, PriorityQueue, SpatialHash, A* pathfinding, StateMachine, SaveManager, SaveMigrator, I18nManager, AnalyticsManager, ConsoleReporter, InputRecorder, ComboDetector, ActionMap, LeakDetector, GameTimer, Cooldown, EventBus, format utils.
 
 ## Creating a Game
 
