@@ -53,4 +53,5 @@ export interface ClikGameConfig {
   input?: InputConfig;
   save?: SaveConfig;
   backgroundColor?: string;
+  pixelArt?: boolean;
 }

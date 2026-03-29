@@ -10,10 +10,36 @@ export interface ThemeColors {
   success: number;
 }
 
+/** Optional mapping of texture keys used by sprite-based UI components. */
+export interface ThemeSprites {
+  buttonPrimary?: string;
+  buttonPrimaryHover?: string;
+  buttonPrimaryPress?: string;
+  buttonSecondary?: string;
+  buttonSecondaryHover?: string;
+  buttonSecondaryPress?: string;
+  buttonDanger?: string;
+  buttonDangerHover?: string;
+  buttonDangerPress?: string;
+  panel?: string;
+  panelAlt?: string;
+  progressTrack?: string;
+  progressFill?: string;
+  tooltip?: string;
+}
+
 export interface Theme {
   name: string;
   colors: ThemeColors;
   fontFamily: string;
+  /** Display / title font family (falls back to `fontFamily`). */
+  fontDisplay?: string;
+  /** UI / button font family (falls back to `fontFamily`). */
+  fontUI?: string;
+  /** Global text stroke color for readability (e.g. `'#000000'`). */
+  textStroke?: string;
+  /** Global text stroke thickness (default `0` — no stroke). */
+  textStrokeThickness?: number;
   fontSize: {
     small: string;
     medium: string;
@@ -26,6 +52,8 @@ export interface Theme {
     large: number;
   };
   borderRadius: number;
+  /** Texture keys for sprite-based UI components. */
+  sprites?: ThemeSprites;
 }
 
 let currentTheme: Theme = DarkTheme();

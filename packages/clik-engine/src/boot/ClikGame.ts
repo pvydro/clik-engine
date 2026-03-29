@@ -29,16 +29,16 @@ export function createGame(config: ClikGameConfig): Phaser.Game {
   const scaleConfig = getScaleConfig(scalePreset);
   const debug = config.debug ?? false;
 
+  const defaultScene = config.devStartScene
+    ?? config.scenes.find(s => s.default)?.key
+    ?? config.scenes[0]?.key;
+
   const scenes = config.scenes.map(entry => entry.class) as unknown as Phaser.Types.Scenes.SceneType[];
 
   // Add debug scenes when debug mode is on
   if (debug) {
     scenes.push(DebugOverlay, StateInspector, GridOverlay);
   }
-
-  const defaultScene = config.devStartScene
-    ?? config.scenes.find(s => s.default)?.key
-    ?? config.scenes[0]?.key;
 
   const physicsConfig: Phaser.Types.Core.PhysicsConfig = {};
   if (config.physics === 'arcade') {
@@ -69,6 +69,7 @@ export function createGame(config: ClikGameConfig): Phaser.Game {
     },
     physics: physicsConfig,
     scene: scenes,
+    pixelArt: config.pixelArt ?? false,
   };
 
   const game = new Phaser.Game(phaserConfig);
@@ -92,8 +93,8 @@ export function createGame(config: ClikGameConfig): Phaser.Game {
       game.scene.bringToTop('__clik_state_inspector');
     }
 
-    // Jump to devStartScene if specified
     if (defaultScene && defaultScene !== config.scenes[0]?.key) {
+      // Jump to devStartScene if specified
       ConsoleReporter.engine(`Jumping to devStartScene: ${defaultScene}`);
       game.scene.start(defaultScene);
     }
