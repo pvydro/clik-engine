@@ -80,6 +80,16 @@ export type { NotificationConfig } from './ui/Notification';
 export { Anchor } from './ui/Anchor';
 export type { AnchorPosition, AnchorConfig } from './ui/Anchor';
 export { ConfirmDialog } from './ui/ConfirmDialog';
+export { LayeredTile } from './ui/LayeredTile';
+export type { LayeredTileConfig } from './ui/LayeredTile';
+export { DepthRenderer } from './ui/DepthRenderer';
+export type { DepthPanelConfig, DepthCellConfig, DepthGridConfig } from './ui/DepthRenderer';
+export { ScorePopup } from './ui/ScorePopup';
+export type { ScorePopupConfig } from './ui/ScorePopup';
+export { ComboDisplay } from './ui/ComboDisplay';
+export type { ComboDisplayConfig } from './ui/ComboDisplay';
+export { AnimatedHUD } from './ui/AnimatedHUD';
+export type { HUDCounterConfig } from './ui/AnimatedHUD';
 export { NumberInput } from './ui/NumberInput';
 export type { NumberInputConfig } from './ui/NumberInput';
 export type { ConfirmDialogConfig } from './ui/ConfirmDialog';
@@ -94,6 +104,8 @@ export type { ValidationResult } from './assets/ManifestValidator';
 
 // Audio
 export { AudioManager } from './audio/AudioManager';
+export { ProceduralAudio } from './audio/ProceduralAudio';
+export { ProceduralMusic } from './audio/ProceduralMusic';
 
 // Save
 export { SaveManager } from './save/SaveManager';
@@ -116,6 +128,7 @@ export type { StateHooks, TransitionRule } from './fsm/State';
 
 // Tween
 export { tween, tweenSequence, TweenPresets } from './tween/TweenHelper';
+export { GameFeelPresets } from './tween/GameFeelPresets';
 export { Ease } from './tween/easings';
 export type { EaseName } from './tween/easings';
 
@@ -128,6 +141,8 @@ export type { SplitScreenConfig, MinimapConfig } from './camera/MultiCamera';
 // Particles
 export { ParticleManager, ParticlePresets } from './particles/ParticleManager';
 export type { ParticlePresetConfig } from './particles/ParticleManager';
+export { GraphicsParticles } from './particles/GraphicsParticles';
+export type { ParticleShape } from './particles/GraphicsParticles';
 
 // Effects
 export { ShaderManager } from './effects/ShaderManager';

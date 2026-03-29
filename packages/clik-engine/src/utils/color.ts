@@ -41,4 +41,8 @@ export const Color = {
   darken(color: number, amount: number): number {
     return Color.blend(color, 0x000000, amount);
   },
+
+  numberToHex(color: number): string {
+    return '#' + (color & 0xffffff).toString(16).padStart(6, '0');
+  },
 };

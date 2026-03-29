@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import { ConsoleReporter } from '../debug/ConsoleReporter';
+import { ProceduralAudio } from './ProceduralAudio';
+import { ProceduralMusic } from './ProceduralMusic';
 
 export class AudioManager {
   private scene: Phaser.Scene;
@@ -11,6 +13,24 @@ export class AudioManager {
   private musicMuted = false;
   private sfxMuted = false;
   private unlocked = false;
+  private _procedural: ProceduralAudio | null = null;
+  private _proceduralMusic: ProceduralMusic | null = null;
+
+  /** Lazy-initialized procedural sound effects (Web Audio synthesis) */
+  get procedural(): ProceduralAudio {
+    if (!this._procedural) {
+      this._procedural = new ProceduralAudio({ volume: this.sfxVolume });
+    }
+    return this._procedural;
+  }
+
+  /** Lazy-initialized procedural music generator */
+  get proceduralMusic(): ProceduralMusic {
+    if (!this._proceduralMusic) {
+      this._proceduralMusic = new ProceduralMusic({ volume: this.musicVolume * 0.1 });
+    }
+    return this._proceduralMusic;
+  }
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;

@@ -114,6 +114,41 @@ export class ShaderManager {
     };
   }
 
+  /**
+   * Apply a temporary PostFX effect to an object, auto-removed after duration.
+   */
+  static temporaryEffect(
+    scene: Phaser.Scene,
+    obj: Phaser.GameObjects.GameObject,
+    effect: 'glow' | 'shine' | 'bloom',
+    config?: { duration?: number; color?: number; strength?: number },
+  ): void {
+    const dur = config?.duration ?? 300;
+    const color = config?.color ?? 0xffffff;
+    const strength = config?.strength ?? 4;
+    const go = obj as unknown as { postFX?: { addGlow?: Function; addShine?: Function; addBloom?: Function; remove?: Function } };
+    if (!go.postFX) return;
+
+    let fx: unknown;
+    switch (effect) {
+      case 'glow':
+        fx = go.postFX.addGlow?.(color, strength, 0, false, 0.1);
+        break;
+      case 'shine':
+        fx = go.postFX.addShine?.(1, 0.5, 5);
+        break;
+      case 'bloom':
+        fx = go.postFX.addBloom?.(color, strength, strength);
+        break;
+    }
+
+    if (fx) {
+      scene.time.delayedCall(dur, () => {
+        go.postFX?.remove?.(fx);
+      });
+    }
+  }
+
   private hasFX(): boolean {
     if (!this.camera.postFX) {
       ConsoleReporter.error('PostFX not available (requires WebGL renderer)');

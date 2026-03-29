@@ -99,6 +99,47 @@ export const SceneUtils = {
   },
 
   /**
+   * Camera shake scaled by combo count.
+   */
+  comboShake(scene: Phaser.Scene, combo: number, config?: {
+    baseIntensity?: number;
+    baseDuration?: number;
+    maxCombo?: number;
+  }): void {
+    const baseI = config?.baseIntensity ?? 0.002;
+    const baseD = config?.baseDuration ?? 100;
+    const max = config?.maxCombo ?? 5;
+    const intensity = baseI * combo;
+    const duration = baseD * Math.min(combo, max);
+    scene.cameras.main.shake(duration, intensity);
+  },
+
+  /**
+   * Screen flash with custom color and alpha.
+   */
+  screenFlashColor(scene: Phaser.Scene, config?: {
+    color?: number;
+    alpha?: number;
+    duration?: number;
+  }): Promise<void> {
+    const { width, height } = scene.scale;
+    const color = config?.color ?? 0xffffff;
+    const alpha = config?.alpha ?? 0.15;
+    const duration = config?.duration ?? 150;
+    const flash = scene.add.rectangle(width / 2, height / 2, width * 2, height * 2, color, alpha)
+      .setDepth(9999).setScrollFactor(0);
+
+    return new Promise(resolve => {
+      scene.tweens.add({
+        targets: flash,
+        alpha: 0,
+        duration,
+        onComplete: () => { flash.destroy(); resolve(); },
+      });
+    });
+  },
+
+  /**
    * Simple screen wipe (black rectangle slides across).
    */
   wipe(scene: Phaser.Scene, direction: 'left' | 'right' = 'left', duration = 400, color = 0x000000): Promise<void> {
