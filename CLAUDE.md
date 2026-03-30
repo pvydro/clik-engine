@@ -1,211 +1,96 @@
-# clik-engine
+# CLAUDE.md
 
-Claude-native game engine built on PhaserJS. Designed for building games collaboratively with Claude using the Preview MCP tools.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Quick Start
+## Commands
 
 ```bash
+# Development
 npm install                                          # Install all workspace dependencies
 npm run dev                                          # Dev harness (port 5173)
-npm run dev:cards                                    # Card Match example (port 5176)
 npm run dev:2048                                     # 2048 example (port 5174)
 npm run dev:shooter                                  # Space Shooter example (port 5175)
-npm run test                                         # Run 401 unit tests (40 test files)
-npm run build                                        # Build engine library (~120 modules)
-npm run docs --workspace=packages/clik-engine        # Generate API docs (TypeDoc)
+npm run dev:cards                                    # Card Match example (port 5176)
+
+# Build & Quality
+npm run build                                        # Build engine library (Vite, ~120 ES modules)
+npm run typecheck --workspace=packages/clik-engine   # TypeScript type checking (tsc --noEmit)
+npm run lint --workspace=packages/clik-engine        # ESLint (src/*.ts only)
+npm run format --workspace=packages/clik-engine      # Prettier (semi, singleQuote, 120 printWidth)
+npm run docs --workspace=packages/clik-engine        # TypeDoc API docs
+
+# Testing (Vitest)
+npm run test                                         # Run all tests (~65 files, ~800 tests)
+npm run test -- tests/utils/Vector2.test.ts          # Run a single test file
+npm run test -- -t "pattern"                         # Filter by test name
+npm run test:watch --workspace=packages/clik-engine  # Watch mode
 ```
 
-## Project Structure
+## Architecture
+
+**Monorepo** (npm workspaces) with these packages:
+
+- `packages/clik-engine/` — Core engine library. Built with Vite in library mode (`es` format), Phaser is an external peer dependency. Entry: `src/index.ts` → `dist/clik-engine.js`. Published as `@pvydro/clik-engine` on GitHub Packages.
+- `packages/create-clik-game/` — CLI scaffolder (`npx create-clik-game <name> [--template=...]`)
+- `packages/clik-server/` — WebSocket matchmaking server (Node.js)
+- `dev-harness/` — Engine playground (SandboxScene, TransitionTest, KitchenSink)
+- `examples/` — Three complete games: 2048, shooter, cards
+
+The engine has 27 system directories under `packages/clik-engine/src/` (boot, scenes, input, ui, entity, physics, animation, camera, particles, audio, tilemap, fsm, tween, save, assets, network, i18n, dialogue, effects, platform, accessibility, analytics, scaling, debug, utils, plugin, ai). Each is a self-contained module — read its directory to understand it.
+
+### BaseScene Lazy Accessor Pattern
+
+All scenes extend `BaseScene`. Engine managers are instantiated lazily via private fields + protected getters:
 
 ```
-clik/
-├── packages/clik-engine/        # Core engine (npm package, 95 source files)
-│   ├── src/
-│   │   ├── accessibility/       # A11yManager (color blind, font scale, reduced motion)
-│   │   ├── analytics/           # AnalyticsManager (events, backends, sessions)
-│   │   ├── animation/           # AnimationHelper, SpriteAnimator, AnimationStateController
-│   │   ├── assets/              # AssetManifest (tiered loading), Preloader
-│   │   ├── audio/               # AudioManager (crossfade, per-channel mute, loop count)
-│   │   ├── boot/                # createGame() factory, scale presets, startup validation
-│   │   ├── camera/              # CameraManager (follow, zoom, shake, pan, path, bounds)
-│   │   ├── debug/               # DebugOverlay, StateInspector, ConsoleReporter, Profiler,
-│   │   │                        #   GridOverlay, SceneInspector (DOM), HotState
-│   │   ├── dialogue/            # DialogueManager (branching trees, typewriter, choices)
-│   │   ├── effects/             # ShaderManager (blur, bloom, vignette, pixelate, CRT)
-│   │   ├── entity/              # Entity, Component, EntityRegistry
-│   │   │   └── components/      # Health, Movement, Timer, Collectible, Spawner, DragDrop,
-│   │   │                        #   Follower, Lifetime, Oscillator, FlashOnHit, Patrol
-│   │   ├── fsm/                 # StateMachine (states, transitions, guards, history)
-│   │   ├── i18n/                # I18nManager (locales, interpolation, dot-notation)
-│   │   ├── input/               # InputManager, ActionMap, GestureDetector, VirtualControls,
-│   │   │                        #   InputRecorder, ComboDetector
-│   │   ├── network/             # NetworkManager (WebSocket, reconnect), Room, StateSync, Lobby
-│   │   ├── particles/           # ParticleManager + presets (explosion, sparkle, trail, rain)
-│   │   ├── physics/             # PhysicsHelper (Arcade), PhysicsBody (fluent wrapper),
-│   │   │                        #   CollisionBuilder (fluent API), MatterHelper, Raycast
-│   │   ├── platform/            # PlatformManager (OS, lifecycle, safe area, fullscreen)
-│   │   ├── save/                # SaveManager (localStorage slots), SaveMigrator
-│   │   ├── scaling/             # ResponsiveManager (breakpoints, DPI, orientation)
-│   │   ├── scenes/              # BaseScene, SceneDirector, Transitions (7 types), SceneUtils
-│   │   ├── tilemap/             # TilemapManager (layers, collision, spawn points, parallax)
-│   │   ├── tween/               # TweenHelper (promise-based), Ease constants, TweenPresets
-│   │   ├── ui/                  # 14 components (see UI section below)
-│   │   ├── utils/               # Vector2, Color, Random, ObjectPool, Grid2D, PriorityQueue,
-│   │   │                        #   SpatialHash, findPath (A*), format helpers, shared interfaces
-│   │   └── utils/interfaces.ts  # Shared PositionLike, TransformLike, TweenableLike etc.
-│   └── tests/                   # 40 test files, 401 tests (Vitest)
-│
-├── packages/create-clik-game/   # CLI: npx create-clik-game <name> [--template=...]
-│   └── templates/               # default, platformer, puzzle
-│
-├── packages/clik-server/         # WebSocket matchmaking server (Node.js)
-├── dev-harness/                 # Engine playground (SandboxScene, TransitionTest, KitchenSink)
-│
-├── examples/
-│   ├── 2048/                    # Full 2048 game (grid logic, scoring, save, swipe)
-│   ├── shooter/                 # Space shooter (physics, spawning, explosions, difficulty)
-│   └── cards/                   # Card matching game (flip, match, moves, save best)
-│
-└── .claude/
-    ├── launch.json              # Preview MCP configs for all dev servers
-    └── skills/                  # 4 Claude skills (scaffold, playtest, build, debug)
+private _actions: InputManager | undefined;
+protected get actions(): InputManager {
+  if (!this._actions) this._actions = new InputManager(this, ...);
+  return this._actions;
+}
 ```
+
+This means: `this.actions`, `this.director`, `this.audio`, `this.save`, `this.entities` — each manager only exists if the scene actually uses it. Cleanup in `shutdown()` destroys and nullifies each. Accessing a manager during shutdown throws.
+
+### Entity/Component System
+
+`Entity` extends Phaser Container. Components are added via `entity.addComponent()`. `EntityRegistry` maintains O(1) indexes by type and tag — use `getByType()` / `getByTag()` instead of filtering. `BaseScene.update()` automatically calls `entityRegistry.updateAll()`.
+
+### Network System
+
+Client-side multiplayer via `NetworkManager` (WebSocket, auto-reconnect, heartbeat), `Lobby` (browse/create/join rooms), `Room` (player management, game actions, state sync), and `StateSync` (entity interpolation with configurable buffer/delay). Matches `clik-server` wire protocol.
+
+### Plugin System
+
+Extensible via `ClikPlugin` interface (init/destroy lifecycle) and `ClikScenePlugin` (scene hooks: onSceneCreate/Update/Shutdown). Register plugins in `ClikGameConfig.plugins`. `PluginManager` handles dependency resolution, error isolation, reverse-order destroy.
+
+### AI System
+
+`BehaviorTree` with `Blackboard` shared data, 8 node types (Sequence, Selector, Parallel, Inverter, Succeeder, Repeater, Wait, Action, Condition). `Steering` behaviors (seek, flee, arrive, pursue, evade, wander, obstacle avoidance, separation, alignment, cohesion). `SteeringCalculator` for weighted force composition.
+
+### Input Provider Architecture
+
+`InputManager` delegates to three providers: `KeyboardProvider`, `TouchProvider`, `GamepadProvider`. Each implements `InputProvider` interface. `InputBuffer` for fighting-game input sequences. `RemapHelper` for settings menu key rebinding.
 
 ## Key Conventions
 
-- All scenes extend `BaseScene` and MUST call `super.create()` and `super.update(time, delta)`
-- BaseScene systems are **lazy** — managers are only created on first access (no cost for unused systems)
+- All scenes extend `BaseScene` and **must** call `super.create()` and `super.update(time, delta)`
 - Use `this.actions` for input (never raw `this.input.keyboard`)
 - Use `this.director` for scene transitions
 - Use `this.audio` for music/SFX
 - Use `this.save` for localStorage persistence
-- Use `this.entities` to access the scene's `EntityRegistry`; `updateAll()` is wired automatically
 - All UI is Phaser-native (rendered on canvas, visible in screenshots — no DOM)
-- Structured logging: `ConsoleReporter.state()`, `.scene()`, `.input()`, `.error()` etc.
-- Filter logs with `preview_console_logs(search: "[CLIK:")`
-- Debug overlay: FPS/scene/entities in top-left, state inspector in top-right
-- Register debug state with `this.inspectState('label', () => ({ key: value }))`
-- Set `devStartScene` in config to skip menus during development
 - Game instance exposed as `window.__CLIK_GAME` when `debug: true`
-
-## Engine Systems (25 directories, 111 build modules)
-
-### Boot & Scenes
+- Set `devStartScene` in config to skip menus during development
 - `createGame(config)` — single declarative config object creates entire game
-- `BaseScene` — wires up input, audio, save, director automatically
-- `SceneDirector` — 7 transition types (fade, slideLeft/Right/Up/Down, zoom, wipe, custom)
-- `SceneUtils` — hitStop, slowMotion, countdown, screenFlash, wipe helpers
-- `ScreenTransition` — fadeThrough, irisWipe, pixelate (scene change overlays)
-- Scale presets: `MOBILE_PORTRAIT`, `MOBILE_LANDSCAPE`, `DESKTOP`, `AUTO`
+- Config is validated at boot (name, scenes, dimensions, scale, physics, colors, save slots)
+- BaseScene has `runSafe()` error boundary — catches crashes, shows red debug banner, pauses update loop
+- UI components: Button, Slider, Toggle, TextInput, Dialog, ConfirmDialog, Toast, ToastManager, ModalStack, Dropdown, Checkbox, RadioGroup, ScrollContainer, GridLayout, TabBar, ListView, Label, Panel, ProgressBar, Tooltip, Notification, Anchor, ComboDisplay, ScorePopup, AnimatedHUD, LayeredTile, DepthRenderer
 
-### Input (6 modules)
-- `InputManager` — unified keyboard/touch/gamepad with action map
-- `ActionMap` — declarative bindings, runtime rebinding
-- `GestureDetector` — tap, double-tap, long-press, swipe (4-dir)
-- `VirtualControls` — D-pad, floating joystick, configurable buttons
-- `InputRecorder` — record/playback for replays and testing
-- `ComboDetector` — fighting game-style input sequences
+## Debug & Logging
 
-### UI (14 components)
-- `Button` — interactive with hover/press states
-- `Label` — styled text with optional background
-- `Panel` — layout container (vertical/horizontal)
-- `Dialog` — modal with backdrop, buttons
-- `ProgressBar` — fill bar with configurable colors
-- `Slider` — draggable range input
-- `Toggle` — on/off switch with label
-- `Toast` — animated notification popup
-- `TextInput` — editable text field with cursor, placeholder
-- `ScrollContainer` — drag/wheel scrolling with momentum
-- `GridLayout` — auto-position items in columns
-- `TabBar` — tabbed navigation
-- `ListView` — virtualized scrolling list (handles 1000+ items)
-- `FocusManager` — keyboard/gamepad UI navigation
-- `Tooltip` — hover-triggered tooltip with delay
-- `Notification` — slide-in notification panel (4 corners)
-- `Anchor` — responsive screen positioning (9 anchor points)
-- `UIAnimator` — 8 animation types + staggered lists
-- `Theme` — 4 built-in themes (dark, light, retro, neon)
+Structured logging with `ConsoleReporter` — filter with `preview_console_logs(search: "[CLIK:")`:
 
-### Entity/Component (11 components)
-- `Entity` — Container with components, tags, debug state; notifies registry on tag changes
-- `EntityRegistry` — O(1) `getByType()`/`getByTag()` via live type+tag indexes; `updateAll()` called automatically by `BaseScene.update()`
-- Built-in components:
-  - `Health` — damage/heal with death callback
-  - `Movement` — velocity-based movement with friction
-  - `Timer` — named one-shot and repeating timers
-  - `Collectible` — collect-once pattern with value
-  - `Spawner` — interval-based entity spawning with max limit
-  - `DragDrop` — drag with snap-back-on-fail
-  - `Follower` — chase/flee toward target
-  - `Lifetime` — auto-destroy after duration with fade-out
-  - `Oscillator` — sinusoidal bob/sway
-  - `FlashOnHit` — tint-flash damage feedback
-  - `Patrol` — waypoint movement with wait times
-  - `Interactable` — hover/click/proximity interaction for NPCs/items
-
-### Physics (7 modules)
-- `PhysicsHelper` — full Arcade wrapper (velocity, drag, bounce, bodies, groups, one-way platforms, impulse)
-- `PhysicsBody` — fluent wrapper around Arcade bodies: `new PhysicsBody(scene, obj, config).setVelocity(200,0).setCollideWorldBounds(true)`; validates static/velocity conflicts; `.raw` escape hatch
-- `CollisionBuilder` — fluent collision/overlap setup: `PhysicsHelper.collide(a).with(b).onProcess(cb).onHit(cb)` or `.asOverlap(cb)`
-- `MatterHelper` — Matter.js bodies, constraints, pins, sensors, collision filters
-- `Raycast` — ray casting, line-of-sight, circle/rect queries, nearest-object, debug draw
-- `MovingPlatform` — waypoint-based platforms with rider support
-- `PhysicsPool` — recycling physics group with auto-spawn/despawn
-
-### Animation (4 modules)
-- `AnimationHelper` — declarative registration from atlas/spritesheet
-- `AnimationStateController` — map FSM states to animations
-- `SpriteAnimator` — simplified play/chain/face API
-- `AnimationEventSystem` — frame callbacks (hitbox timing, footstep sounds)
-
-### Camera
-- `CameraManager` — follow (lerp, deadzone), zoom, pan, shake (3 presets), flash, fade, path following, visible bounds check, rotation
-- `MultiCamera` — split screen (2/4 player), minimap, picture-in-picture
-
-### Networking (4 modules)
-- `NetworkManager` — WebSocket with auto-reconnect (exponential backoff), heartbeat
-- `Room` — create/join/leave, player tracking, ready state, state sync
-- `StateSync` — entity synchronization with interpolation, client prediction
-- `Lobby` — room browsing, creation, quick match
-
-### Other Systems
-- `AudioManager` — music/SFX, crossfade, per-channel mute, loop count
-- `SaveManager` + `SaveMigrator` — versioned localStorage slots with migration chain
-- `AssetManifest` + `Preloader` — tiered loading (boot/main/deferred), error handling
-- `StateMachine` — FSM with enter/update/exit hooks, auto-transitions, guards, history
-- `TweenHelper` — promise-based tweens, sequences, 7 presets (popIn, shake, pulse, etc.)
-- `TilemapManager` — Tiled JSON maps, layers, collision, spawn points, parallax, tile replacement
-- `ParticleManager` — named emitters, burst/continuous, follow target, 4 presets
-- `I18nManager` — locale loading, dot-notation keys, interpolation, browser detection
-- `DialogueManager` — branching trees, typewriter effect, choices, emotions, auto-advance
-- `ShaderManager` — post-FX (blur, bloom, vignette, pixelate, CRT barrel), per-object FX
-- `AnalyticsManager` — event tracking, pluggable backends, session tracking
-- `PlatformManager` — OS detection, app lifecycle, safe area, fullscreen
-- `A11yManager` — color blind modes, high contrast, font scaling, reduced motion
-- `Profiler` — per-section timing, slow frame detection, memory tracking
-- `SceneInspector` — DOM-based hierarchy browser with property editor
-- `HotState` — sessionStorage state preservation across HMR reloads
-- `LeakDetector` — track object creation/destruction, threshold warnings
-- `EffectPresets` — CRT, dream, underwater, night vision, frozen, retro, damage
-
-### Utilities
-- `Vector2` — full 2D math (normalize, distance, angle, rotate, lerp)
-- `Color` — hex/rgb/number conversion, blend, lighten, darken
-- `SeededRandom` — deterministic PRNG (mulberry32), weighted random, shuffle
-- `ObjectPool` — generic object pooling with factory/reset
-- `Grid2D` — 2D grid with neighbors, find, clone
-- `PriorityQueue` — min-heap for pathfinding
-- `SpatialHash` — broad-phase collision indexing
-- `findPath` — A* pathfinding on Grid2D
-- `GameTimer` — frame-rate independent countdown/cooldown with pause, extend, repeat
-- `Cooldown` — use/isReady pattern for abilities and weapons
-- `EventBus` — global decoupled event system (singleton: `eventBus`)
-- Format: `formatNumber`, `formatCompact`, `formatTime`, `truncate`, `pluralize`, `ordinal`
-
-## Debug & Development
-
-### Console Log Channels
 | Prefix | Purpose |
 |--------|---------|
 | `[CLIK:ENGINE]` | Engine lifecycle, config |
@@ -217,47 +102,13 @@ clik/
 | `[CLIK:AUDIO]` | Music/SFX events |
 | `[CLIK:SAVE]` | Save/load operations |
 
-Channels can be individually enabled/disabled:
-```typescript
-ConsoleReporter.disableChannel(ClikLogChannel.INPUT); // Quiet input logs
-```
+Channels can be individually disabled: `ConsoleReporter.disableChannel(ClikLogChannel.INPUT)`
 
-### Scene Inspector
-Toggle with: `new SceneInspector(game).toggle()`
-Shows game object hierarchy, editable properties, copy-as-code.
-
-### Profiler
-```typescript
-profiler.begin('physics');
-// ... physics code ...
-profiler.end('physics');
-profiler.getTimingSummary(); // { physics: "0.5ms avg, 1.2ms max" }
-```
-
-## Testing
-
-```bash
-npm run test                                         # Run all 401 tests (40 files)
-npm run test:watch --workspace=packages/clik-engine  # Watch mode
-```
-
-Test coverage: math, Vector2, Color, Random, ObjectPool, Grid2D, PriorityQueue, SpatialHash, A* pathfinding, StateMachine, SaveManager, SaveMigrator, I18nManager, AnalyticsManager, ConsoleReporter, InputRecorder, ComboDetector, ActionMap, LeakDetector, GameTimer, Cooldown, EventBus, format utils, AudioManager, CameraManager, EntityRegistry (indexed queries), PhysicsBody, CollisionBuilder, entity components (Health, Movement, Timer, Collectible, Lifetime, Oscillator, Patrol, Follower).
-
-## Creating a Game
-
-```bash
-npx create-clik-game my-game                          # Default (empty scene)
-npx create-clik-game my-game --template=platformer    # Side-scroller with physics
-npx create-clik-game my-game --template=puzzle        # Grid-based puzzle
-```
-
-Each template includes `.claude/launch.json` for Preview MCP integration.
+Debug overlay (when `debug: true`): FPS/scene/entities in top-left, state inspector in top-right. Register state with `this.inspectState('label', () => ({ key: value }))`.
 
 ## Claude Skills
 
-Available in `.claude/skills/` (repo) and `~/.claude/skills/` (machine):
-
-- `/clik-scaffold` — generate scenes, entities, input, UI following engine conventions
+- `/clik-scaffold` — generate scenes, entities, input configs, UI layouts following engine conventions
 - `/clik-playtest` — boot game via Preview, play-test, find bugs, fix, verify
 - `/clik-build` — production build, bundle size check, release bundle
 - `/clik-debug` — diagnose issues via console logs, screenshots, state inspection
