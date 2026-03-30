@@ -24,6 +24,7 @@ export { HotState } from './debug/HotState';
 export type { HotStateConfig } from './debug/HotState';
 export { LeakDetector, leakDetector } from './debug/LeakDetector';
 export { VisualTest } from './debug/VisualTest';
+export { ProfilerDashboard } from './debug/ProfilerDashboard';
 
 // Input
 export { InputManager } from './input/InputManager';
@@ -229,6 +230,7 @@ export type { A11yConfig, ColorBlindMode } from './accessibility/A11yManager';
 export { PlatformManager } from './platform/PlatformManager';
 export type { SafeArea } from './platform/PlatformManager';
 export { CapacitorHelper } from './platform/CapacitorHelper';
+export { HapticFeedback } from './platform/HapticFeedback';
 
 // Scaling
 export { ResponsiveManager } from './scaling/ResponsiveManager';
