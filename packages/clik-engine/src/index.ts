@@ -161,15 +161,21 @@ export { ParticleManager, ParticlePresets } from './particles/ParticleManager';
 export type { ParticlePresetConfig } from './particles/ParticleManager';
 export { GraphicsParticles } from './particles/GraphicsParticles';
 export type { ParticleShape } from './particles/GraphicsParticles';
+export { TrailRenderer } from './particles/TrailRenderer';
+export type { TrailConfig } from './particles/TrailRenderer';
+export { AdvancedParticlePresets } from './particles/AdvancedPresets';
 
 // Effects
 export { ShaderManager } from './effects/ShaderManager';
 export { EffectPresets } from './effects/EffectPresets';
+export { CustomShaderPipeline, ShaderEffects } from './effects/CustomShader';
+export type { ShaderUniform } from './effects/CustomShader';
 
 // Animation
 export { AnimationHelper, AnimationStateController } from './animation/AnimationManager';
 export type { AnimationDef, AnimationSet } from './animation/AnimationManager';
 export { SpriteAnimator } from './animation/SpriteAnimator';
+export { AnimationBlender } from './animation/AnimationBlender';
 export { AnimationEventSystem } from './animation/AnimationEvents';
 export type { AnimationEventDef } from './animation/AnimationEvents';
 
