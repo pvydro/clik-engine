@@ -37,8 +37,11 @@ jobs:
           path: packages/clik-engine/coverage/
           retention-days: 14
 
-      - name: Build
+      - name: Build engine
         run: npm run build --workspace=packages/clik-engine
+
+      - name: Build CLI
+        run: npm run build --workspace=packages/create-clik-game
 
       - name: Check bundle size
         run: |
@@ -51,3 +54,12 @@ jobs:
             echo "::error::Bundle size $SIZE bytes exceeds 400KB limit"
             exit 1
           fi
+
+      - name: Test server
+        run: npm run test --workspace=packages/clik-server
+
+      - name: Build examples
+        run: |
+          npm run build --workspace=examples/2048
+          npm run build --workspace=examples/shooter
+          npm run build --workspace=examples/cards
