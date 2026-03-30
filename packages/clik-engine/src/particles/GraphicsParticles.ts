@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { ObjectPool } from '../utils/pool';
 
 export type ParticleShape = 'circle' | 'square' | 'diamond' | 'star';
 
@@ -43,9 +44,38 @@ export interface CelebrateConfig {
  */
 export class GraphicsParticles {
   private scene: Phaser.Scene;
+  private pool: ObjectPool<Phaser.GameObjects.Graphics>;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: Phaser.Scene, poolSize = 32) {
     this.scene = scene;
+    this.pool = new ObjectPool(
+      () => scene.add.graphics().setVisible(false),
+      (gfx) => { gfx.clear(); gfx.setAlpha(1); gfx.setScale(1); gfx.setAngle(0); gfx.setVisible(false); },
+      poolSize,
+    );
+  }
+
+  /** Acquire a graphics object from the pool */
+  private acquireGfx(x: number, y: number, depth: number, alpha: number): Phaser.GameObjects.Graphics {
+    const gfx = this.pool.acquire();
+    gfx.clear();
+    gfx.setPosition(x, y);
+    gfx.setDepth(depth);
+    gfx.setAlpha(alpha);
+    gfx.setScale(1);
+    gfx.setAngle(0);
+    gfx.setVisible(true);
+    return gfx;
+  }
+
+  /** Release a graphics object back to the pool */
+  private releaseGfx(gfx: Phaser.GameObjects.Graphics): void {
+    this.pool.release(gfx);
+  }
+
+  /** Get pool stats for profiling */
+  get poolSize(): number {
+    return this.pool.size;
   }
 
   /**
@@ -77,10 +107,7 @@ export class GraphicsParticles {
       const vx = Math.cos(angle) * spd;
       const vy = Math.sin(angle) * spd;
 
-      const gfx = this.scene.add.graphics();
-      gfx.setPosition(x, y);
-      gfx.setDepth(depth);
-      gfx.setAlpha(pAlpha);
+      const gfx = this.acquireGfx(x, y, depth, pAlpha);
 
       this.drawShape(gfx, 0, 0, size, shape, pColor);
 
@@ -99,7 +126,7 @@ export class GraphicsParticles {
         scaleY: 0.1 + Math.random() * 0.3,
         duration: pLife,
         ease: 'Quad.easeOut',
-        onComplete: () => gfx.destroy(),
+        onComplete: () => this.releaseGfx(gfx),
       });
     }
   }
@@ -114,10 +141,7 @@ export class GraphicsParticles {
     const duration = config?.duration ?? 300;
     const depth = config?.depth ?? 50;
 
-    const gfx = this.scene.add.graphics();
-    gfx.setPosition(x, y);
-    gfx.setDepth(depth);
-    gfx.setAlpha(alpha);
+    const gfx = this.acquireGfx(x, y, depth, alpha);
     gfx.lineStyle(lineWidth, color, 1);
     gfx.strokeCircle(0, 0, 20);
 
@@ -128,7 +152,7 @@ export class GraphicsParticles {
       alpha: 0,
       duration,
       ease: 'Quad.easeOut',
-      onComplete: () => gfx.destroy(),
+      onComplete: () => this.releaseGfx(gfx),
     });
   }
 
@@ -148,10 +172,7 @@ export class GraphicsParticles {
       const size = 2 + Math.random() * 3;
       const shape = shapes[Math.floor(Math.random() * shapes.length)];
 
-      const gfx = this.scene.add.graphics();
-      gfx.setPosition(x, y);
-      gfx.setDepth(depth);
-      gfx.setAlpha(0.7);
+      const gfx = this.acquireGfx(x, y, depth, 0.7);
 
       this.drawShape(gfx, 0, 0, size, shape, color);
 
@@ -164,7 +185,7 @@ export class GraphicsParticles {
         scaleY: 0.3,
         duration: 250 + Math.random() * 150,
         ease: 'Quad.easeOut',
-        onComplete: () => gfx.destroy(),
+        onComplete: () => this.releaseGfx(gfx),
       });
     }
   }
@@ -190,10 +211,7 @@ export class GraphicsParticles {
       const vx = Math.cos(angle) * spd * 0.5;
       const vy = Math.sin(angle) * spd * 0.5 - 100; // bias upward
 
-      const gfx = this.scene.add.graphics();
-      gfx.setPosition(x, y);
-      gfx.setDepth(depth);
-      gfx.setAlpha(0.8);
+      const gfx = this.acquireGfx(x, y, depth, 0.8);
 
       this.drawShape(gfx, 0, 0, size, shape, pColor);
 
@@ -208,7 +226,7 @@ export class GraphicsParticles {
         angle: Phaser.Math.RadToDeg(rotation),
         duration: pLife,
         ease: 'Quad.easeOut',
-        onComplete: () => gfx.destroy(),
+        onComplete: () => this.releaseGfx(gfx),
       });
     }
   }
