@@ -236,6 +236,27 @@ export {
   validatePositiveInt,
 } from './utils/validation';
 
+// Network
+export { NetworkManager } from './network/NetworkManager';
+export { Lobby } from './network/Lobby';
+export { Room } from './network/Room';
+export { StateSync } from './network/StateSync';
+export type { StateSyncConfig } from './network/StateSync';
+export type {
+  ConnectionState,
+  RoomState,
+  NetworkConfig,
+  ServerMessage,
+  ConnectedData,
+  RoomInfo,
+  PlayerInfo,
+  RoomJoinedData,
+  RoomActionData,
+  SyncStateData,
+  EntityStateSnapshot,
+  ErrorData,
+} from './network/protocol';
+
 // Types
 export type {
   ClikGameConfig,
