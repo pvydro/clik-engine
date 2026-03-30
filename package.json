@@ -4,6 +4,7 @@
   "workspaces": [
     "packages/clik-engine",
     "packages/create-clik-game",
+    "packages/clik-server",
     "dev-harness",
     "examples/2048",
     "examples/shooter",
