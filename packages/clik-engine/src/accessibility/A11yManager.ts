@@ -1,7 +1,9 @@
 import Phaser from 'phaser';
 import { ConsoleReporter } from '../debug/ConsoleReporter';
+import { validateEnum, validatePositiveNumber } from '../utils/validation';
 
 export type ColorBlindMode = 'none' | 'deuteranopia' | 'protanopia' | 'tritanopia';
+const VALID_CB_MODES: readonly ColorBlindMode[] = ['none', 'deuteranopia', 'protanopia', 'tritanopia'];
 
 export interface A11yConfig {
   colorBlindMode?: ColorBlindMode;
@@ -16,6 +18,8 @@ export class A11yManager {
 
   constructor(game: Phaser.Game, config?: A11yConfig) {
     this.game = game;
+    if (config?.colorBlindMode) validateEnum(config.colorBlindMode, VALID_CB_MODES, 'colorBlindMode', 'A11yManager');
+    if (config?.fontScale !== undefined) validatePositiveNumber(config.fontScale, 'fontScale', 'A11yManager');
     this.config = {
       colorBlindMode: 'none',
       highContrast: false,

@@ -227,6 +227,14 @@ export { Cooldown } from './utils/Cooldown';
 export { EventBus, eventBus } from './utils/EventBus';
 export { formatNumber, formatCompact, formatTime, formatTimePrecise, truncate, padRight, pluralize, ordinal } from './utils/format';
 export type { PositionLike, TransformLike, TweenableLike, DepthLike, VisibilityLike, SpawnableLike } from './utils/interfaces';
+export {
+  validatePositiveNumber,
+  validateNonNegativeNumber,
+  validateNonEmptyString,
+  validateEnum,
+  validateHexColor,
+  validatePositiveInt,
+} from './utils/validation';
 
 // Types
 export type {

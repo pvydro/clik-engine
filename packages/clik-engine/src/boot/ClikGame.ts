@@ -1,18 +1,41 @@
 import Phaser from 'phaser';
-import type { ClikGameConfig } from '../utils/types';
+import type { ClikGameConfig, ScalePresetType, PhysicsType } from '../utils/types';
 import { getScaleConfig } from './defaults';
 import { ConsoleReporter } from '../debug/ConsoleReporter';
 import { DebugOverlay } from '../debug/DebugOverlay';
 import { StateInspector } from '../debug/StateInspector';
 import { GridOverlay } from '../debug/GridOverlay';
+import {
+  validateNonEmptyString,
+  validatePositiveNumber,
+  validateEnum,
+  validateHexColor,
+  validatePositiveInt,
+} from '../utils/validation';
+
+const VALID_SCALES: readonly ScalePresetType[] = ['mobile-portrait', 'mobile-landscape', 'desktop', 'auto'];
+const VALID_PHYSICS: readonly PhysicsType[] = ['arcade', 'matter', 'none'];
 
 export function createGame(config: ClikGameConfig): Phaser.Game {
   ConsoleReporter.engine(`Creating game: ${config.name}`);
 
-  // Startup validation
-  if (!config.scenes.length) {
+  // Config validation
+  validateNonEmptyString(config.name, 'name', 'ClikGameConfig');
+
+  if (!config.scenes || !config.scenes.length) {
     ConsoleReporter.error('No scenes defined in ClikGameConfig', 'Add at least one scene to the scenes array.');
   }
+
+  for (const entry of config.scenes) {
+    validateNonEmptyString(entry.key, 'scenes[].key', 'ClikGameConfig');
+    if (!entry.class) {
+      ConsoleReporter.error(
+        `Scene '${entry.key}' is missing a class`,
+        'Each scene entry must have a class that extends Phaser.Scene.'
+      );
+    }
+  }
+
   const sceneKeys = config.scenes.map(s => s.key);
   const duplicateKeys = sceneKeys.filter((k, i) => sceneKeys.indexOf(k) !== i);
   if (duplicateKeys.length > 0) {
@@ -23,6 +46,17 @@ export function createGame(config: ClikGameConfig): Phaser.Game {
       `devStartScene '${config.devStartScene}' not found in scenes`,
       `Available scenes: ${sceneKeys.join(', ')}`
     );
+  }
+
+  if (config.width !== undefined) validatePositiveNumber(config.width, 'width', 'ClikGameConfig');
+  if (config.height !== undefined) validatePositiveNumber(config.height, 'height', 'ClikGameConfig');
+  if (config.scale !== undefined) validateEnum(config.scale, VALID_SCALES, 'scale', 'ClikGameConfig');
+  if (config.physics !== undefined) validateEnum(config.physics, VALID_PHYSICS, 'physics', 'ClikGameConfig');
+  if (config.backgroundColor !== undefined) validateHexColor(config.backgroundColor, 'backgroundColor', 'ClikGameConfig');
+
+  if (config.save) {
+    if (config.save.slots !== undefined) validatePositiveInt(config.save.slots, 'save.slots', 'ClikGameConfig');
+    if (config.save.version !== undefined) validatePositiveInt(config.save.version, 'save.version', 'ClikGameConfig');
   }
 
   const scalePreset = config.scale ?? 'auto';

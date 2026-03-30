@@ -1,4 +1,5 @@
 import { ConsoleReporter } from '../debug/ConsoleReporter';
+import { validateNonEmptyString, validatePositiveInt } from '../utils/validation';
 import type { SaveConfig } from '../utils/types';
 
 interface SaveData {
@@ -14,9 +15,12 @@ export class SaveManager {
   private version: number;
 
   constructor(gameName: string, config?: SaveConfig) {
+    validateNonEmptyString(gameName, 'gameName', 'SaveManager');
     this.prefix = `clik_${gameName}`;
     this.maxSlots = config?.slots ?? 3;
     this.version = config?.version ?? 1;
+    if (config?.slots !== undefined) validatePositiveInt(config.slots, 'slots', 'SaveManager');
+    if (config?.version !== undefined) validatePositiveInt(config.version, 'version', 'SaveManager');
   }
 
   save(slot: number, data: Record<string, unknown>): boolean {

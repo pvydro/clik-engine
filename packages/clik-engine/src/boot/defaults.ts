@@ -36,7 +36,7 @@ const PRESETS: Record<ScalePresetType, ScaleConfig> = {
 };
 
 export function getScaleConfig(preset: ScalePresetType): ScaleConfig {
-  return PRESETS[preset];
+  return PRESETS[preset] ?? PRESETS['auto'];
 }
 
 export const ScalePreset = {

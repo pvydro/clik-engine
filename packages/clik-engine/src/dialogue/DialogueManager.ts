@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { ConsoleReporter } from '../debug/ConsoleReporter';
+import { validatePositiveNumber, validateNonNegativeNumber } from '../utils/validation';
 
 export interface DialogueLine {
   speaker?: string;
@@ -48,6 +49,10 @@ export class DialogueManager {
   constructor(scene: Phaser.Scene, config: DialogueDisplayConfig) {
     this.scene = scene;
     this.displayConfig = config;
+    validatePositiveNumber(config.width, 'width', 'DialogueManager');
+    if (config.height !== undefined) validatePositiveNumber(config.height, 'height', 'DialogueManager');
+    if (config.typewriterSpeed !== undefined) validateNonNegativeNumber(config.typewriterSpeed, 'typewriterSpeed', 'DialogueManager');
+    if (config.padding !== undefined) validateNonNegativeNumber(config.padding, 'padding', 'DialogueManager');
   }
 
   load(tree: DialogueTree): this {
