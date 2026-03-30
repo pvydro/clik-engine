@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck --workspace=packages/clik-engine
+
+      - name: Lint
+        run: npm run lint --workspace=packages/clik-engine
+
+      - name: Test with coverage
+        run: npm run test:coverage --workspace=packages/clik-engine
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: packages/clik-engine/coverage/
+          retention-days: 14
+
+      - name: Build
+        run: npm run build --workspace=packages/clik-engine
+
+      - name: Check bundle size
+        run: |
+          BUNDLE="packages/clik-engine/dist/clik-engine.js"
+          SIZE=$(wc -c < "$BUNDLE")
+          echo "Bundle size: $SIZE bytes ($(( SIZE / 1024 )) KB)"
+
+          # Fail if bundle exceeds 400KB (generous ceiling, tighten over time)
+          if [ "$SIZE" -gt 409600 ]; then
+            echo "::error::Bundle size $SIZE bytes exceeds 400KB limit"
+            exit 1
+          fi
