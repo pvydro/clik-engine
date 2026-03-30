@@ -277,6 +277,11 @@ export type {
   ErrorData,
 } from './network/protocol';
 
+// AI
+export { BehaviorTree, Blackboard, BTNode, NodeStatus } from './ai/BehaviorTree';
+export { Sequence, Selector, Parallel, Inverter, Succeeder, Repeater, Wait, Action, Condition } from './ai/nodes/index';
+export { Steering, SteeringCalculator } from './ai/SteeringBehaviors';
+
 // Types
 export type {
   ClikGameConfig,
