@@ -2,7 +2,7 @@
 
 A Claude-native game engine built on [PhaserJS](https://phaser.io). Designed from the ground up for building games collaboratively with AI using Claude's Preview MCP tools.
 
-**33 commits | 114 source files | 11,400+ lines | 111 build modules | 212 tests | 217KB bundle**
+**160+ source files | 17,000+ lines | 1,050+ tests | 330KB bundle**
 
 ## Why clik-engine?
 
@@ -17,61 +17,162 @@ Traditional game engines aren't designed for AI-assisted development. clik-engin
 ## Quick Start
 
 ```bash
-# Install
+npx create-clik-game my-game
+cd my-game
 npm install
-
-# Run the dev harness
 npm run dev
-
-# Run an example game
-npm run dev:2048
-npm run dev:shooter
-npm run dev:cards
-
-# Run tests
-npm run test
-
-# Build the engine
-npm run build
-
-# Generate API docs
-npm run docs --workspace=packages/clik-engine
 ```
 
-## Create a New Game
+Templates: `default`, `platformer`, `puzzle`, `multiplayer`
 
 ```bash
-npx create-clik-game my-game                        # Empty template
-npx create-clik-game my-game --template=platformer   # Side-scroller with physics
-npx create-clik-game my-game --template=puzzle        # Grid-based puzzle game
+npx create-clik-game my-game --template=multiplayer
 ```
-
-Each template includes a `.claude/launch.json` for instant Preview MCP integration.
 
 ## Installing as a Dependency
 
-The engine is published as `@pvydro/clik-engine` on GitHub Packages.
-
-**1. Authenticate (once per machine):**
 ```bash
-npm login --registry=https://npm.pkg.github.com
-# Username: your-github-username
-# Password: GitHub personal access token (classic, with read:packages scope)
+# Add .npmrc to your project root:
+echo "@pvydro:registry=https://npm.pkg.github.com" > .npmrc
+
+# Install
+npm install @pvydro/clik-engine phaser
 ```
 
-**2. Add `.npmrc` to your project root:**
-```
-@pvydro:registry=https://npm.pkg.github.com
-```
-
-**3. Install:**
-```bash
-npm install @pvydro/clik-engine
-```
-
-**4. Import:**
 ```typescript
 import { createGame, BaseScene, ScalePreset } from '@pvydro/clik-engine';
+```
+
+## The Config-Driven Approach
+
+```typescript
+createGame({
+  name: 'my-game',
+  scale: ScalePreset.AUTO,
+  physics: 'arcade',
+  debug: import.meta.env.DEV,
+  scenes: [
+    { key: 'game', class: GameScene, default: true },
+  ],
+  input: {
+    actions: {
+      left:  { keys: ['LEFT', 'A'], touch: 'swipe_left' },
+      right: { keys: ['RIGHT', 'D'], touch: 'swipe_right' },
+      jump:  { keys: ['SPACE'], touch: 'tap', gamepad: '0' },
+    },
+  },
+  save: { slots: 3, version: 1 },
+  network: { url: 'ws://localhost:8080' },           // optional
+  accessibility: { fontScale: 1, reducedMotion: false }, // optional
+  plugins: [{ plugin: MyPlugin, config: { ... } }],     // optional
+});
+```
+
+## Scene Pattern
+
+```typescript
+export class GameScene extends BaseScene {
+  create(): void {
+    super.create();
+
+    // All systems available via lazy accessors:
+    // this.actions  — InputManager (keyboard/touch/gamepad)
+    // this.director — SceneDirector (transitions)
+    // this.audio    — AudioManager (music/SFX/procedural)
+    // this.save     — SaveManager (localStorage)
+    // this.entities — EntityRegistry (O(1) type/tag queries)
+    // this.network  — NetworkManager (WebSocket multiplayer)
+    // this.lobby    — Lobby (browse/create/join rooms)
+    // this.room     — Room (players, actions, state sync)
+    // this.a11y     — A11yManager (color blind, font scale, reduced motion)
+
+    this.inspectState('game', () => ({ score: this.score }));
+  }
+
+  update(time: number, delta: number): void {
+    super.update(time, delta);
+    if (this.actions.justPressed('jump')) { /* ... */ }
+  }
+}
+```
+
+## Engine Systems
+
+### 27 System Directories
+
+| System | Key Modules |
+|--------|-------------|
+| **Boot** | `createGame()`, scale presets, config validation |
+| **Scenes** | `BaseScene`, `SceneDirector` (7 transitions), `SceneStack`, `SceneUtils` (hitStop, slowMotion, countdown), `ScreenTransition` |
+| **Input** | `InputManager` with provider architecture (`KeyboardProvider`, `TouchProvider`, `GamepadProvider`), `ActionMap`, `GestureDetector`, `VirtualControls`, `ComboDetector`, `InputRecorder`, `InputBuffer`, `RemapHelper` |
+| **UI** | 30+ components: Button, Label, Panel, Dialog, ConfirmDialog, ProgressBar, Slider, Toggle, Toast, ToastManager, ModalStack, Dropdown, Checkbox, RadioGroup, TextInput, NumberInput, ScrollContainer, GridLayout, TabBar, ListView, Tooltip, Notification, FocusManager, Anchor, UIAnimator, ComboDisplay, ScorePopup, AnimatedHUD, LayeredTile, DepthRenderer. Theme system (4 presets) |
+| **Entity** | `Entity`/`Component`/`EntityRegistry` + 15 built-in components: Health, Movement, Timer, Collectible, Spawner, DragDrop, Follower, Lifetime, Oscillator, FlashOnHit, Patrol, Interactable, BehaviorTreeComponent, SteeringComponent, NetworkSync |
+| **Physics** | `PhysicsHelper`, `MatterHelper`, `Raycast`, `MovingPlatform`, `PhysicsPool`, `CollisionGroups`, `CollisionBuilder` |
+| **Animation** | `AnimationHelper`, `SpriteAnimator`, `AnimationStateController`, `AnimationEventSystem`, `AnimationBlender` |
+| **Camera** | `CameraManager` (follow, deadzone, zoom, pan, shake, flash, fade, path), `MultiCamera` (split screen, minimap, PIP) |
+| **Particles** | `ParticleManager` + presets, `GraphicsParticles` (procedural, pooled), `TrailRenderer`, `AdvancedParticlePresets` (fire, smoke, snow, confetti, dust, magic, lightning, blood) |
+| **Audio** | `AudioManager`, `ProceduralAudio` (synthesis), `ProceduralMusic` (generative) |
+| **Network** | `NetworkManager` (WebSocket, auto-reconnect, heartbeat), `Lobby`, `Room`, `StateSync` (entity interpolation) |
+| **AI** | `BehaviorTree` with `Blackboard` (Sequence, Selector, Parallel, Inverter, Repeater, Wait, Action, Condition), `SteeringBehaviors` (seek, flee, arrive, pursue, evade, wander, obstacle avoidance, flocking), `SteeringCalculator` |
+| **Plugin** | `ClikPlugin`/`ClikScenePlugin` interfaces, `PluginManager` (dependency resolution, error isolation, reverse-order destroy) |
+| **Effects** | `ShaderManager` (blur, bloom, vignette, pixelate, CRT barrel), `EffectPresets`, `CustomShaderPipeline` |
+| **Tilemap** | `TilemapManager` (Tiled JSON, collision, spawn points, parallax) |
+| **FSM** | `StateMachine` (states, transitions, guards, 10-deep history) |
+| **Tween** | `TweenHelper`, `GameFeelPresets` (mergeSquash, impactPop, spawnIn, despawn, flashGlow, numberRoll, slideTo), `Ease` constants |
+| **Save** | `SaveManager` (versioned localStorage slots), `SaveMigrator` |
+| **i18n** | `I18nManager` (locales, interpolation, fallback) |
+| **Dialogue** | `DialogueManager` (branching trees, typewriter, choices) |
+| **Platform** | `PlatformManager` (OS, lifecycle, safe area, fullscreen), `CapacitorHelper`, `HapticFeedback` |
+| **Accessibility** | `A11yManager` (color blind modes, font scale, reduced motion — integrated into UIAnimator) |
+| **Analytics** | `AnalyticsManager` (events, pluggable backends) |
+| **Scaling** | `ResponsiveManager` (breakpoints, DPI), `Letterbox` |
+| **Debug** | `DebugOverlay`, `StateInspector`, `ProfilerDashboard` (FPS graph), `ConsoleReporter`, `Profiler`, `SceneInspector`, `HotState`, `LeakDetector`, `GridOverlay`, `VisualTest` |
+| **Utils** | `Vector2`, `Color`, `SeededRandom`, `ObjectPool`, `Grid2D`, `PriorityQueue`, `SpatialHash`, `findPath` (A*), `GameTimer`, `Cooldown`, `EventBus`, format helpers, validation utilities |
+
+## Multiplayer
+
+```typescript
+// In your scene:
+this.network.connect();
+this.lobby.quickMatch('my-game');
+
+this.room.onPlayerJoined(p => console.log(`${p.name} joined`));
+this.room.sendAction('move', { x: 100, y: 200 });
+
+// Entity sync with interpolation:
+const sync = new StateSync(this.network, { syncRate: 50, interpolationDelay: 100 });
+entity.addComponent('netSync', new NetworkSync(sync, 'player1', true));
+```
+
+Server: `cd packages/clik-server && npm start`
+
+## AI
+
+```typescript
+const tree = new Selector([
+  new Sequence([
+    new Condition(bb => bb.get('enemyVisible')),
+    new Action(bb => { chase(); return NodeStatus.RUNNING; }),
+  ]),
+  new Action(bb => { patrol(); return NodeStatus.RUNNING; }),
+]);
+
+entity.addComponent('ai', new BehaviorTreeComponent(tree));
+entity.addComponent('steering', new SteeringComponent(100, 50));
+```
+
+## Example Games
+
+| Game | What it demonstrates |
+|------|---------------------|
+| **2048** | Grid logic, swipe input, procedural audio/music, visual polish (LayeredTile, ComboDisplay, AnimatedHUD) |
+| **Space Shooter** | Physics, procedural particles, combo system, screen effects, difficulty scaling |
+| **Card Match** | State machines, card flip animation, score persistence, UI layering |
+
+```bash
+npm run dev:2048
+npm run dev:shooter
+npm run dev:cards
 ```
 
 ## Architecture
@@ -79,236 +180,52 @@ import { createGame, BaseScene, ScalePreset } from '@pvydro/clik-engine';
 ```
 clik/
 ├── packages/
-│   ├── clik-engine/          # Core engine (npm package)
-│   ├── create-clik-game/     # CLI scaffolding tool
+│   ├── clik-engine/          # Core engine (160+ modules)
+│   ├── create-clik-game/     # CLI scaffolding (4 templates)
 │   └── clik-server/          # WebSocket matchmaking server
-├── dev-harness/              # Engine development playground
-├── examples/
-│   ├── 2048/                 # Full 2048 clone
-│   ├── shooter/              # Space shooter
-│   └── cards/                # Card matching game
+├── dev-harness/              # Engine playground
+├── examples/                 # 3 complete games
+├── docs/                     # System guides
+│   ├── getting-started.md
+│   ├── migration.md
+│   └── systems/              # network, ai, entity, plugins, ui
 └── .claude/
-    ├── launch.json           # Preview MCP server configs
-    └── skills/               # 4 Claude skills
+    ├── launch.json           # Preview MCP configs
+    └── skills/               # Claude skills
 ```
-
-## The Config-Driven Approach
-
-Every clik-engine game starts with a single config:
-
-```typescript
-import { createGame, ScalePreset } from 'clik-engine';
-import { GameScene } from './scenes/GameScene';
-
-createGame({
-  name: 'my-game',
-  scale: ScalePreset.AUTO,
-  physics: 'arcade',
-  debug: import.meta.env.DEV,
-  devStartScene: 'game',
-  scenes: [
-    { key: 'preload', class: PreloadScene },
-    { key: 'menu', class: MenuScene },
-    { key: 'game', class: GameScene, default: true },
-  ],
-  input: {
-    actions: {
-      move_left:  { keys: ['LEFT', 'A'], touch: 'swipe_left' },
-      move_right: { keys: ['RIGHT', 'D'], touch: 'swipe_right' },
-      jump:       { keys: ['SPACE'], touch: 'tap', gamepad: '0' },
-    },
-  },
-  save: { slots: 3, version: 1 },
-});
-```
-
-## Scene Pattern
-
-All scenes extend `BaseScene`, which automatically wires up input, audio, save, and scene management:
-
-```typescript
-import { BaseScene, ConsoleReporter } from 'clik-engine';
-
-export class GameScene extends BaseScene {
-  create(): void {
-    super.create(); // Required — sets up all engine systems
-
-    // All systems available:
-    // this.actions  — InputManager (keyboard/touch/gamepad)
-    // this.director — SceneDirector (transitions)
-    // this.audio    — AudioManager (music/SFX)
-    // this.save     — SaveManager (localStorage)
-
-    // Register debug state (visible in screenshots)
-    this.inspectState('game', () => ({
-      score: this.score,
-      lives: this.lives,
-    }));
-  }
-
-  update(time: number, delta: number): void {
-    super.update(time, delta); // Required — polls input
-
-    if (this.actions.justPressed('jump')) {
-      // Action-based input, not raw keys
-    }
-  }
-}
-```
-
-## Engine Systems
-
-### 25 System Directories, 111 Build Modules
-
-| System | What it does |
-|--------|-------------|
-| **Boot** | `createGame()` factory, scale presets, startup validation |
-| **Scenes** | `BaseScene`, `SceneDirector` (7 transitions), `SceneStack` (push/pop), `SceneUtils` (hitStop, slowMotion, countdown), `ScreenTransition` (fade, iris, pixelate) |
-| **Input** | `InputManager` (keyboard/touch/gamepad), `ActionMap` (rebinding), `GestureDetector` (tap, swipe, pinch, long-press), `VirtualControls` (floating joystick), `ComboDetector` (fighting game combos), `InputRecorder` (replay) |
-| **UI** | 22 components: Button, Label, Panel, Dialog, ProgressBar, Slider, Toggle, Toast, TextInput, ScrollContainer, GridLayout, TabBar, ListView, NumberInput, ConfirmDialog, Tooltip, Notification, FocusManager, Anchor, UIAnimator, Theme (4 presets) |
-| **Entity** | `Entity`/`Component`/`EntityRegistry` + 12 built-in components: Health, Movement, Timer, Collectible, Spawner, DragDrop, Follower, Lifetime, Oscillator, FlashOnHit, Patrol, Interactable. `EntityFactory` for prefabs |
-| **Physics** | `PhysicsHelper` (full Arcade wrapper), `MatterHelper`, `Raycast` (line-of-sight, area queries), `MovingPlatform`, `PhysicsPool` (recycling), `CollisionGroups` |
-| **Animation** | `AnimationHelper` (declarative registration, auto-detect from atlas), `SpriteAnimator`, `AnimationStateController` (FSM integration), `AnimationEventSystem` (frame callbacks) |
-| **Camera** | `CameraManager` (follow, deadzone, zoom, pan, shake presets, flash, fade, path), `MultiCamera` (split screen, minimap, PIP) |
-| **Particles** | `ParticleManager` + presets (explosion, sparkle, trail, rain) |
-| **Audio** | `AudioManager` (crossfade, per-channel mute, loop count) |
-| **Tilemap** | `TilemapManager` (Tiled JSON, collision, spawn points, parallax, tile replacement) |
-| **FSM** | `StateMachine` (states, transitions, guards, history) |
-| **Tween** | `TweenHelper` (promise-based), `Ease` constants, presets (popIn, shake, pulse, float, bounceIn) |
-| **Save** | `SaveManager` (versioned localStorage slots), `SaveMigrator` |
-| **Assets** | `AssetManifest` (tiered: boot/main/deferred), `Preloader`, `ManifestValidator` |
-| **Network** | `NetworkManager` (WebSocket, auto-reconnect), `Room`, `StateSync` (interpolation), `Lobby` (quick match) |
-| **i18n** | `I18nManager` (locales, dot-notation keys, interpolation) |
-| **Dialogue** | `DialogueManager` (branching trees, typewriter, choices, emotions) |
-| **Effects** | `ShaderManager` (blur, bloom, vignette, pixelate, CRT barrel), `EffectPresets` (dream, underwater, frozen, damage) |
-| **Platform** | `PlatformManager` (OS, lifecycle, safe area, fullscreen), `CapacitorHelper` (mobile native) |
-| **Accessibility** | `A11yManager` (color blind modes, font scale, reduced motion) |
-| **Analytics** | `AnalyticsManager` (events, pluggable backends, sessions) |
-| **Scaling** | `ResponsiveManager` (breakpoints, DPI), `Letterbox` (cinematic bars) |
-| **Debug** | `DebugOverlay`, `StateInspector`, `ConsoleReporter` (per-channel), `Profiler`, `SceneInspector` (DOM editor), `HotState` (HMR preservation), `LeakDetector`, `VisualTest` |
-| **Utils** | `Vector2`, `Color`, `SeededRandom`, `ObjectPool`, `Grid2D`, `PriorityQueue`, `SpatialHash`, `findPath` (A*), `GameTimer`, `Cooldown`, `EventBus`, format helpers |
-
-## Debug & Claude Integration
-
-### Console Log Channels
-
-Every engine system logs with structured prefixes that Claude can filter:
-
-```
-[CLIK:ENGINE]  — Engine lifecycle, config
-[CLIK:SCENE]   — Scene init/create/shutdown/transitions
-[CLIK:STATE]   — Game state changes (score, health, FSM)
-[CLIK:INPUT]   — Actions, gestures, combos, button clicks
-[CLIK:ERROR]   — Errors with fix suggestions
-[CLIK:ASSET]   — Asset loading progress
-[CLIK:AUDIO]   — Music/SFX events
-[CLIK:SAVE]    — Save/load operations
-```
-
-Claude reads these with `preview_console_logs(search: "[CLIK:")` to understand game state without screenshots.
-
-### Debug Overlay
-
-When `debug: true`, the canvas shows:
-- **Top-left**: FPS, active scene, entity count, memory
-- **Top-right**: Registered state from `inspectState()` (player HP, position, FSM state)
-- **Red banner**: Error messages with fix suggestions
-
-### Scene Inspector
-
-A DOM-based property editor for live-editing game objects:
-```typescript
-import { SceneInspector } from 'clik-engine';
-new SceneInspector(game).show(); // Toggle with .toggle()
-```
-
-## Example Games
-
-### 2048
-Full implementation with grid logic, merge mechanics, swipe/keyboard input, score persistence, and game over detection.
-
-### Space Shooter
-Physics-based with player movement, shooting, enemy spawning with difficulty scaling, explosions, starfield parallax, and lives system.
-
-### Card Match
-Memory matching game with card flip animations, match detection, move counter, win detection, and best score persistence.
-
-## Multiplayer
-
-### Client
-```typescript
-import { NetworkManager, Room, Lobby } from 'clik-engine';
-
-const network = new NetworkManager({ url: 'ws://localhost:8080' });
-network.connect();
-
-const lobby = new Lobby(network);
-lobby.quickMatch('my-game');
-
-const room = new Room(network);
-room.onPlayerJoin(player => console.log(`${player.name} joined`));
-room.sendAction('move', { x: 100, y: 200 });
-```
-
-### Server
-```bash
-cd packages/clik-server
-npm install
-npm start  # WebSocket server on port 8080
-```
-
-Features: room creation/joining, player tracking, host migration, state synchronization, lobby with quick match.
-
-## Mobile (Capacitor)
-
-A `capacitor.config.tmpl.ts` template is included in every generated game:
-
-```bash
-npm install @capacitor/core @capacitor/cli
-npx cap init my-game com.example.mygame
-npx cap add android
-npm run build && npx cap sync
-```
-
-The engine handles touch input, responsive scaling, app lifecycle (pause/resume), safe area insets, and audio unlock automatically.
-
-## Claude Skills
-
-Four skills are included for AI-assisted development:
-
-| Skill | Purpose |
-|-------|---------|
-| `/clik-scaffold` | Generate scenes, entities, input configs, UI layouts following engine conventions |
-| `/clik-playtest` | Boot game via Preview, play-test autonomously, find and fix bugs |
-| `/clik-build` | Production build, bundle optimization, mobile deployment |
-| `/clik-debug` | Diagnose issues via console logs, screenshots, state inspection |
 
 ## Testing
 
 ```bash
-npm run test                                         # Run all 212 tests
-npm run test:watch --workspace=packages/clik-engine  # Watch mode
+npm run test                    # 1,050+ tests across 88 files
+npm run test:coverage           # Coverage report with thresholds
 ```
 
-212 tests covering: math, Vector2, Color, Random, ObjectPool, Grid2D, PriorityQueue, SpatialHash, A* pathfinding, StateMachine, SaveManager, SaveMigrator, I18nManager, AnalyticsManager, ConsoleReporter, InputRecorder, ComboDetector, ActionMap, LeakDetector, GameTimer, Cooldown, EventBus, CollisionGroups, EntityFactory, SceneStack, ManifestValidator, and format utils.
+## Claude Skills
 
-## API Documentation
+| Skill | Purpose |
+|-------|---------|
+| `/clik-scaffold` | Generate scenes, entities, input configs, UI layouts |
+| `/clik-playtest` | Boot, play-test, find and fix bugs autonomously |
+| `/clik-build` | Production build, bundle size check, release |
+| `/clik-debug` | Diagnose via console logs, screenshots, state inspection |
 
-```bash
-npm run docs --workspace=packages/clik-engine
-# Opens at packages/clik-engine/docs/index.html
-```
+## Documentation
 
-Generated with TypeDoc — full class reference for all 111 modules.
+- [Getting Started](docs/getting-started.md)
+- [Migration Guide](docs/migration.md)
+- System Guides: [Network](docs/systems/network.md) | [AI](docs/systems/ai.md) | [Entity](docs/systems/entity.md) | [Plugins](docs/systems/plugins.md) | [UI](docs/systems/ui.md)
+- [API Reference](packages/clik-engine/docs/index.html) (TypeDoc)
+- [Changelog](CHANGELOG.md)
 
 ## Tech Stack
 
-- **[PhaserJS](https://phaser.io)** v3.90 — Rendering, physics, audio
-- **[Vite](https://vitejs.dev)** — Build tooling, HMR
-- **[TypeScript](https://www.typescriptlang.org)** — Full type safety
-- **[Vitest](https://vitest.dev)** — Unit testing
-- **[TypeDoc](https://typedoc.org)** — API documentation
-- **npm workspaces** — Monorepo management
+- **[PhaserJS](https://phaser.io)** v3.87 — Rendering, physics, audio
+- **[Vite](https://vitejs.dev)** — Build, HMR
+- **[TypeScript](https://www.typescriptlang.org)** — Full strict mode
+- **[Vitest](https://vitest.dev)** — 1,050+ tests
+- **[TypeDoc](https://typedoc.org)** — API docs
+- **npm workspaces** — Monorepo
 
 ## License
 

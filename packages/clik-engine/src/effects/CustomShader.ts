@@ -40,12 +40,12 @@ export class CustomShaderPipeline {
   setUniform(shaderName: string, uniformName: string, value: number | number[]): this {
     const shader = this.shaders.get(shaderName);
     if (!shader) {
-      ConsoleReporter.error(`Shader '${shaderName}' not found`);
+      ConsoleReporter.error(`Shader '${shaderName}' not found`, 'Register the shader first with pipeline.register(name, source, uniforms).');
       return this;
     }
     const uniform = shader.uniforms.get(uniformName);
     if (!uniform) {
-      ConsoleReporter.error(`Uniform '${uniformName}' not found in shader '${shaderName}'`);
+      ConsoleReporter.error(`Uniform '${uniformName}' not found in shader '${shaderName}'`, 'Check the uniform name matches what was passed to register().');
       return this;
     }
     uniform.value = value;

@@ -174,7 +174,7 @@ describe('DialogueManager', () => {
     it('logs error and closes when node does not exist', () => {
       dm.load(sampleTree);
       dm.start('nonexistent');
-      expect(ConsoleReporter.error).toHaveBeenCalledWith(expect.stringContaining('nonexistent'));
+      expect(ConsoleReporter.error).toHaveBeenCalledWith(expect.stringContaining('nonexistent'), expect.any(String));
       expect(dm.isActive()).toBe(false);
     });
 
@@ -353,7 +353,7 @@ describe('DialogueManager', () => {
       dm.load(sampleTree);
       dm.destroy();
       dm.start('start');
-      expect(ConsoleReporter.error).toHaveBeenCalledWith(expect.stringContaining('start'));
+      expect(ConsoleReporter.error).toHaveBeenCalledWith(expect.stringContaining('start'), expect.any(String));
       expect(dm.isActive()).toBe(false);
     });
   });

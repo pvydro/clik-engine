@@ -203,7 +203,7 @@ describe('ShaderManager', () => {
 
     it('blur returns this without calling addBlur', () => {
       expect(noFxShader.blur()).toBe(noFxShader);
-      expect(ConsoleReporter.error).toHaveBeenCalledWith('PostFX not available (requires WebGL renderer)');
+      expect(ConsoleReporter.error).toHaveBeenCalledWith(expect.stringContaining('PostFX not available'), expect.any(String));
     });
 
     it('bloom returns this without calling addBloom', () => {
@@ -319,7 +319,7 @@ describe('ShaderManager', () => {
     it('returns no-op methods when object has no FX support', () => {
       const obj = {} as unknown as Phaser.GameObjects.GameObject;
       const fx = shader.applyToObject(obj);
-      expect(ConsoleReporter.error).toHaveBeenCalledWith('Object does not support FX');
+      expect(ConsoleReporter.error).toHaveBeenCalledWith(expect.stringContaining('Object does not support FX'), expect.any(String));
       // Should not throw
       fx.blur();
       fx.bloom();

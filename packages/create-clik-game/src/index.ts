@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-const TEMPLATES = ['default', 'platformer', 'puzzle'];
+const TEMPLATES = ['default', 'platformer', 'puzzle', 'multiplayer'];
 
 const args = process.argv.slice(2);
 let gameName = '';
@@ -16,12 +16,13 @@ for (const arg of args) {
 }
 
 if (!gameName) {
-  console.log('Usage: npx create-clik-game <game-name> [--template=default|platformer|puzzle]');
+  console.log('Usage: npx create-clik-game <game-name> [--template=default|platformer|puzzle|multiplayer]');
   console.log('');
   console.log('Templates:');
-  console.log('  default     — Empty game with a single scene');
-  console.log('  platformer  — Side-scrolling platformer with physics and camera');
+  console.log('  default      — Empty game with a single scene');
+  console.log('  platformer   — Side-scrolling platformer with physics and camera');
   console.log('  puzzle       — Grid-based puzzle game with scoring');
+  console.log('  multiplayer  — Networked multiplayer with lobby and room system');
   process.exit(1);
 }
 

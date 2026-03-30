@@ -49,7 +49,7 @@ export class ParticleManager {
   burst(name: string, x: number, y: number, count?: number): void {
     const emitter = this.emitters.get(name);
     if (!emitter) {
-      ConsoleReporter.error(`Particle emitter '${name}' not found`);
+      ConsoleReporter.error(`Particle emitter '${name}' not found`, 'Create it first with createEmitter(name, config).');
       return;
     }
     emitter.setPosition(x, y);

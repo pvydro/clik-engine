@@ -60,7 +60,7 @@ export class TilemapManager {
    */
   createLayer(layerName: string, depth?: number): Phaser.Tilemaps.TilemapLayer | null {
     if (!this.map) {
-      ConsoleReporter.error('No tilemap loaded. Call load() first.');
+      ConsoleReporter.error('No tilemap loaded', 'Call tilemapManager.load(config) before accessing tilemap features.');
       return null;
     }
 

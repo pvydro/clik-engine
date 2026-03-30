@@ -102,7 +102,7 @@ export class ShaderManager {
     // Phaser's FX pipeline types are incomplete — cast at this boundary
     const go = obj as { preFX?: Phaser.FX.Controller; postFX?: { addBlur: Function; addBloom: Function; addGlow: Function; addShadow: Function; clear: Function } };
     if (!go.preFX && !go.postFX) {
-      ConsoleReporter.error('Object does not support FX');
+      ConsoleReporter.error('Object does not support FX', 'Ensure the game object is a Sprite/Image with a postFX pipeline (requires WebGL).');
       return { blur: () => {}, bloom: () => {}, glow: () => {}, shadow: () => {}, clear: () => {} };
     }
 
@@ -152,7 +152,7 @@ export class ShaderManager {
 
   private hasFX(): boolean {
     if (!this.camera.postFX) {
-      ConsoleReporter.error('PostFX not available (requires WebGL renderer)');
+      ConsoleReporter.error('PostFX not available (requires WebGL renderer)', 'The game is running in Canvas mode. Use WebGL for post-processing effects.');
       return false;
     }
     return true;

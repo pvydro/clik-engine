@@ -20,7 +20,7 @@ npm run format --workspace=packages/clik-engine      # Prettier (semi, singleQuo
 npm run docs --workspace=packages/clik-engine        # TypeDoc API docs
 
 # Testing (Vitest)
-npm run test                                         # Run all tests (~65 files, ~800 tests)
+npm run test                                         # Run all tests (~88 files, ~1050 tests)
 npm run test -- tests/utils/Vector2.test.ts          # Run a single test file
 npm run test -- -t "pattern"                         # Filter by test name
 npm run test:watch --workspace=packages/clik-engine  # Watch mode

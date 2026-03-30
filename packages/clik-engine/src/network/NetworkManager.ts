@@ -93,7 +93,7 @@ export class NetworkManager {
   /** Send a typed message to the server */
   send(type: string, data?: unknown): void {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      ConsoleReporter.error(`Network: cannot send '${type}' — not connected`);
+      ConsoleReporter.error(`Network: cannot send '${type}' — not connected`, 'Call network.connect() first and wait for the connected state.');
       return;
     }
     this.ws.send(JSON.stringify({ type, data: data ?? {} }));
@@ -180,7 +180,7 @@ export class NetworkManager {
     } else {
       this.setState('disconnected');
       if (this.retryCount >= this.config.maxRetries) {
-        ConsoleReporter.error('Network: max reconnection attempts reached');
+        ConsoleReporter.error('Network: max reconnection attempts reached', 'Check server availability or increase maxRetries in NetworkConfig.');
       }
     }
   }

@@ -68,7 +68,7 @@ export class DialogueManager {
   private showNode(nodeId: string): void {
     const node = this.tree[nodeId];
     if (!node) {
-      ConsoleReporter.error(`Dialogue node '${nodeId}' not found`);
+      ConsoleReporter.error(`Dialogue node '${nodeId}' not found`, 'Check that the node ID exists in your DialogueTree.');
       this.close();
       return;
     }

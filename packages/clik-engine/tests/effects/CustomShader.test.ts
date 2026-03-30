@@ -36,13 +36,13 @@ describe('CustomShaderPipeline', () => {
 
   it('logs error for missing shader on setUniform', () => {
     pipeline.setUniform('missing', 'foo', 1);
-    expect(ConsoleReporter.error).toHaveBeenCalledWith(expect.stringContaining("'missing' not found"));
+    expect(ConsoleReporter.error).toHaveBeenCalledWith(expect.stringContaining("'missing' not found"), expect.any(String));
   });
 
   it('logs error for missing uniform', () => {
     pipeline.register('test', '');
     pipeline.setUniform('test', 'missing', 1);
-    expect(ConsoleReporter.error).toHaveBeenCalledWith(expect.stringContaining("'missing' not found"));
+    expect(ConsoleReporter.error).toHaveBeenCalledWith(expect.stringContaining("'missing' not found"), expect.any(String));
   });
 
   it('removes a shader', () => {
