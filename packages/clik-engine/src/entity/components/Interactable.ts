@@ -109,4 +109,10 @@ export class Interactable extends Component {
   isHovered(): boolean {
     return this.hovered;
   }
+
+  onDetach(): void {
+    this.entity?.off('pointerover');
+    this.entity?.off('pointerout');
+    this.entity?.off('pointerup');
+  }
 }

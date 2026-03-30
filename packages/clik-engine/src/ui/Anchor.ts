@@ -19,11 +19,15 @@ export interface AnchorConfig {
  * Automatically repositions on resize.
  */
 export class Anchor {
+  /**
+   * Anchor a target to a screen position with auto-reposition on resize.
+   * Returns a cleanup function to remove the resize listener.
+   */
   static apply(
     scene: Phaser.Scene,
     target: Phaser.GameObjects.Components.Transform,
     config: AnchorConfig,
-  ): void {
+  ): () => void {
     const update = () => {
       const { width, height } = scene.scale;
       const ox = config.offsetX ?? 0;
@@ -53,6 +57,9 @@ export class Anchor {
 
     // Update on resize
     scene.scale.on(Phaser.Scale.Events.RESIZE, update);
+
+    // Return cleanup function
+    return () => scene.scale.off(Phaser.Scale.Events.RESIZE, update);
   }
 
   /** Helper: center a game object on screen */

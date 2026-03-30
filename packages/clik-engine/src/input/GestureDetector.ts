@@ -36,6 +36,11 @@ export class GestureDetector {
   private isDown = false;
   private pinchStartDist = 0;
   private pinchActive = false;
+  private scenePointerDownHandler: ((pointer: Phaser.Input.Pointer) => void) | null = null;
+  private scenePointerUpHandler: ((pointer: Phaser.Input.Pointer) => void) | null = null;
+  private scenePinchDownHandler: ((pointer: Phaser.Input.Pointer) => void) | null = null;
+  private scenePinchMoveHandler: (() => void) | null = null;
+  private scenePinchUpHandler: (() => void) | null = null;
 
   constructor(scene: Phaser.Scene, config?: GestureConfig) {
     this.scene = scene;
@@ -76,7 +81,7 @@ export class GestureDetector {
   }
 
   private setupListeners(): void {
-    this.scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+    this.scenePointerDownHandler = (pointer: Phaser.Input.Pointer) => {
       this.startX = pointer.x;
       this.startY = pointer.y;
       this.startTime = pointer.time;
@@ -97,9 +102,10 @@ export class GestureDetector {
           }
         }
       });
-    });
+    };
+    this.scene.input.on('pointerdown', this.scenePointerDownHandler);
 
-    this.scene.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
+    this.scenePointerUpHandler = (pointer: Phaser.Input.Pointer) => {
       this.isDown = false;
       if (this.longPressTimer) {
         this.longPressTimer.destroy();
@@ -137,19 +143,21 @@ export class GestureDetector {
           this.lastTapTime = now;
         }
       }
-    });
+    };
+    this.scene.input.on('pointerup', this.scenePointerUpHandler);
 
     // Pinch-to-zoom (multi-touch)
-    this.scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+    this.scenePinchDownHandler = (_pointer: Phaser.Input.Pointer) => {
       if (this.scene.input.pointer1.isDown && this.scene.input.pointer2.isDown) {
         const p1 = this.scene.input.pointer1;
         const p2 = this.scene.input.pointer2;
         this.pinchStartDist = Phaser.Math.Distance.Between(p1.x, p1.y, p2.x, p2.y);
         this.pinchActive = true;
       }
-    });
+    };
+    this.scene.input.on('pointerdown', this.scenePinchDownHandler);
 
-    this.scene.input.on('pointermove', () => {
+    this.scenePinchMoveHandler = () => {
       if (!this.pinchActive) return;
       if (!this.scene.input.pointer1.isDown || !this.scene.input.pointer2.isDown) return;
 
@@ -168,11 +176,13 @@ export class GestureDetector {
         distance: currentDist,
         duration: 0,
       });
-    });
+    };
+    this.scene.input.on('pointermove', this.scenePinchMoveHandler);
 
-    this.scene.input.on('pointerup', () => {
+    this.scenePinchUpHandler = () => {
       this.pinchActive = false;
-    });
+    };
+    this.scene.input.on('pointerup', this.scenePinchUpHandler);
   }
 
   destroy(): void {
@@ -180,5 +190,11 @@ export class GestureDetector {
     if (this.longPressTimer) {
       this.longPressTimer.destroy();
     }
+    // Remove all scene input listeners
+    if (this.scenePointerDownHandler) this.scene.input.off('pointerdown', this.scenePointerDownHandler);
+    if (this.scenePointerUpHandler) this.scene.input.off('pointerup', this.scenePointerUpHandler);
+    if (this.scenePinchDownHandler) this.scene.input.off('pointerdown', this.scenePinchDownHandler);
+    if (this.scenePinchMoveHandler) this.scene.input.off('pointermove', this.scenePinchMoveHandler);
+    if (this.scenePinchUpHandler) this.scene.input.off('pointerup', this.scenePinchUpHandler);
   }
 }

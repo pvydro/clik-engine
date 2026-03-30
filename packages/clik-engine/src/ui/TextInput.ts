@@ -29,6 +29,8 @@ export class TextInput extends Phaser.GameObjects.Container {
   private focused = false;
   private cursorVisible = true;
   private cursorTimer: Phaser.Time.TimerEvent | null = null;
+  private blurHandler: ((pointer: Phaser.Input.Pointer) => void) | null = null;
+  private keydownHandler: ((event: KeyboardEvent) => void) | null = null;
 
   constructor(scene: Phaser.Scene, config: TextInputConfig) {
     super(scene, config.x, config.y);
@@ -60,18 +62,19 @@ export class TextInput extends Phaser.GameObjects.Container {
     this.bg.on('pointerdown', () => this.focus());
 
     // Click outside to blur
-    scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+    this.blurHandler = (pointer: Phaser.Input.Pointer) => {
       if (this.focused) {
         const bounds = this.bg.getBounds();
         if (!bounds.contains(pointer.x, pointer.y)) {
           this.blur();
         }
       }
-    });
+    };
+    scene.input.on('pointerdown', this.blurHandler);
 
     // Keyboard input
     if (scene.input.keyboard) {
-      scene.input.keyboard.on('keydown', (event: KeyboardEvent) => {
+      this.keydownHandler = (event: KeyboardEvent) => {
         if (!this.focused) return;
 
         if (event.key === 'Backspace') {
@@ -90,7 +93,8 @@ export class TextInput extends Phaser.GameObjects.Container {
           this.inputConfig.onChange?.(this._value);
           this.emit('change', this._value);
         }
-      });
+      };
+      scene.input.keyboard.on('keydown', this.keydownHandler);
     }
 
     scene.add.existing(this);
@@ -163,6 +167,14 @@ export class TextInput extends Phaser.GameObjects.Container {
 
   destroy(fromScene?: boolean): void {
     this.cursorTimer?.destroy();
+    if (this.blurHandler) {
+      this.scene?.input?.off('pointerdown', this.blurHandler);
+      this.blurHandler = null;
+    }
+    if (this.keydownHandler) {
+      this.scene?.input?.keyboard?.off('keydown', this.keydownHandler);
+      this.keydownHandler = null;
+    }
     super.destroy(fromScene);
   }
 }

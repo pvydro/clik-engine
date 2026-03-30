@@ -24,13 +24,14 @@ export class ResponsiveManager {
   private breakpoints: BreakpointConfig;
   private currentBreakpoint: Breakpoint = 'md';
   private breakpointListeners: ((bp: Breakpoint) => void)[] = [];
+  private resizeHandler: ((gameSize: Phaser.Structs.Size) => void) | null = null;
 
   constructor(game: Phaser.Game, breakpoints?: Partial<BreakpointConfig>) {
     this.game = game;
     this.breakpoints = { ...DEFAULT_BREAKPOINTS, ...breakpoints };
     this.currentBreakpoint = this.calculateBreakpoint();
 
-    game.scale.on(Phaser.Scale.Events.RESIZE, (gameSize: Phaser.Structs.Size) => {
+    this.resizeHandler = (gameSize: Phaser.Structs.Size) => {
       const width = gameSize.width;
       const height = gameSize.height;
 
@@ -51,7 +52,8 @@ export class ResponsiveManager {
           scene.onResize(width, height);
         }
       }
-    });
+    };
+    game.scale.on(Phaser.Scale.Events.RESIZE, this.resizeHandler);
   }
 
   private calculateBreakpoint(): Breakpoint {
@@ -110,5 +112,13 @@ export class ResponsiveManager {
   /** Get device pixel ratio */
   get dpr(): number {
     return window.devicePixelRatio ?? 1;
+  }
+
+  destroy(): void {
+    if (this.resizeHandler) {
+      this.game.scale.off(Phaser.Scale.Events.RESIZE, this.resizeHandler);
+      this.resizeHandler = null;
+    }
+    this.breakpointListeners.length = 0;
   }
 }

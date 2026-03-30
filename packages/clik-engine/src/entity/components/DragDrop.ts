@@ -69,4 +69,10 @@ export class DragDrop extends Component {
   getOriginalPosition(): { x: number; y: number } {
     return { x: this.originalX, y: this.originalY };
   }
+
+  onDetach(): void {
+    this.entity?.off('dragstart');
+    this.entity?.off('drag');
+    this.entity?.off('dragend');
+  }
 }

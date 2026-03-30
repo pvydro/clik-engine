@@ -22,6 +22,8 @@ export class ScrollContainer extends Phaser.GameObjects.Container {
   private velocity = 0;
   private containerConfig: ScrollContainerConfig;
   private bg: Phaser.GameObjects.Rectangle;
+  private pointerMoveHandler: ((pointer: Phaser.Input.Pointer) => void) | null = null;
+  private pointerUpHandler: ((pointer: Phaser.Input.Pointer) => void) | null = null;
 
   constructor(scene: Phaser.Scene, config: ScrollContainerConfig) {
     super(scene, config.x, config.y);
@@ -49,17 +51,19 @@ export class ScrollContainer extends Phaser.GameObjects.Container {
       this.velocity = 0;
     });
 
-    scene.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+    this.pointerMoveHandler = (pointer: Phaser.Input.Pointer) => {
       if (!this.isDragging) return;
       const dy = pointer.y - this.dragStartY;
       this.setScroll(this.dragScrollStart - dy);
-    });
+    };
+    scene.input.on('pointermove', this.pointerMoveHandler);
 
-    scene.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
+    this.pointerUpHandler = (pointer: Phaser.Input.Pointer) => {
       if (!this.isDragging) return;
       this.isDragging = false;
       this.velocity = (this.dragStartY - pointer.y) * (config.momentum ?? 0.95);
-    });
+    };
+    scene.input.on('pointerup', this.pointerUpHandler);
 
     // Mouse wheel
     this.bg.on('wheel', (_pointer: Phaser.Input.Pointer, _dx: number, dy: number) => {
@@ -122,5 +126,17 @@ export class ScrollContainer extends Phaser.GameObjects.Container {
 
   scrollToBottom(): void {
     this.scrollTo(this.maxScrollY);
+  }
+
+  destroy(fromScene?: boolean): void {
+    if (this.pointerMoveHandler) {
+      this.scene?.input?.off('pointermove', this.pointerMoveHandler);
+      this.pointerMoveHandler = null;
+    }
+    if (this.pointerUpHandler) {
+      this.scene?.input?.off('pointerup', this.pointerUpHandler);
+      this.pointerUpHandler = null;
+    }
+    super.destroy(fromScene);
   }
 }

@@ -20,6 +20,7 @@ export class AnimationEventSystem {
   private scene: Phaser.Scene;
   private events: Map<string, AnimationEventDef[]> = new Map();
   private firedOnce: Set<string> = new Set();
+  private boundSprites: Map<Phaser.GameObjects.Sprite, { update: Function; start: Function }> = new Map();
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -36,7 +37,7 @@ export class AnimationEventSystem {
 
   /** Bind to a sprite — listens for animation frame updates */
   bind(sprite: Phaser.GameObjects.Sprite): this {
-    sprite.on(Phaser.Animations.Events.ANIMATION_UPDATE, (
+    const updateHandler = (
       anim: Phaser.Animations.Animation,
       frame: Phaser.Animations.AnimationFrame,
     ) => {
@@ -52,18 +53,32 @@ export class AnimationEventSystem {
           if (def.once) this.firedOnce.add(onceKey);
         }
       }
-    });
+    };
+    sprite.on(Phaser.Animations.Events.ANIMATION_UPDATE, updateHandler);
 
     // Reset once-tracking on animation restart
-    sprite.on(Phaser.Animations.Events.ANIMATION_START, (anim: Phaser.Animations.Animation) => {
+    const startHandler = (anim: Phaser.Animations.Animation) => {
       // Clear once-fired flags for this animation
       for (const key of this.firedOnce) {
-        if (key.startsWith(anim.key + '_')) {
+        if (key.startsWith(`${anim.key}_`)) {
           this.firedOnce.delete(key);
         }
       }
-    });
+    };
+    sprite.on(Phaser.Animations.Events.ANIMATION_START, startHandler);
 
+    this.boundSprites.set(sprite, { update: updateHandler, start: startHandler });
+    return this;
+  }
+
+  /** Unbind from a sprite — removes animation listeners */
+  unbind(sprite: Phaser.GameObjects.Sprite): this {
+    const handlers = this.boundSprites.get(sprite);
+    if (handlers) {
+      sprite.off(Phaser.Animations.Events.ANIMATION_UPDATE, handlers.update as (...args: unknown[]) => void);
+      sprite.off(Phaser.Animations.Events.ANIMATION_START, handlers.start as (...args: unknown[]) => void);
+      this.boundSprites.delete(sprite);
+    }
     return this;
   }
 
@@ -73,8 +88,13 @@ export class AnimationEventSystem {
     return this;
   }
 
-  /** Remove all events */
+  /** Remove all events and unbind all sprites */
   clearAll(): void {
+    for (const [sprite, handlers] of this.boundSprites) {
+      sprite.off(Phaser.Animations.Events.ANIMATION_UPDATE, handlers.update as (...args: unknown[]) => void);
+      sprite.off(Phaser.Animations.Events.ANIMATION_START, handlers.start as (...args: unknown[]) => void);
+    }
+    this.boundSprites.clear();
     this.events.clear();
     this.firedOnce.clear();
   }
