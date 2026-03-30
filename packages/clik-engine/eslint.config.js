@@ -25,6 +25,24 @@ export default [
       'prefer-const': 'error',
       'no-var': 'error',
       eqeqeq: ['error', 'always'],
+
+      // Catch common mistakes
+      'no-duplicate-case': 'error',
+      'no-fallthrough': 'error',
+      'no-self-compare': 'error',
+      'no-template-curly-in-string': 'warn',
+      'no-unreachable': 'error',
+      'no-constant-binary-expression': 'error',
+      'no-constructor-return': 'error',
+      'no-promise-executor-return': 'warn',
+      'no-self-assign': 'error',
+      'no-unused-private-class-members': 'warn',
+
+      // Style consistency
+      'no-lonely-if': 'warn',
+      'no-useless-return': 'warn',
+      'prefer-template': 'warn',
+      'object-shorthand': ['warn', 'always'],
     },
   },
   {

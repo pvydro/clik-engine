@@ -18,6 +18,7 @@ export class BaseScene extends Phaser.Scene {
   private _entities: EntityRegistry | undefined;
   private _clikConfig: ClikGameConfig | undefined;
   private _shuttingDown = false;
+  private _hasError = false;
 
   /** Input manager — created on first access */
   protected get actions(): InputManager {
@@ -63,6 +64,7 @@ export class BaseScene extends Phaser.Scene {
 
   init(data?: object): void {
     this._shuttingDown = false;
+    this._hasError = false;
     this._clikConfig = this.game.registry.get('__clikConfig') as ClikGameConfig | undefined;
     this.debugEnabled = this._clikConfig?.debug ?? false;
     ConsoleReporter.scene(`init: ${this.scene.key}`, data);
@@ -73,8 +75,44 @@ export class BaseScene extends Phaser.Scene {
   }
 
   update(time: number, delta: number): void {
+    if (this._hasError) return;
     this._actions?.update();
     this._entities?.updateAll(delta);
+  }
+
+  /** Wraps a scene lifecycle method with error handling. Call from subclass overrides if desired. */
+  protected runSafe(fn: () => void): void {
+    try {
+      fn();
+    } catch (err) {
+      this._hasError = true;
+      const message = err instanceof Error ? err.message : String(err);
+      const stack = err instanceof Error ? err.stack : undefined;
+      ConsoleReporter.error(
+        `Scene '${this.scene.key}' error: ${message}`,
+        'Check the console for the full stack trace. The scene update loop has been paused.'
+      );
+      if (stack) console.error(stack);
+
+      // Show red error banner if debug mode is on
+      if (this.debugEnabled) {
+        this._showErrorBanner(message);
+      }
+    }
+  }
+
+  private _showErrorBanner(message: string): void {
+    try {
+      const cam = this.cameras.main;
+      const bg = this.add.rectangle(cam.width / 2, 30, cam.width, 40, 0xcc0000, 0.9).setScrollFactor(0).setDepth(99999);
+      const text = this.add.text(cam.width / 2, 30, `ERROR: ${message}`, {
+        fontSize: '14px',
+        fontFamily: 'monospace',
+        color: '#ffffff',
+      }).setOrigin(0.5).setScrollFactor(0).setDepth(99999);
+    } catch {
+      // If even the banner fails, just log
+    }
   }
 
   onResize(width: number, height: number): void {

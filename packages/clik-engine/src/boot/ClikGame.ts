@@ -119,6 +119,14 @@ export function createGame(config: ClikGameConfig): Phaser.Game {
   }
 
   game.events.once(Phaser.Core.Events.READY, () => {
+    // Warn about Canvas renderer limitations
+    if (game.renderer.type === Phaser.CANVAS) {
+      ConsoleReporter.engine(
+        'Running with Canvas renderer — post-processing effects (blur, bloom, vignette, etc.) will be disabled. ' +
+        'Use a WebGL-capable browser for full visual effects.'
+      );
+    }
+
     // Launch debug overlay scenes in parallel (they render on top)
     if (debug) {
       game.scene.start('__clik_debug_overlay');

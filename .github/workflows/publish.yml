@@ -20,8 +20,24 @@ jobs:
           cache: npm
           registry-url: https://npm.pkg.github.com
       - run: npm ci
-      - run: npm run test --workspace=packages/clik-engine
-      - run: npm run build --workspace=packages/clik-engine
-      - run: npm publish --workspace=packages/clik-engine
+
+      # Quality gates — must pass before publishing
+      - name: Typecheck
+        run: npm run typecheck --workspace=packages/clik-engine
+
+      - name: Lint
+        run: npm run lint --workspace=packages/clik-engine
+
+      - name: Test
+        run: npm run test --workspace=packages/clik-engine
+
+      - name: Build
+        run: npm run build --workspace=packages/clik-engine
+
+      - name: Verify bundle exists
+        run: test -f packages/clik-engine/dist/clik-engine.js
+
+      - name: Publish
+        run: npm publish --workspace=packages/clik-engine
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
