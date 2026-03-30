@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { themedTextColor, themedFont, themedFontSize } from './themed';
+import { getTheme } from './Theme';
 
 export interface ToastManagerConfig {
   /** Maximum visible toasts at once (default: 3) */
@@ -96,12 +98,12 @@ export class ToastManager {
     const targetY = baseY + slotIndex * (40 + this.config.spacing) * direction;
 
     const text = this.scene.add.text(width / 2, targetY + 20 * direction, options.message, {
-      fontSize: options.fontSize ?? '16px',
-      fontFamily: 'monospace',
-      color: options.color ?? '#ffffff',
+      fontSize: themedFontSize(options.fontSize),
+      fontFamily: themedFont(undefined),
+      color: themedTextColor(options.color),
       backgroundColor: options.backgroundColor
         ? `#${options.backgroundColor.toString(16).padStart(6, '0')}`
-        : '#333333dd',
+        : `#${getTheme().colors.surface.toString(16).padStart(6, '0')}dd`,
       padding: { x: 16, y: 10 },
     }).setOrigin(0.5).setAlpha(0).setDepth(8000 + slotIndex);
 

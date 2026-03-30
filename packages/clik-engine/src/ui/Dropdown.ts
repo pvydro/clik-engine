@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { ConsoleReporter } from '../debug/ConsoleReporter';
+import { themedColor, themedTextColor, themedFont, themedFontSize } from './themed';
 
 export interface DropdownOption {
   label: string;
@@ -46,15 +47,15 @@ export class Dropdown extends Phaser.GameObjects.Container {
     const w = config.width ?? 180;
     const h = config.height ?? 36;
 
-    this.bg = scene.add.rectangle(0, 0, w, h, config.backgroundColor ?? 0x333333)
+    this.bg = scene.add.rectangle(0, 0, w, h, themedColor(config.backgroundColor, 'surface'))
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true });
 
     const displayText = this.getDisplayText();
     this.label = scene.add.text(-w / 2 + 10, 0, displayText, {
-      fontSize: config.fontSize ?? '14px',
-      fontFamily: 'monospace',
-      color: config.textColor ?? '#ffffff',
+      fontSize: themedFontSize(config.fontSize),
+      fontFamily: themedFont(undefined),
+      color: themedTextColor(config.textColor),
     }).setOrigin(0, 0.5);
 
     this.arrow = scene.add.text(w / 2 - 20, 0, '\u25BC', {

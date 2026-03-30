@@ -101,6 +101,7 @@ export type { NumberInputConfig } from './ui/NumberInput';
 export type { ConfirmDialogConfig } from './ui/ConfirmDialog';
 export { setTheme, getTheme, DarkTheme, LightTheme, RetroTheme, NeonTheme } from './ui/Theme';
 export type { Theme, ThemeColors, ThemeSprites } from './ui/Theme';
+export { themedColor, themedTextColor, themedFont, themedFontSize, themedBorderRadius } from './ui/themed';
 export { ToastManager } from './ui/ToastManager';
 export type { ToastManagerConfig, ToastOptions } from './ui/ToastManager';
 export { ModalStack } from './ui/ModalStack';

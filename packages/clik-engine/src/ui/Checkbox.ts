@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { themedColor, themedTextColor, themedFont, themedFontSize } from './themed';
 
 export interface CheckboxConfig {
   x: number;
@@ -29,7 +30,7 @@ export class Checkbox extends Phaser.GameObjects.Container {
     this._checked = config.checked ?? false;
 
     const size = config.size ?? 24;
-    const boxColor = config.boxColor ?? 0x333333;
+    const boxColor = themedColor(config.boxColor, 'surface');
 
     this.box = scene.add.rectangle(0, 0, size, size, boxColor)
       .setOrigin(0.5)
@@ -39,16 +40,16 @@ export class Checkbox extends Phaser.GameObjects.Container {
     this.checkMark = scene.add.text(0, -1, '\u2713', {
       fontSize: `${size - 6}px`,
       fontFamily: 'monospace',
-      color: config.checkColor ? `#${config.checkColor.toString(16).padStart(6, '0')}` : '#00ff88',
+      color: config.checkColor ? `#${config.checkColor.toString(16).padStart(6, '0')}` : `#${themedColor(undefined, 'primary').toString(16).padStart(6, '0')}`,
     }).setOrigin(0.5).setVisible(this._checked);
 
     this.add([this.box, this.checkMark]);
 
     if (config.label) {
       this.labelText = scene.add.text(size / 2 + 8, 0, config.label, {
-        fontSize: config.fontSize ?? '14px',
-        fontFamily: 'monospace',
-        color: config.labelColor ?? '#ffffff',
+        fontSize: themedFontSize(config.fontSize),
+        fontFamily: themedFont(undefined),
+        color: themedTextColor(config.labelColor),
       }).setOrigin(0, 0.5);
       this.add(this.labelText);
     }

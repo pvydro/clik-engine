@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { themedColor, themedTextColor, themedFont, themedFontSize } from './themed';
 
 export interface RadioOption {
   label: string;
@@ -36,8 +37,8 @@ export class RadioGroup extends Phaser.GameObjects.Container {
     const layout = config.layout ?? 'vertical';
     const spacing = config.spacing ?? 30;
     const size = config.size ?? 10;
-    const radioColor = config.radioColor ?? 0x666666;
-    const selectedColor = config.selectedColor ?? 0x00ff88;
+    const radioColor = themedColor(config.radioColor, 'secondary');
+    const selectedColor = themedColor(config.selectedColor, 'primary');
 
     config.options.forEach((opt, i) => {
       const ox = layout === 'horizontal' ? i * spacing * 4 : 0;
@@ -53,9 +54,9 @@ export class RadioGroup extends Phaser.GameObjects.Container {
       outer.on('pointerup', () => this.select(opt.value));
 
       const label = scene.add.text(ox + size + 8, oy, opt.label, {
-        fontSize: config.fontSize ?? '14px',
-        fontFamily: 'monospace',
-        color: config.labelColor ?? '#ffffff',
+        fontSize: themedFontSize(config.fontSize),
+        fontFamily: themedFont(undefined),
+        color: themedTextColor(config.labelColor),
       }).setOrigin(0, 0.5);
 
       this.add([outer, inner, label]);
