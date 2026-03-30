@@ -8,6 +8,10 @@ import { EntityRegistry } from '../entity/EntityRegistry';
 import { StateInspector } from '../debug/StateInspector';
 import type { ClikGameConfig } from '../utils/types';
 import type { PluginManager } from '../plugin/PluginManager';
+import { NetworkManager } from '../network/NetworkManager';
+import { Lobby } from '../network/Lobby';
+import { Room } from '../network/Room';
+import { A11yManager } from '../accessibility/A11yManager';
 
 export class BaseScene extends Phaser.Scene {
   protected debugEnabled = false;
@@ -17,6 +21,10 @@ export class BaseScene extends Phaser.Scene {
   private _audio: AudioManager | undefined;
   private _save: SaveManager | undefined;
   private _entities: EntityRegistry | undefined;
+  private _network: NetworkManager | undefined;
+  private _lobby: Lobby | undefined;
+  private _room: Room | undefined;
+  private _a11y: A11yManager | undefined;
   private _clikConfig: ClikGameConfig | undefined;
   private _shuttingDown = false;
   private _hasError = false;
@@ -61,6 +69,43 @@ export class BaseScene extends Phaser.Scene {
       this._entities = new EntityRegistry();
     }
     return this._entities;
+  }
+
+  /** Network manager — created on first access from config.network */
+  protected get network(): NetworkManager {
+    if (this._shuttingDown) throw new Error('Cannot access network after scene shutdown');
+    if (!this._network) {
+      const netConfig = this._clikConfig?.network;
+      if (!netConfig?.url) {
+        throw new Error('NetworkManager requires config.network.url. Add network config to createGame().');
+      }
+      this._network = new NetworkManager(netConfig);
+    }
+    return this._network;
+  }
+
+  /** Lobby client — created on first access, depends on network */
+  protected get lobby(): Lobby {
+    if (!this._lobby) {
+      this._lobby = new Lobby(this.network);
+    }
+    return this._lobby;
+  }
+
+  /** Room client — created on first access, depends on network */
+  protected get room(): Room {
+    if (!this._room) {
+      this._room = new Room(this.network);
+    }
+    return this._room;
+  }
+
+  /** Accessibility manager — created on first access */
+  protected get a11y(): A11yManager {
+    if (!this._a11y) {
+      this._a11y = new A11yManager(this.game, this._clikConfig?.accessibility);
+    }
+    return this._a11y;
   }
 
   init(data?: object): void {
@@ -145,10 +190,17 @@ export class BaseScene extends Phaser.Scene {
     this._actions?.destroy();
     this._audio?.destroy();
     this._entities?.clear();
+    this._lobby?.destroy();
+    this._room?.destroy();
+    this._network?.destroy();
     this._actions = undefined;
     this._director = undefined;
     this._audio = undefined;
     this._save = undefined;
     this._entities = undefined;
+    this._network = undefined;
+    this._lobby = undefined;
+    this._room = undefined;
+    this._a11y = undefined;
   }
 }

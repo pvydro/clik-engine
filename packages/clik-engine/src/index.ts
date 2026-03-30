@@ -204,6 +204,9 @@ export { FlashOnHit } from './entity/components/FlashOnHit';
 export { Patrol } from './entity/components/Patrol';
 export type { PatrolPoint } from './entity/components/Patrol';
 export type { OscillateAxis } from './entity/components/Oscillator';
+export { BehaviorTreeComponent } from './entity/components/BehaviorTreeComponent';
+export { SteeringComponent } from './entity/components/SteeringComponent';
+export { NetworkSync } from './entity/components/NetworkSync';
 
 // Analytics
 export { AnalyticsManager } from './analytics/AnalyticsManager';

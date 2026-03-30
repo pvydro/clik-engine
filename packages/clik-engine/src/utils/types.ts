@@ -1,5 +1,7 @@
 import type Phaser from 'phaser';
 import type { ClikPluginConfig } from '../plugin/ClikPlugin';
+import type { NetworkConfig } from '../network/protocol';
+import type { A11yConfig } from '../accessibility/A11yManager';
 
 export interface SceneEntry {
   key: string;
@@ -56,4 +58,6 @@ export interface ClikGameConfig {
   backgroundColor?: string;
   pixelArt?: boolean;
   plugins?: ClikPluginConfig[];
+  network?: NetworkConfig;
+  accessibility?: A11yConfig;
 }
