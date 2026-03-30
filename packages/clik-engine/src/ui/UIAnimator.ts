@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import type { TweenableLike } from '../utils/interfaces';
+import type { A11yManager } from '../accessibility/A11yManager';
 
 export type UIAnimationType = 'fadeIn' | 'fadeOut' | 'slideInLeft' | 'slideInRight' | 'slideInUp' | 'slideInDown' | 'scaleIn' | 'scaleOut' | 'bounceIn';
 
@@ -9,6 +10,16 @@ export interface UIAnimationConfig {
   delay?: number;
 }
 
+/** Check if reduced motion is active via A11yManager in the game registry */
+function shouldReduceMotion(scene: Phaser.Scene): boolean {
+  try {
+    const a11y = scene.game?.registry?.get('__clikA11y') as A11yManager | undefined;
+    return a11y?.isReducedMotion() ?? false;
+  } catch {
+    return false;
+  }
+}
+
 export class UIAnimator {
   static animate(
     scene: Phaser.Scene,
@@ -16,10 +27,17 @@ export class UIAnimator {
     type: UIAnimationType,
     config?: UIAnimationConfig,
   ): Promise<void> {
+    const go = target as unknown as TweenableLike;
+
+    // Reduced motion: apply final state instantly, skip tweens
+    if (shouldReduceMotion(scene)) {
+      UIAnimator.applyFinalState(go, type);
+      return Promise.resolve();
+    }
+
     const duration = config?.duration ?? 300;
     const ease = config?.ease ?? 'Cubic.easeOut';
     const delay = config?.delay ?? 0;
-    const go = target as unknown as TweenableLike;
 
     return new Promise(resolve => {
       switch (type) {
@@ -102,5 +120,34 @@ export class UIAnimator {
         UIAnimator.animate(scene, target, type, { ...config, delay: (config?.delay ?? 0) + i * staggerDelay })
       )
     );
+  }
+
+  /** Apply the final state of an animation instantly (for reduced motion) */
+  private static applyFinalState(go: TweenableLike, type: UIAnimationType): void {
+    switch (type) {
+      case 'fadeIn':
+        go.alpha = 1;
+        break;
+      case 'fadeOut':
+        go.alpha = 0;
+        break;
+      case 'slideInLeft':
+      case 'slideInRight':
+      case 'slideInUp':
+      case 'slideInDown':
+        go.alpha = 1;
+        break;
+      case 'scaleIn':
+      case 'bounceIn':
+        go.scaleX = 1;
+        go.scaleY = 1;
+        go.alpha = 1;
+        break;
+      case 'scaleOut':
+        go.scaleX = 0;
+        go.scaleY = 0;
+        go.alpha = 0;
+        break;
+    }
   }
 }

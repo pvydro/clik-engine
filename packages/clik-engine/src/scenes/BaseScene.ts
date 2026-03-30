@@ -104,6 +104,8 @@ export class BaseScene extends Phaser.Scene {
   protected get a11y(): A11yManager {
     if (!this._a11y) {
       this._a11y = new A11yManager(this.game, this._clikConfig?.accessibility);
+      // Store in registry so UI components (UIAnimator) can check reducedMotion
+      this.game.registry.set('__clikA11y', this._a11y);
     }
     return this._a11y;
   }
