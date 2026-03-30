@@ -35,6 +35,12 @@ export type { GestureType, GestureEvent, GestureConfig } from './input/GestureDe
 export { ComboDetector } from './input/ComboDetector';
 export type { ComboDefinition } from './input/ComboDetector';
 export { InputRecorder } from './input/InputRecorder';
+export { InputBuffer } from './input/InputBuffer';
+export { RemapHelper } from './input/RemapHelper';
+export type { InputProvider } from './input/providers/InputProvider';
+export { KeyboardProvider } from './input/providers/KeyboardProvider';
+export { TouchProvider } from './input/providers/TouchProvider';
+export { GamepadProvider } from './input/providers/GamepadProvider';
 
 // UI
 export { UIScene } from './ui/UIScene';

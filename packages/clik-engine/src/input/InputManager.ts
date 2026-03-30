@@ -1,6 +1,9 @@
 import Phaser from 'phaser';
 import { ActionMap } from './ActionMap';
 import { ConsoleReporter } from '../debug/ConsoleReporter';
+import { KeyboardProvider } from './providers/KeyboardProvider';
+import { TouchProvider } from './providers/TouchProvider';
+import { GamepadProvider } from './providers/GamepadProvider';
 import type { InputConfig } from '../utils/types';
 
 interface ActionState {
@@ -8,134 +11,36 @@ interface ActionState {
   wasDown: boolean;
 }
 
-interface SwipeState {
-  startX: number;
-  startY: number;
-  startTime: number;
-  active: boolean;
-}
-
 export class InputManager {
   private scene: Phaser.Scene;
   private actionMap: ActionMap;
   private states: Map<string, ActionState> = new Map();
-  private keyObjects: Map<string, Phaser.Input.Keyboard.Key[]> = new Map();
-  private swipeState: SwipeState = { startX: 0, startY: 0, startTime: 0, active: false };
-  private lastSwipe: string | null = null;
-  private swipeConsumed = false;
-  private gamepadIndex: number | null = null;
   private cachedActions: string[] = [];
-  private pointerDownHandler: ((pointer: Phaser.Input.Pointer) => void) | null = null;
-  private pointerUpHandler: ((pointer: Phaser.Input.Pointer) => void) | null = null;
-  private gamepadConnectedHandler: ((pad: Phaser.Input.Gamepad.Gamepad) => void) | null = null;
-  private gamepadDisconnectedHandler: ((pad: Phaser.Input.Gamepad.Gamepad) => void) | null = null;
 
-  // Swipe detection thresholds
-  private swipeThreshold = 50;  // minimum distance in pixels
-  private swipeMaxTime = 300;   // max time in ms
+  // Input providers
+  private keyboard: KeyboardProvider;
+  private touch: TouchProvider;
+  private gamepad: GamepadProvider;
 
   constructor(scene: Phaser.Scene, config?: InputConfig) {
     this.scene = scene;
     this.actionMap = new ActionMap(config);
-
     this.cachedActions = this.actionMap.allActions();
 
     for (const action of this.cachedActions) {
       this.states.set(action, { isDown: false, wasDown: false });
-
-      const keys = this.actionMap.getKeys(action);
-      if (keys.length > 0 && scene.input.keyboard) {
-        const keyObjs = keys.map(k =>
-          scene.input.keyboard!.addKey(
-            Phaser.Input.Keyboard.KeyCodes[k as keyof typeof Phaser.Input.Keyboard.KeyCodes] ?? k
-          )
-        );
-        this.keyObjects.set(action, keyObjs);
-      }
     }
 
-    // Setup touch/swipe detection
-    this.setupTouchInput();
-
-    // Setup gamepad detection
-    this.setupGamepad();
-  }
-
-  private setupTouchInput(): void {
-    this.pointerDownHandler = (pointer: Phaser.Input.Pointer) => {
-      this.swipeState = {
-        startX: pointer.x,
-        startY: pointer.y,
-        startTime: pointer.time,
-        active: true,
-      };
-      this.lastSwipe = null;
-      this.swipeConsumed = false;
-    };
-    this.scene.input.on('pointerdown', this.pointerDownHandler);
-
-    this.pointerUpHandler = (pointer: Phaser.Input.Pointer) => {
-      if (!this.swipeState.active) return;
-      this.swipeState.active = false;
-
-      const dx = pointer.x - this.swipeState.startX;
-      const dy = pointer.y - this.swipeState.startY;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      const elapsed = pointer.time - this.swipeState.startTime;
-
-      if (dist < this.swipeThreshold || elapsed > this.swipeMaxTime) {
-        // Not a swipe — check if it's a tap
-        if (dist < 10 && elapsed < 200) {
-          this.lastSwipe = 'tap';
-          this.swipeConsumed = false;
-        }
-        return;
-      }
-
-      // Determine swipe direction
-      const angle = Math.atan2(dy, dx);
-      if (angle > -Math.PI / 4 && angle <= Math.PI / 4) {
-        this.lastSwipe = 'swipe_right';
-      } else if (angle > Math.PI / 4 && angle <= 3 * Math.PI / 4) {
-        this.lastSwipe = 'swipe_down';
-      } else if (angle > -3 * Math.PI / 4 && angle <= -Math.PI / 4) {
-        this.lastSwipe = 'swipe_up';
-      } else {
-        this.lastSwipe = 'swipe_left';
-      }
-      this.swipeConsumed = false;
-      ConsoleReporter.input(`gesture: ${this.lastSwipe}`);
-    };
-    this.scene.input.on('pointerup', this.pointerUpHandler);
-  }
-
-  private setupGamepad(): void {
-    if (!this.scene.input.gamepad) return;
-
-    this.gamepadConnectedHandler = (pad: Phaser.Input.Gamepad.Gamepad) => {
-      this.gamepadIndex = pad.index;
-      ConsoleReporter.input(`Gamepad connected: ${pad.id}`);
-    };
-    this.scene.input.gamepad.on('connected', this.gamepadConnectedHandler);
-
-    this.gamepadDisconnectedHandler = (pad: Phaser.Input.Gamepad.Gamepad) => {
-      if (this.gamepadIndex === pad.index) {
-        this.gamepadIndex = null;
-        ConsoleReporter.input(`Gamepad disconnected: ${pad.id}`);
-      }
-    };
-    this.scene.input.gamepad.on('disconnected', this.gamepadDisconnectedHandler);
-
-    // Check for already-connected gamepads
-    if (this.scene.input.gamepad.total > 0) {
-      this.gamepadIndex = this.scene.input.gamepad.pad1?.index ?? null;
-    }
+    // Initialize providers
+    this.keyboard = new KeyboardProvider(scene, this.actionMap);
+    this.touch = new TouchProvider(scene, this.actionMap);
+    this.gamepad = new GamepadProvider(scene, this.actionMap);
   }
 
   update(): void {
-    const gamepad = this.gamepadIndex !== null
-      ? this.scene.input.gamepad?.getPad(this.gamepadIndex)
-      : null;
+    this.keyboard.update();
+    this.touch.update();
+    this.gamepad.update();
 
     for (const action of this.cachedActions) {
       const state = this.states.get(action)!;
@@ -143,33 +48,10 @@ export class InputManager {
 
       let down = false;
 
-      // Check keyboard
-      const keys = this.keyObjects.get(action);
-      if (keys?.some(k => k.isDown)) {
-        down = true;
-      }
-
-      // Check touch/swipe gestures
-      const touchBinding = this.actionMap.getTouch(action);
-      if (touchBinding && this.lastSwipe === touchBinding && !this.swipeConsumed) {
-        down = true;
-        this.swipeConsumed = true;
-        // Swipes are instant — consume immediately on next frame
-        this.scene.time.delayedCall(0, () => {
-          if (this.lastSwipe === touchBinding) {
-            this.lastSwipe = null;
-          }
-        });
-      }
-
-      // Check gamepad
-      const gamepadBinding = this.actionMap.getGamepad(action);
-      if (gamepad && gamepadBinding) {
-        const btnIndex = parseInt(gamepadBinding, 10);
-        if (!isNaN(btnIndex) && gamepad.buttons[btnIndex]?.pressed) {
-          down = true;
-        }
-      }
+      // Check all providers
+      if (this.keyboard.isActionDown(action)) down = true;
+      if (this.touch.consumeAction(action)) down = true;
+      if (this.gamepad.isActionDown(action)) down = true;
 
       state.isDown = down;
 
@@ -210,16 +92,9 @@ export class InputManager {
     if (posY && this.isDown(posY)) y += 1;
 
     // Add gamepad analog stick
-    if (this.gamepadIndex !== null) {
-      const gamepad = this.scene.input.gamepad?.getPad(this.gamepadIndex);
-      if (gamepad) {
-        const stickX = gamepad.leftStick.x;
-        const stickY = gamepad.leftStick.y;
-        const deadzone = 0.15;
-        if (Math.abs(stickX) > deadzone) x = Phaser.Math.Clamp(x + stickX, -1, 1);
-        if (Math.abs(stickY) > deadzone) y = Phaser.Math.Clamp(y + stickY, -1, 1);
-      }
-    }
+    const stick = this.gamepad.getAxis();
+    if (stick.x !== 0) x = Phaser.Math.Clamp(x + stick.x, -1, 1);
+    if (stick.y !== 0) y = Phaser.Math.Clamp(y + stick.y, -1, 1);
 
     return { x, y };
   }
@@ -232,7 +107,7 @@ export class InputManager {
 
   /** Check if a gamepad is connected */
   hasGamepad(): boolean {
-    return this.gamepadIndex !== null;
+    return this.gamepad.hasGamepad();
   }
 
   getActionMap(): ActionMap {
@@ -241,34 +116,29 @@ export class InputManager {
 
   /** Configure swipe detection thresholds */
   setSwipeThreshold(distance: number, maxTime?: number): void {
-    this.swipeThreshold = distance;
-    if (maxTime !== undefined) this.swipeMaxTime = maxTime;
+    this.touch.setSwipeThreshold(distance, maxTime);
+  }
+
+  /** Access the keyboard provider directly for advanced use */
+  getKeyboardProvider(): KeyboardProvider {
+    return this.keyboard;
+  }
+
+  /** Access the touch provider directly for advanced use */
+  getTouchProvider(): TouchProvider {
+    return this.touch;
+  }
+
+  /** Access the gamepad provider directly for advanced use */
+  getGamepadProvider(): GamepadProvider {
+    return this.gamepad;
   }
 
   /** Clean up all event listeners */
   destroy(): void {
-    if (this.pointerDownHandler) {
-      this.scene.input.off('pointerdown', this.pointerDownHandler);
-    }
-    if (this.pointerUpHandler) {
-      this.scene.input.off('pointerup', this.pointerUpHandler);
-    }
-    if (this.scene.input.gamepad) {
-      if (this.gamepadConnectedHandler) {
-        this.scene.input.gamepad.off('connected', this.gamepadConnectedHandler);
-      }
-      if (this.gamepadDisconnectedHandler) {
-        this.scene.input.gamepad.off('disconnected', this.gamepadDisconnectedHandler);
-      }
-    }
-    if (this.scene.input.keyboard) {
-      for (const keys of this.keyObjects.values()) {
-        for (const key of keys) {
-          this.scene.input.keyboard.removeKey(key, true);
-        }
-      }
-    }
-    this.keyObjects.clear();
+    this.keyboard.destroy();
+    this.touch.destroy();
+    this.gamepad.destroy();
     this.states.clear();
     this.cachedActions = [];
   }
