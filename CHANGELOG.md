@@ -27,11 +27,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Infrastructure
 - GitHub Actions CI workflow (typecheck, lint, test+coverage, build, bundle-size check)
-- Config validation across createGame() and managers (name, scenes, dimensions, scale, physics, colors, save)
+- CI: server tests, CLI build, all example builds in pipeline
+- Config validation across createGame() and managers
 - BaseScene error boundary with runSafe() and red debug banner
 - Canvas renderer detection with graceful degradation warning
 - Vitest coverage with @vitest/coverage-v8
-- Test count: 40 files / 401 tests → 65 files / 797 tests
+- clik-server: refactored to ClikServer class with graceful shutdown, rate limiting, health check, room timeouts, README
+- Theme: ui/themed.ts DRY helper — Dropdown, Checkbox, RadioGroup, ToastManager use getTheme()
+- A11y: UIAnimator respects reducedMotion (skips tweens, applies final state instantly)
+- BaseScene: network, lobby, room, a11y lazy accessors
+- Entity components: BehaviorTreeComponent, SteeringComponent, NetworkSync
+- ClikGameConfig: network and accessibility config fields
+- Test count: 40 files / 401 tests → 88 files / 1061 tests
 
 ## [0.4.0] - 2025-05-01
 
