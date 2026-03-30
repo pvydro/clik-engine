@@ -1,0 +1,7 @@
+[
+  {
+    "name": "clik-engine (full)",
+    "path": "packages/clik-engine/dist/clik-engine.js",
+    "limit": "400 KB"
+  }
+]
