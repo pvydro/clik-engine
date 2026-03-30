@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import type { PositionLike } from '../utils/interfaces';
 
 export interface RaycastHit {
   object: Phaser.GameObjects.GameObject;
@@ -71,7 +72,7 @@ export const Raycast = {
   ): Phaser.GameObjects.GameObject[] {
     const r2 = radius * radius;
     return objects.filter(obj => {
-      const go = obj as unknown as { x: number; y: number };
+      const go = obj as unknown as PositionLike;
       if (go.x === undefined) return false;
       const dx = go.x - cx;
       const dy = go.y - cy;
@@ -88,7 +89,7 @@ export const Raycast = {
     width: number, height: number,
   ): Phaser.GameObjects.GameObject[] {
     return objects.filter(obj => {
-      const go = obj as unknown as { x: number; y: number };
+      const go = obj as unknown as PositionLike;
       if (go.x === undefined) return false;
       return go.x >= x && go.x <= x + width && go.y >= y && go.y <= y + height;
     });
@@ -105,7 +106,7 @@ export const Raycast = {
     let closestDist = Infinity;
 
     for (const obj of objects) {
-      const go = obj as unknown as { x: number; y: number };
+      const go = obj as unknown as PositionLike;
       if (go.x === undefined) continue;
       const dx = go.x - x;
       const dy = go.y - y;

@@ -29,7 +29,7 @@ export class SandboxScene extends BaseScene {
       color: '#888888',
     }).setOrigin(0.5);
 
-    this.add.text(width / 2, 160, 'v0.1.0 | sandbox scene', {
+    this.add.text(width / 2, 160, 'v0.4.0 | sandbox scene', {
       fontSize: '14px',
       fontFamily: 'monospace',
       color: '#555555',

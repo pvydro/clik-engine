@@ -1,7 +1,41 @@
 import Phaser from 'phaser';
 import { ConsoleReporter } from '../debug/ConsoleReporter';
+import { PhysicsBody, type PhysicsBodyConfig } from './PhysicsBody';
+import { CollisionBuilder } from './CollisionBuilder';
 
 export const PhysicsHelper = {
+  // --- PhysicsBody / CollisionBuilder factories ---
+
+  /**
+   * Enable Arcade physics on a game object and return a typed PhysicsBody wrapper.
+   *
+   * @example
+   * const body = PhysicsHelper.body(scene, sprite, { drag: 300, collideWorldBounds: true });
+   * body.setVelocity(200, 0).setBounce(0.5);
+   */
+  body(
+    scene: Phaser.Scene,
+    obj: Phaser.GameObjects.GameObject,
+    config?: PhysicsBodyConfig,
+  ): PhysicsBody {
+    return new PhysicsBody(scene, obj, config);
+  },
+
+  /**
+   * Begin a fluent collision setup chain.
+   *
+   * @example
+   * PhysicsHelper.collide(scene, player).with(platforms).onHit(onLand);
+   * PhysicsHelper.collide(scene, bullets).with(enemies).asOverlap(onHit);
+   */
+  collide(
+    scene: Phaser.Scene,
+    a: Phaser.GameObjects.GameObject | Phaser.GameObjects.Group,
+  ): CollisionBuilder {
+    return new CollisionBuilder(scene, a);
+  },
+
+
   // --- Gravity ---
 
   setGravity(scene: Phaser.Scene, x: number, y: number): void {

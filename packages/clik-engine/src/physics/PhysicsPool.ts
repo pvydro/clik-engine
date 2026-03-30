@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { ConsoleReporter } from '../debug/ConsoleReporter';
+import type { PositionLike, VisibilityLike, SpawnableLike } from '../utils/interfaces';
 
 /**
  * Managed physics group with automatic recycling.
@@ -38,14 +39,14 @@ export class PhysicsPool {
     }
 
     obj.setActive(true);
-    (obj as unknown as { setVisible: (v: boolean) => void }).setVisible(true);
+    (obj as unknown as VisibilityLike).setVisible(true);
 
     const body = (obj as Phaser.Types.Physics.Arcade.GameObjectWithBody).body as Phaser.Physics.Arcade.Body;
     if (body) {
       body.enable = true;
       body.reset(x, y);
     } else {
-      (obj as unknown as { setPosition: (x: number, y: number) => void }).setPosition(x, y);
+      (obj as unknown as SpawnableLike).setPosition(x, y);
     }
 
     return obj;
@@ -54,7 +55,7 @@ export class PhysicsPool {
   /** Return an object to the pool */
   despawn(obj: Phaser.GameObjects.GameObject): void {
     obj.setActive(false);
-    (obj as unknown as { setVisible: (v: boolean) => void }).setVisible(false);
+    (obj as unknown as VisibilityLike).setVisible(false);
 
     const body = (obj as Phaser.Types.Physics.Arcade.GameObjectWithBody).body as Phaser.Physics.Arcade.Body;
     if (body) {
@@ -108,7 +109,7 @@ export class PhysicsPool {
     };
 
     this.forEachActive(obj => {
-      const go = obj as unknown as { x: number; y: number };
+      const go = obj as unknown as PositionLike;
       if (go.x < bounds.left || go.x > bounds.right || go.y < bounds.top || go.y > bounds.bottom) {
         this.despawn(obj);
       }

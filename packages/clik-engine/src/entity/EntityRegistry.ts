@@ -2,13 +2,38 @@ import { Entity } from './Entity';
 
 export class EntityRegistry {
   private entities: Set<Entity> = new Set();
+  private typeIndex: Map<string, Set<Entity>> = new Map();
+  private tagIndex: Map<string, Set<Entity>> = new Map();
 
   register(entity: Entity): void {
     this.entities.add(entity);
+    // Index by type
+    this.addToIndex(this.typeIndex, entity.entityType, entity);
+    // Index existing tags
+    for (const tag of entity.getTags()) {
+      this.addToIndex(this.tagIndex, tag, entity);
+    }
+    // Listen for tag changes
+    entity.setRegistry(this);
   }
 
   unregister(entity: Entity): void {
     this.entities.delete(entity);
+    this.removeFromIndex(this.typeIndex, entity.entityType, entity);
+    for (const tag of entity.getTags()) {
+      this.removeFromIndex(this.tagIndex, tag, entity);
+    }
+    entity.setRegistry(null);
+  }
+
+  /** Called by Entity when a tag is added */
+  onTagAdded(entity: Entity, tag: string): void {
+    this.addToIndex(this.tagIndex, tag, entity);
+  }
+
+  /** Called by Entity when a tag is removed */
+  onTagRemoved(entity: Entity, tag: string): void {
+    this.removeFromIndex(this.tagIndex, tag, entity);
   }
 
   /** Update all registered entity components */
@@ -25,29 +50,31 @@ export class EntityRegistry {
     return Array.from(this.entities);
   }
 
-  /** Query by entity type */
+  /** Query by entity type — O(1) via index */
   getByType(type: string): Entity[] {
-    return this.getAll().filter(e => e.entityType === type);
+    const set = this.typeIndex.get(type);
+    return set ? Array.from(set) : [];
   }
 
-  /** Query by tag */
+  /** Query by tag — O(1) via index */
   getByTag(tag: string): Entity[] {
-    return this.getAll().filter(e => e.hasTag(tag));
+    const set = this.tagIndex.get(tag);
+    return set ? Array.from(set) : [];
   }
 
   /** Get the first entity matching a type */
   findByType(type: string): Entity | undefined {
-    for (const entity of this.entities) {
-      if (entity.entityType === type) return entity;
-    }
+    const set = this.typeIndex.get(type);
+    if (!set) return undefined;
+    for (const entity of set) return entity;
     return undefined;
   }
 
   /** Get the first entity matching a tag */
   findByTag(tag: string): Entity | undefined {
-    for (const entity of this.entities) {
-      if (entity.hasTag(tag)) return entity;
-    }
+    const set = this.tagIndex.get(tag);
+    if (!set) return undefined;
+    for (const entity of set) return entity;
     return undefined;
   }
 
@@ -59,17 +86,37 @@ export class EntityRegistry {
   /** Destroy all entities and clear registry */
   clear(): void {
     for (const entity of this.entities) {
+      entity.setRegistry(null);
       entity.destroy();
     }
     this.entities.clear();
+    this.typeIndex.clear();
+    this.tagIndex.clear();
   }
 
   /** Remove destroyed entities from the registry */
   prune(): void {
     for (const entity of this.entities) {
       if (!entity.active) {
-        this.entities.delete(entity);
+        this.unregister(entity);
       }
+    }
+  }
+
+  private addToIndex(index: Map<string, Set<Entity>>, key: string, entity: Entity): void {
+    let set = index.get(key);
+    if (!set) {
+      set = new Set();
+      index.set(key, set);
+    }
+    set.add(entity);
+  }
+
+  private removeFromIndex(index: Map<string, Set<Entity>>, key: string, entity: Entity): void {
+    const set = index.get(key);
+    if (set) {
+      set.delete(entity);
+      if (set.size === 0) index.delete(key);
     }
   }
 }

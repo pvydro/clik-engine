@@ -1,15 +1,21 @@
 import Phaser from 'phaser';
 import { Component } from './Component';
-import { ConsoleReporter } from '../debug/ConsoleReporter';
+import type { EntityRegistry } from './EntityRegistry';
 
 export class Entity extends Phaser.GameObjects.Container {
   private components: Map<string, Component> = new Map();
   private tags: Set<string> = new Set();
+  private registry: EntityRegistry | null = null;
   public entityType = 'entity';
 
   constructor(scene: Phaser.Scene, x = 0, y = 0) {
     super(scene, x, y);
     scene.add.existing(this);
+  }
+
+  /** @internal Used by EntityRegistry to track this entity */
+  setRegistry(registry: EntityRegistry | null): void {
+    this.registry = registry;
   }
 
   addComponent<T extends Component>(name: string, component: T): T {
@@ -36,12 +42,17 @@ export class Entity extends Phaser.GameObjects.Container {
   }
 
   addTag(tag: string): this {
-    this.tags.add(tag);
+    if (!this.tags.has(tag)) {
+      this.tags.add(tag);
+      this.registry?.onTagAdded(this, tag);
+    }
     return this;
   }
 
   removeTag(tag: string): this {
-    this.tags.delete(tag);
+    if (this.tags.delete(tag)) {
+      this.registry?.onTagRemoved(this, tag);
+    }
     return this;
   }
 

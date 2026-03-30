@@ -112,10 +112,9 @@ export const GameFeelPresets = {
     gfx.fillStyle(color, alpha);
     gfx.fillRoundedRect(-half, -half, half * 2, half * 2, 12);
 
-    const tx = (target as Phaser.GameObjects.Components.Transform as unknown as { x: number }).x;
-    const ty = (target as Phaser.GameObjects.Components.Transform as unknown as { y: number }).y;
-    gfx.setPosition(tx, ty);
-    gfx.setDepth(((target as unknown as { depth: number }).depth ?? 0) - 1);
+    const pos = target as unknown as { x: number; y: number; depth?: number };
+    gfx.setPosition(pos.x, pos.y);
+    gfx.setDepth((pos.depth ?? 0) - 1);
 
     await tween(scene, gfx, { alpha: 0 }, { duration: dur, ease: 'Quad.easeOut' });
     gfx.destroy();
@@ -131,10 +130,11 @@ export const GameFeelPresets = {
   ): Promise<void> {
     const color = config?.color ?? 0xffffff;
     const dur = config?.duration ?? 100;
-    (target as unknown as Phaser.GameObjects.Sprite).setTintFill(color);
+    const sprite = target as Phaser.GameObjects.Sprite;
+    sprite.setTintFill(color);
     await new Promise<void>(resolve => {
       scene.time.delayedCall(dur, () => {
-        (target as unknown as Phaser.GameObjects.Sprite).clearTint();
+        sprite.clearTint();
         resolve();
       });
     });

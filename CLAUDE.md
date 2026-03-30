@@ -10,8 +10,8 @@ npm run dev                                          # Dev harness (port 5173)
 npm run dev:cards                                    # Card Match example (port 5176)
 npm run dev:2048                                     # 2048 example (port 5174)
 npm run dev:shooter                                  # Space Shooter example (port 5175)
-npm run test                                         # Run 212 unit tests
-npm run build                                        # Build engine library (111 modules)
+npm run test                                         # Run 401 unit tests (40 test files)
+npm run build                                        # Build engine library (~120 modules)
 npm run docs --workspace=packages/clik-engine        # Generate API docs (TypeDoc)
 ```
 
@@ -19,7 +19,7 @@ npm run docs --workspace=packages/clik-engine        # Generate API docs (TypeDo
 
 ```
 clik/
-├── packages/clik-engine/        # Core engine (npm package, 91 source files)
+├── packages/clik-engine/        # Core engine (npm package, 95 source files)
 │   ├── src/
 │   │   ├── accessibility/       # A11yManager (color blind, font scale, reduced motion)
 │   │   ├── analytics/           # AnalyticsManager (events, backends, sessions)
@@ -41,7 +41,8 @@ clik/
 │   │   │                        #   InputRecorder, ComboDetector
 │   │   ├── network/             # NetworkManager (WebSocket, reconnect), Room, StateSync, Lobby
 │   │   ├── particles/           # ParticleManager + presets (explosion, sparkle, trail, rain)
-│   │   ├── physics/             # PhysicsHelper (Arcade), MatterHelper, Raycast
+│   │   ├── physics/             # PhysicsHelper (Arcade), PhysicsBody (fluent wrapper),
+│   │   │                        #   CollisionBuilder (fluent API), MatterHelper, Raycast
 │   │   ├── platform/            # PlatformManager (OS, lifecycle, safe area, fullscreen)
 │   │   ├── save/                # SaveManager (localStorage slots), SaveMigrator
 │   │   ├── scaling/             # ResponsiveManager (breakpoints, DPI, orientation)
@@ -49,9 +50,10 @@ clik/
 │   │   ├── tilemap/             # TilemapManager (layers, collision, spawn points, parallax)
 │   │   ├── tween/               # TweenHelper (promise-based), Ease constants, TweenPresets
 │   │   ├── ui/                  # 14 components (see UI section below)
-│   │   └── utils/               # Vector2, Color, Random, ObjectPool, Grid2D, PriorityQueue,
-│   │                            #   SpatialHash, findPath (A*), format helpers
-│   └── tests/                   # 17 test files, 136 tests (Vitest)
+│   │   ├── utils/               # Vector2, Color, Random, ObjectPool, Grid2D, PriorityQueue,
+│   │   │                        #   SpatialHash, findPath (A*), format helpers, shared interfaces
+│   │   └── utils/interfaces.ts  # Shared PositionLike, TransformLike, TweenableLike etc.
+│   └── tests/                   # 40 test files, 401 tests (Vitest)
 │
 ├── packages/create-clik-game/   # CLI: npx create-clik-game <name> [--template=...]
 │   └── templates/               # default, platformer, puzzle
@@ -72,10 +74,12 @@ clik/
 ## Key Conventions
 
 - All scenes extend `BaseScene` and MUST call `super.create()` and `super.update(time, delta)`
+- BaseScene systems are **lazy** — managers are only created on first access (no cost for unused systems)
 - Use `this.actions` for input (never raw `this.input.keyboard`)
 - Use `this.director` for scene transitions
 - Use `this.audio` for music/SFX
 - Use `this.save` for localStorage persistence
+- Use `this.entities` to access the scene's `EntityRegistry`; `updateAll()` is wired automatically
 - All UI is Phaser-native (rendered on canvas, visible in screenshots — no DOM)
 - Structured logging: `ConsoleReporter.state()`, `.scene()`, `.input()`, `.error()` etc.
 - Filter logs with `preview_console_logs(search: "[CLIK:")`
@@ -124,8 +128,8 @@ clik/
 - `Theme` — 4 built-in themes (dark, light, retro, neon)
 
 ### Entity/Component (11 components)
-- `Entity` — Container with components, tags, debug state
-- `EntityRegistry` — query by type/tag, update all, prune
+- `Entity` — Container with components, tags, debug state; notifies registry on tag changes
+- `EntityRegistry` — O(1) `getByType()`/`getByTag()` via live type+tag indexes; `updateAll()` called automatically by `BaseScene.update()`
 - Built-in components:
   - `Health` — damage/heal with death callback
   - `Movement` — velocity-based movement with friction
@@ -140,8 +144,10 @@ clik/
   - `Patrol` — waypoint movement with wait times
   - `Interactable` — hover/click/proximity interaction for NPCs/items
 
-### Physics (5 modules)
+### Physics (7 modules)
 - `PhysicsHelper` — full Arcade wrapper (velocity, drag, bounce, bodies, groups, one-way platforms, impulse)
+- `PhysicsBody` — fluent wrapper around Arcade bodies: `new PhysicsBody(scene, obj, config).setVelocity(200,0).setCollideWorldBounds(true)`; validates static/velocity conflicts; `.raw` escape hatch
+- `CollisionBuilder` — fluent collision/overlap setup: `PhysicsHelper.collide(a).with(b).onProcess(cb).onHit(cb)` or `.asOverlap(cb)`
 - `MatterHelper` — Matter.js bodies, constraints, pins, sensors, collision filters
 - `Raycast` — ray casting, line-of-sight, circle/rect queries, nearest-object, debug draw
 - `MovingPlatform` — waypoint-based platforms with rider support
@@ -231,11 +237,11 @@ profiler.getTimingSummary(); // { physics: "0.5ms avg, 1.2ms max" }
 ## Testing
 
 ```bash
-npm run test                                         # Run all 212 tests
+npm run test                                         # Run all 401 tests (40 files)
 npm run test:watch --workspace=packages/clik-engine  # Watch mode
 ```
 
-Test coverage: math, Vector2, Color, Random, ObjectPool, Grid2D, PriorityQueue, SpatialHash, A* pathfinding, StateMachine, SaveManager, SaveMigrator, I18nManager, AnalyticsManager, ConsoleReporter, InputRecorder, ComboDetector, ActionMap, LeakDetector, GameTimer, Cooldown, EventBus, format utils.
+Test coverage: math, Vector2, Color, Random, ObjectPool, Grid2D, PriorityQueue, SpatialHash, A* pathfinding, StateMachine, SaveManager, SaveMigrator, I18nManager, AnalyticsManager, ConsoleReporter, InputRecorder, ComboDetector, ActionMap, LeakDetector, GameTimer, Cooldown, EventBus, format utils, AudioManager, CameraManager, EntityRegistry (indexed queries), PhysicsBody, CollisionBuilder, entity components (Health, Movement, Timer, Collectible, Lifetime, Oscillator, Patrol, Follower).
 
 ## Creating a Game
 

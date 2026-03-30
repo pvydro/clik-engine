@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import type { TransformLike } from '../utils/interfaces';
 
 export type LayoutDirection = 'vertical' | 'horizontal';
 
@@ -65,7 +66,7 @@ export class Panel extends Phaser.GameObjects.Container {
       const startY = -height / 2 + padding;
       let currentY = startY;
       for (const item of this.items) {
-        const go = item as unknown as Phaser.GameObjects.Components.Transform;
+        const go = item as unknown as TransformLike;
         if (go.setPosition) {
           go.setPosition(0, currentY);
           const bounds = (item as Phaser.GameObjects.Container).getBounds?.();
@@ -76,7 +77,7 @@ export class Panel extends Phaser.GameObjects.Container {
       const startX = -width / 2 + padding;
       let currentX = startX;
       for (const item of this.items) {
-        const go = item as unknown as Phaser.GameObjects.Components.Transform;
+        const go = item as unknown as TransformLike;
         if (go.setPosition) {
           go.setPosition(currentX, 0);
           const bounds = (item as Phaser.GameObjects.Container).getBounds?.();

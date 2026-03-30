@@ -49,7 +49,7 @@ export class TextInput extends Phaser.GameObjects.Container {
       color: this._value ? (config.textColor ?? '#ffffff') : (config.placeholderColor ?? '#666666'),
     }).setOrigin(0, 0.5);
 
-    this.cursor = scene.add.rectangle(-w / 2 + 8, 0, 2, parseInt(config.fontSize ?? '14') + 4, 0xffffff)
+    this.cursor = scene.add.rectangle(-w / 2 + 8, 0, 2, parseFloat(config.fontSize ?? '14') + 4, 0xffffff)
       .setOrigin(0, 0.5)
       .setVisible(false);
 
@@ -78,14 +78,17 @@ export class TextInput extends Phaser.GameObjects.Container {
           this._value = this._value.slice(0, -1);
           this.updateDisplay();
           this.inputConfig.onChange?.(this._value);
+          this.emit('change', this._value);
         } else if (event.key === 'Enter') {
           this.inputConfig.onSubmit?.(this._value);
+          this.emit('submit', this._value);
           ConsoleReporter.input(`text submitted: ${this._value}`);
-        } else if (event.key.length === 1 && !event.ctrlKey && !event.metaKey) {
+        } else if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
           if (this.inputConfig.maxLength && this._value.length >= this.inputConfig.maxLength) return;
           this._value += event.key;
           this.updateDisplay();
           this.inputConfig.onChange?.(this._value);
+          this.emit('change', this._value);
         }
       });
     }

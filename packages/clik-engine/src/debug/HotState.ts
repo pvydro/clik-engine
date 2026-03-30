@@ -88,7 +88,7 @@ export const HotState = {
     window.addEventListener('beforeunload', handler);
 
     // Also hook into Vite HMR if available
-    const meta = import.meta as unknown as { hot?: { dispose: (cb: () => void) => void } };
+    const meta = import.meta as { hot?: { dispose: (cb: () => void) => void } };
     if (meta.hot) {
       meta.hot.dispose(() => {
         HotState.save(sceneKey, serialize());

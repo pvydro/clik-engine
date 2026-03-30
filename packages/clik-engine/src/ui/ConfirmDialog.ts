@@ -2,7 +2,6 @@ import Phaser from 'phaser';
 import { ConsoleReporter } from '../debug/ConsoleReporter';
 
 export interface ConfirmDialogConfig {
-  scene: Phaser.Scene;
   title: string;
   message: string;
   confirmText?: string;
@@ -16,11 +15,16 @@ export interface ConfirmDialogConfig {
 /**
  * Pre-built confirmation dialog with confirm/cancel buttons.
  * Returns a promise that resolves true (confirm) or false (cancel).
+ *
+ * @example
+ * const confirmed = await ConfirmDialog.show(scene, {
+ *   title: 'Quit?',
+ *   message: 'Your progress will be lost.',
+ * });
  */
 export class ConfirmDialog {
-  static show(config: ConfirmDialogConfig): Promise<boolean> {
+  static show(scene: Phaser.Scene, config: ConfirmDialogConfig): Promise<boolean> {
     return new Promise(resolve => {
-      const scene = config.scene;
       const { width: sw, height: sh } = scene.scale;
       const w = config.width ?? 350;
       const h = config.height ?? 180;

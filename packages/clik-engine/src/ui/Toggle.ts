@@ -62,6 +62,7 @@ export class Toggle extends Phaser.GameObjects.Container {
     this.thumb.x = this._value ? w / 2 - r - 3 : -w / 2 + r + 3;
 
     this.toggleConfig.onChange?.(this._value);
+    this.emit('change', this._value);
     ConsoleReporter.input(`toggle: ${this.toggleConfig.label ?? 'unnamed'} = ${this._value}`);
   }
 

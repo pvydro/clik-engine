@@ -32,15 +32,18 @@ export class AudioManager {
     return this._proceduralMusic;
   }
 
+  private unlockHandler: (() => void) | null = null;
+
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
     const game = scene.game;
 
     if (game.sound.locked) {
-      game.sound.once(Phaser.Sound.Events.UNLOCKED, () => {
+      this.unlockHandler = () => {
         this.unlocked = true;
         ConsoleReporter.audio('Audio context unlocked');
-      });
+      };
+      game.sound.once(Phaser.Sound.Events.UNLOCKED, this.unlockHandler);
     } else {
       this.unlocked = true;
     }
@@ -184,5 +187,21 @@ export class AudioManager {
 
   isPlaying(): boolean {
     return this.currentMusic?.isPlaying ?? false;
+  }
+
+  /** Clean up all audio resources and listeners */
+  destroy(): void {
+    if (this.unlockHandler) {
+      this.scene.game.sound.off(Phaser.Sound.Events.UNLOCKED, this.unlockHandler);
+      this.unlockHandler = null;
+    }
+    if (this.currentMusic) {
+      this.currentMusic.stop();
+      this.currentMusic.destroy();
+      this.currentMusic = null;
+      this.currentMusicKey = '';
+    }
+    this._procedural = null;
+    this._proceduralMusic = null;
   }
 }

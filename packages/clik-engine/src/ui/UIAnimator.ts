@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import type { TweenableLike } from '../utils/interfaces';
 
 export type UIAnimationType = 'fadeIn' | 'fadeOut' | 'slideInLeft' | 'slideInRight' | 'slideInUp' | 'slideInDown' | 'scaleIn' | 'scaleOut' | 'bounceIn';
 
@@ -18,7 +19,7 @@ export class UIAnimator {
     const duration = config?.duration ?? 300;
     const ease = config?.ease ?? 'Cubic.easeOut';
     const delay = config?.delay ?? 0;
-    const go = target as unknown as { alpha: number; x: number; y: number; scaleX: number; scaleY: number };
+    const go = target as unknown as TweenableLike;
 
     return new Promise(resolve => {
       switch (type) {

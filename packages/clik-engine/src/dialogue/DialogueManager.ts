@@ -202,4 +202,12 @@ export class DialogueManager {
   getCurrentNodeId(): string | null {
     return this.currentNodeId;
   }
+
+  /** Clean up all dialogue resources */
+  destroy(): void {
+    this.clearDisplay();
+    this.currentNodeId = null;
+    this.tree = {};
+    this.onCompleteCallback = undefined;
+  }
 }

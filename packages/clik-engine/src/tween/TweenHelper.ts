@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import type { EaseName } from './easings';
+import type { TweenableLike, PositionLike } from '../utils/interfaces';
 
 export interface TweenConfig {
   duration?: number;
@@ -48,15 +49,15 @@ export async function tweenSequence(
 /** Common tween presets */
 export const TweenPresets = {
   /** Pop in from scale 0 → 1 */
-  popIn(scene: Phaser.Scene, target: Phaser.GameObjects.Components.Transform, duration = 300): Promise<void> {
-    (target as unknown as { scaleX: number; scaleY: number }).scaleX = 0;
-    (target as unknown as { scaleX: number; scaleY: number }).scaleY = 0;
+  popIn(scene: Phaser.Scene, target: TweenableLike, duration = 300): Promise<void> {
+    target.scaleX = 0;
+    target.scaleY = 0;
     return tween(scene, target, { scaleX: 1, scaleY: 1 }, { duration, ease: 'Back.easeOut' });
   },
 
   /** Shake horizontally */
-  shake(scene: Phaser.Scene, target: Phaser.GameObjects.Components.Transform, intensity = 5, duration = 200): Promise<void> {
-    const original = (target as unknown as { x: number }).x;
+  shake(scene: Phaser.Scene, target: PositionLike, intensity = 5, duration = 200): Promise<void> {
+    const original = target.x;
     return new Promise(resolve => {
       scene.tweens.add({
         targets: target,
@@ -66,7 +67,7 @@ export const TweenPresets = {
         repeat: 2,
         ease: 'Sine.easeInOut',
         onComplete: () => {
-          (target as unknown as { x: number }).x = original;
+          target.x = original;
           resolve();
         },
       });
@@ -74,26 +75,26 @@ export const TweenPresets = {
   },
 
   /** Pulse scale up and down */
-  pulse(scene: Phaser.Scene, target: Phaser.GameObjects.Components.Transform, scale = 1.15, duration = 400): Promise<void> {
+  pulse(scene: Phaser.Scene, target: TweenableLike, scale = 1.15, duration = 400): Promise<void> {
     return tween(scene, target, { scaleX: scale, scaleY: scale }, {
       duration: duration / 2, ease: 'Sine.easeInOut', yoyo: true,
     });
   },
 
   /** Fade in from alpha 0 → 1 */
-  fadeIn(scene: Phaser.Scene, target: Phaser.GameObjects.Components.Alpha, duration = 300): Promise<void> {
-    (target as unknown as { alpha: number }).alpha = 0;
+  fadeIn(scene: Phaser.Scene, target: { alpha: number }, duration = 300): Promise<void> {
+    target.alpha = 0;
     return tween(scene, target, { alpha: 1 }, { duration });
   },
 
   /** Fade out from alpha 1 → 0 */
-  fadeOut(scene: Phaser.Scene, target: Phaser.GameObjects.Components.Alpha, duration = 300): Promise<void> {
+  fadeOut(scene: Phaser.Scene, target: { alpha: number }, duration = 300): Promise<void> {
     return tween(scene, target, { alpha: 0 }, { duration });
   },
 
   /** Float up and down continuously */
-  float(scene: Phaser.Scene, target: Phaser.GameObjects.Components.Transform, amplitude = 8, duration = 2000): Phaser.Tweens.Tween {
-    const baseY = (target as unknown as { y: number }).y;
+  float(scene: Phaser.Scene, target: PositionLike, amplitude = 8, duration = 2000): Phaser.Tweens.Tween {
+    const baseY = target.y;
     return scene.tweens.add({
       targets: target,
       y: baseY - amplitude,
@@ -105,9 +106,9 @@ export const TweenPresets = {
   },
 
   /** Bounce in from above */
-  bounceIn(scene: Phaser.Scene, target: Phaser.GameObjects.Components.Transform, fromY: number, duration = 500): Promise<void> {
-    const targetY = (target as unknown as { y: number }).y;
-    (target as unknown as { y: number }).y = fromY;
+  bounceIn(scene: Phaser.Scene, target: PositionLike, fromY: number, duration = 500): Promise<void> {
+    const targetY = target.y;
+    target.y = fromY;
     return tween(scene, target, { y: targetY }, { duration, ease: 'Bounce.easeOut' });
   },
 };

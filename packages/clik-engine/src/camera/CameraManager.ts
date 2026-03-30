@@ -168,4 +168,9 @@ export class CameraManager {
            worldY >= bounds.y - margin &&
            worldY <= bounds.y + bounds.height + margin;
   }
+
+  /** Clean up camera state */
+  destroy(): void {
+    this.stopFollow();
+  }
 }

@@ -24,6 +24,11 @@ export class InputManager {
   private lastSwipe: string | null = null;
   private swipeConsumed = false;
   private gamepadIndex: number | null = null;
+  private cachedActions: string[] = [];
+  private pointerDownHandler: ((pointer: Phaser.Input.Pointer) => void) | null = null;
+  private pointerUpHandler: ((pointer: Phaser.Input.Pointer) => void) | null = null;
+  private gamepadConnectedHandler: ((pad: Phaser.Input.Gamepad.Gamepad) => void) | null = null;
+  private gamepadDisconnectedHandler: ((pad: Phaser.Input.Gamepad.Gamepad) => void) | null = null;
 
   // Swipe detection thresholds
   private swipeThreshold = 50;  // minimum distance in pixels
@@ -33,7 +38,9 @@ export class InputManager {
     this.scene = scene;
     this.actionMap = new ActionMap(config);
 
-    for (const action of this.actionMap.allActions()) {
+    this.cachedActions = this.actionMap.allActions();
+
+    for (const action of this.cachedActions) {
       this.states.set(action, { isDown: false, wasDown: false });
 
       const keys = this.actionMap.getKeys(action);
@@ -55,7 +62,7 @@ export class InputManager {
   }
 
   private setupTouchInput(): void {
-    this.scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+    this.pointerDownHandler = (pointer: Phaser.Input.Pointer) => {
       this.swipeState = {
         startX: pointer.x,
         startY: pointer.y,
@@ -64,9 +71,10 @@ export class InputManager {
       };
       this.lastSwipe = null;
       this.swipeConsumed = false;
-    });
+    };
+    this.scene.input.on('pointerdown', this.pointerDownHandler);
 
-    this.scene.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
+    this.pointerUpHandler = (pointer: Phaser.Input.Pointer) => {
       if (!this.swipeState.active) return;
       this.swipeState.active = false;
 
@@ -97,23 +105,26 @@ export class InputManager {
       }
       this.swipeConsumed = false;
       ConsoleReporter.input(`gesture: ${this.lastSwipe}`);
-    });
+    };
+    this.scene.input.on('pointerup', this.pointerUpHandler);
   }
 
   private setupGamepad(): void {
     if (!this.scene.input.gamepad) return;
 
-    this.scene.input.gamepad.on('connected', (pad: Phaser.Input.Gamepad.Gamepad) => {
+    this.gamepadConnectedHandler = (pad: Phaser.Input.Gamepad.Gamepad) => {
       this.gamepadIndex = pad.index;
       ConsoleReporter.input(`Gamepad connected: ${pad.id}`);
-    });
+    };
+    this.scene.input.gamepad.on('connected', this.gamepadConnectedHandler);
 
-    this.scene.input.gamepad.on('disconnected', (pad: Phaser.Input.Gamepad.Gamepad) => {
+    this.gamepadDisconnectedHandler = (pad: Phaser.Input.Gamepad.Gamepad) => {
       if (this.gamepadIndex === pad.index) {
         this.gamepadIndex = null;
         ConsoleReporter.input(`Gamepad disconnected: ${pad.id}`);
       }
-    });
+    };
+    this.scene.input.gamepad.on('disconnected', this.gamepadDisconnectedHandler);
 
     // Check for already-connected gamepads
     if (this.scene.input.gamepad.total > 0) {
@@ -126,7 +137,7 @@ export class InputManager {
       ? this.scene.input.gamepad?.getPad(this.gamepadIndex)
       : null;
 
-    for (const action of this.actionMap.allActions()) {
+    for (const action of this.cachedActions) {
       const state = this.states.get(action)!;
       state.wasDown = state.isDown;
 
@@ -232,5 +243,33 @@ export class InputManager {
   setSwipeThreshold(distance: number, maxTime?: number): void {
     this.swipeThreshold = distance;
     if (maxTime !== undefined) this.swipeMaxTime = maxTime;
+  }
+
+  /** Clean up all event listeners */
+  destroy(): void {
+    if (this.pointerDownHandler) {
+      this.scene.input.off('pointerdown', this.pointerDownHandler);
+    }
+    if (this.pointerUpHandler) {
+      this.scene.input.off('pointerup', this.pointerUpHandler);
+    }
+    if (this.scene.input.gamepad) {
+      if (this.gamepadConnectedHandler) {
+        this.scene.input.gamepad.off('connected', this.gamepadConnectedHandler);
+      }
+      if (this.gamepadDisconnectedHandler) {
+        this.scene.input.gamepad.off('disconnected', this.gamepadDisconnectedHandler);
+      }
+    }
+    if (this.scene.input.keyboard) {
+      for (const keys of this.keyObjects.values()) {
+        for (const key of keys) {
+          this.scene.input.keyboard.removeKey(key, true);
+        }
+      }
+    }
+    this.keyObjects.clear();
+    this.states.clear();
+    this.cachedActions = [];
   }
 }

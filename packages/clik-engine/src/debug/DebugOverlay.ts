@@ -7,6 +7,8 @@ export class DebugOverlay extends Phaser.Scene {
   private sceneText!: Phaser.GameObjects.Text;
   private memoryText!: Phaser.GameObjects.Text;
   private errorBanner: Phaser.GameObjects.Text | null = null;
+  private frameCount = 0;
+  private static readonly UPDATE_INTERVAL = 10; // update every N frames
 
   private static readonly STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
     fontSize: '12px',
@@ -31,24 +33,27 @@ export class DebugOverlay extends Phaser.Scene {
   }
 
   update(): void {
+    // FPS updates every frame (lightweight)
     const fps = Math.round(this.game.loop.actualFps);
     this.fpsText.setText(`FPS: ${fps}`);
 
-    const activeScenes = this.game.scene.getScenes(true)
-      .filter(s => !s.scene.key.startsWith('__clik_'))
-      .map(s => s.scene.key);
-    this.sceneText.setText(`Scene: ${activeScenes.join(', ') || '--'}`);
+    // Throttle heavier updates
+    this.frameCount++;
+    if (this.frameCount % DebugOverlay.UPDATE_INTERVAL !== 0) return;
 
+    const sceneNames: string[] = [];
     let entityCount = 0;
     for (const scene of this.game.scene.getScenes(true)) {
       if (scene.scene.key.startsWith('__clik_')) continue;
+      sceneNames.push(scene.scene.key);
       entityCount += scene.children?.length ?? 0;
     }
+    this.sceneText.setText(`Scene: ${sceneNames.join(', ') || '--'}`);
     this.entityText.setText(`Entities: ${entityCount}`);
 
-    const perf = (performance as unknown as { memory?: { usedJSHeapSize: number } });
-    if (perf.memory) {
-      const mb = (perf.memory.usedJSHeapSize / 1048576).toFixed(1);
+    const perfMemory = (performance as { memory?: { usedJSHeapSize: number } }).memory;
+    if (perfMemory) {
+      const mb = (perfMemory.usedJSHeapSize / 1048576).toFixed(1);
       this.memoryText.setText(`Mem: ${mb}MB`);
     }
   }

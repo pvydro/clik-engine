@@ -86,10 +86,10 @@ export class Interactable extends Component {
    * Check if a game object is within interaction range.
    * Call this in update() with the player reference.
    */
-  isInRange(other: Phaser.GameObjects.GameObject): boolean {
+  isInRange(other: Phaser.GameObjects.GameObject & { x: number; y: number }): boolean {
     if (this.interactRange <= 0) return false;
-    const ox = (other as unknown as { x: number }).x;
-    const oy = (other as unknown as { y: number }).y;
+    const ox = other.x;
+    const oy = other.y;
     const dx = ox - this.entity.x;
     const dy = oy - this.entity.y;
     return Math.sqrt(dx * dx + dy * dy) <= this.interactRange;
@@ -98,7 +98,7 @@ export class Interactable extends Component {
   /**
    * Attempt interaction — fires callback if in range.
    */
-  tryInteract(other: Phaser.GameObjects.GameObject): boolean {
+  tryInteract(other: Phaser.GameObjects.GameObject & { x: number; y: number }): boolean {
     if (this.isInRange(other)) {
       this.onInteractCb?.();
       return true;

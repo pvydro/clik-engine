@@ -2,7 +2,6 @@ import Phaser from 'phaser';
 import { ConsoleReporter } from '../debug/ConsoleReporter';
 
 export interface DialogConfig {
-  scene: Phaser.Scene;
   width?: number;
   height?: number;
   title?: string;
@@ -18,8 +17,7 @@ export class Dialog extends Phaser.GameObjects.Container {
   private messageText: Phaser.GameObjects.Text | null = null;
   private dialogScene: Phaser.Scene;
 
-  constructor(config: DialogConfig) {
-    const scene = config.scene;
+  constructor(scene: Phaser.Scene, config: DialogConfig = {}) {
     const { width: sw, height: sh } = scene.scale;
     super(scene, sw / 2, sh / 2);
     this.dialogScene = scene;
@@ -64,7 +62,6 @@ export class Dialog extends Phaser.GameObjects.Container {
   }
 
   addButton(text: string, onClick: () => void, offsetX = 0, offsetY = 60): this {
-    const { height } = this.panel.getBounds();
     const btn = this.dialogScene.add.text(offsetX, offsetY, text, {
       fontSize: '16px',
       fontFamily: 'monospace',
@@ -76,6 +73,7 @@ export class Dialog extends Phaser.GameObjects.Container {
       .on('pointerup', () => {
         ConsoleReporter.input(`dialog button: ${text}`);
         onClick();
+        this.emit('button', text);
       })
       .on('pointerover', function(this: Phaser.GameObjects.Text) { this.setColor('#ffffff'); })
       .on('pointerout', function(this: Phaser.GameObjects.Text) { this.setColor('#00ff88'); });
@@ -86,6 +84,7 @@ export class Dialog extends Phaser.GameObjects.Container {
 
   close(): void {
     ConsoleReporter.scene('Dialog closed');
+    this.emit('close');
     this.destroy();
   }
 }

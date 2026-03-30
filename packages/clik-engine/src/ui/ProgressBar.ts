@@ -30,6 +30,7 @@ export class ProgressBar extends Phaser.GameObjects.Container {
   private barHeight: number;
   private _value: number;
   private barConfig: ProgressBarConfig;
+  private activeTween: Phaser.Tweens.Tween | null = null;
 
   constructor(scene: Phaser.Scene, config: ProgressBarConfig) {
     super(scene, config.x, config.y);
@@ -93,7 +94,11 @@ export class ProgressBar extends Phaser.GameObjects.Container {
     const shouldAnimate = animate ?? this.barConfig.animateOnChange ?? false;
 
     if (shouldAnimate && this.scene) {
-      this.scene.tweens.add({
+      if (this.activeTween) {
+        this.activeTween.stop();
+        this.activeTween = null;
+      }
+      this.activeTween = this.scene.tweens.add({
         targets: this,
         _value: newValue,
         duration: this.barConfig.animateDuration ?? 200,
@@ -101,6 +106,9 @@ export class ProgressBar extends Phaser.GameObjects.Container {
           this.fillRect.setSize(this.barWidth * this._value, this.barHeight);
           this.updateColor();
           this.updatePercentage();
+        },
+        onComplete: () => {
+          this.activeTween = null;
         },
       });
     } else {

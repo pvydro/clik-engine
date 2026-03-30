@@ -114,6 +114,9 @@ export type { MigrationFn } from './save/migration';
 
 // Physics
 export { PhysicsHelper } from './physics/PhysicsHelper';
+export { PhysicsBody } from './physics/PhysicsBody';
+export type { PhysicsBodyConfig } from './physics/PhysicsBody';
+export { CollisionBuilder } from './physics/CollisionBuilder';
 export { Raycast } from './physics/Raycast';
 export type { RaycastHit } from './physics/Raycast';
 export { MatterHelper } from './physics/MatterHelper';
@@ -202,16 +205,6 @@ export { PlatformManager } from './platform/PlatformManager';
 export type { SafeArea } from './platform/PlatformManager';
 export { CapacitorHelper } from './platform/CapacitorHelper';
 
-// Network
-export { NetworkManager } from './network/NetworkManager';
-export type { NetworkConfig, ConnectionState } from './network/NetworkManager';
-export { Room } from './network/Room';
-export type { RoomPlayer } from './network/Room';
-export { StateSync } from './network/StateSync';
-export type { SyncedEntity, StateSyncConfig } from './network/StateSync';
-export { Lobby } from './network/Lobby';
-export type { LobbyRoom } from './network/Lobby';
-
 // Scaling
 export { ResponsiveManager } from './scaling/ResponsiveManager';
 export { Letterbox } from './scaling/Letterbox';
@@ -233,6 +226,7 @@ export { GameTimer } from './utils/GameTimer';
 export { Cooldown } from './utils/Cooldown';
 export { EventBus, eventBus } from './utils/EventBus';
 export { formatNumber, formatCompact, formatTime, formatTimePrecise, truncate, padRight, pluralize, ordinal } from './utils/format';
+export type { PositionLike, TransformLike, TweenableLike, DepthLike, VisibilityLike, SpawnableLike } from './utils/interfaces';
 
 // Types
 export type {

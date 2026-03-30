@@ -48,6 +48,7 @@ export class Slider extends Phaser.GameObjects.Container {
       const norm = clamped / w;
       this._value = min + norm * (max - min);
       config.onChange?.(this._value);
+      this.emit('change', this._value);
     });
 
     // Also allow clicking the track
@@ -60,6 +61,7 @@ export class Slider extends Phaser.GameObjects.Container {
       const norm = clamped / w;
       this._value = min + norm * (max - min);
       config.onChange?.(this._value);
+      this.emit('change', this._value);
     });
 
     scene.add.existing(this);

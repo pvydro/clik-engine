@@ -211,7 +211,7 @@ export class SceneInspector {
 
   private generateCode(): string {
     if (!this.selectedObject) return '';
-    const obj = this.selectedObject as unknown as { x?: number; y?: number; scaleX?: number; scaleY?: number; angle?: number; alpha?: number; type?: string };
+    const obj = this.selectedObject as { x?: number; y?: number; scaleX?: number; scaleY?: number; angle?: number; alpha?: number; type?: string };
     const lines = [`// ${obj.type ?? 'GameObject'}`];
     if (obj.x !== undefined) lines.push(`.setPosition(${obj.x.toFixed(0)}, ${obj.y?.toFixed(0) ?? 0})`);
     if (obj.scaleX !== undefined && obj.scaleX !== 1) lines.push(`.setScale(${obj.scaleX.toFixed(2)}, ${obj.scaleY?.toFixed(2) ?? obj.scaleX.toFixed(2)})`);

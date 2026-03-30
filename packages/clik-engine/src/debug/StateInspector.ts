@@ -9,6 +9,8 @@ interface InspectedState {
 export class StateInspector extends Phaser.Scene {
   private stateText!: Phaser.GameObjects.Text;
   private registrations: InspectedState[] = [];
+  private frameCount = 0;
+  private static readonly UPDATE_INTERVAL = 6;
 
   private static readonly STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
     fontSize: '11px',
@@ -46,6 +48,9 @@ export class StateInspector extends Phaser.Scene {
   }
 
   update(): void {
+    this.frameCount++;
+    if (this.frameCount % StateInspector.UPDATE_INTERVAL !== 0) return;
+
     if (this.registrations.length === 0) {
       this.stateText.setText('');
       return;

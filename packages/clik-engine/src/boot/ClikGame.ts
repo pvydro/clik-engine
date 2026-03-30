@@ -33,11 +33,13 @@ export function createGame(config: ClikGameConfig): Phaser.Game {
     ?? config.scenes.find(s => s.default)?.key
     ?? config.scenes[0]?.key;
 
+  // Phaser's SceneType doesn't perfectly match our constructor signature — this
+  // boundary cast is intentional and the only place we bridge clik → Phaser types.
   const scenes = config.scenes.map(entry => entry.class) as unknown as Phaser.Types.Scenes.SceneType[];
 
   // Add debug scenes when debug mode is on
   if (debug) {
-    scenes.push(DebugOverlay, StateInspector, GridOverlay);
+    (scenes as unknown[]).push(DebugOverlay, StateInspector, GridOverlay);
   }
 
   const physicsConfig: Phaser.Types.Core.PhysicsConfig = {};
@@ -74,8 +76,8 @@ export function createGame(config: ClikGameConfig): Phaser.Game {
 
   const game = new Phaser.Game(phaserConfig);
 
-  // Store clik config on the game instance for access from scenes
-  (game as ClikGameInstance).__clikConfig = config;
+  // Store clik config in Phaser's registry for access from scenes
+  game.registry.set('__clikConfig', config);
 
   // Expose game globally in dev for debugging
   if (debug) {
@@ -111,6 +113,7 @@ export function createGame(config: ClikGameConfig): Phaser.Game {
   return game;
 }
 
+/** @deprecated Use `game.registry.get('__clikConfig')` instead */
 export interface ClikGameInstance extends Phaser.Game {
   __clikConfig: ClikGameConfig;
 }

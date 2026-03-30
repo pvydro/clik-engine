@@ -99,7 +99,8 @@ export class ShaderManager {
     shadow: (x?: number, y?: number, decay?: number, power?: number) => void;
     clear: () => void;
   } {
-    const go = obj as unknown as { preFX?: Phaser.FX.Controller; postFX?: { addBlur: Function; addBloom: Function; addGlow: Function; addShadow: Function; clear: Function } };
+    // Phaser's FX pipeline types are incomplete — cast at this boundary
+    const go = obj as { preFX?: Phaser.FX.Controller; postFX?: { addBlur: Function; addBloom: Function; addGlow: Function; addShadow: Function; clear: Function } };
     if (!go.preFX && !go.postFX) {
       ConsoleReporter.error('Object does not support FX');
       return { blur: () => {}, bloom: () => {}, glow: () => {}, shadow: () => {}, clear: () => {} };
@@ -126,7 +127,7 @@ export class ShaderManager {
     const dur = config?.duration ?? 300;
     const color = config?.color ?? 0xffffff;
     const strength = config?.strength ?? 4;
-    const go = obj as unknown as { postFX?: { addGlow?: Function; addShine?: Function; addBloom?: Function; remove?: Function } };
+    const go = obj as { postFX?: { addGlow?: Function; addShine?: Function; addBloom?: Function; remove?: Function } };
     if (!go.postFX) return;
 
     let fx: unknown;

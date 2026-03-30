@@ -36,8 +36,12 @@ export class Label extends Phaser.GameObjects.Container {
     this.add(this.label);
 
     const origin = config.origin ?? { x: 0.5, y: 0.5 };
-    // Container doesn't have setOrigin, adjust position manually
-    this.setPosition(config.x, config.y);
+    // Container doesn't have setOrigin — shift children to simulate it
+    const bounds = this.label.getBounds();
+    const offsetX = (0.5 - origin.x) * bounds.width;
+    const offsetY = (0.5 - origin.y) * bounds.height;
+    this.label.setPosition(offsetX, offsetY);
+    if (this.bg) this.bg.setPosition(offsetX, offsetY);
 
     scene.add.existing(this);
   }

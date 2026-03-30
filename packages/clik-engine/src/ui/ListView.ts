@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import type { PositionLike } from '../utils/interfaces';
 
 export interface ListViewConfig<T> {
   x: number;
@@ -27,6 +28,8 @@ export class ListView<T> extends Phaser.GameObjects.Container {
   private velocity = 0;
   private bg: Phaser.GameObjects.Rectangle;
   private maskGraphics: Phaser.GameObjects.Graphics;
+  private pointerMoveHandler: ((pointer: Phaser.Input.Pointer) => void) | null = null;
+  private pointerUpHandler: ((pointer: Phaser.Input.Pointer) => void) | null = null;
 
   constructor(scene: Phaser.Scene, config: ListViewConfig<T>) {
     super(scene, config.x, config.y);
@@ -50,17 +53,19 @@ export class ListView<T> extends Phaser.GameObjects.Container {
       this.velocity = 0;
     });
 
-    scene.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+    this.pointerMoveHandler = (pointer: Phaser.Input.Pointer) => {
       if (!this.isDragging) return;
       const dy = pointer.y - this.dragStartY;
       this.setScroll(this.dragScrollStart - dy);
-    });
+    };
+    scene.input.on('pointermove', this.pointerMoveHandler);
 
-    scene.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
+    this.pointerUpHandler = (pointer: Phaser.Input.Pointer) => {
       if (!this.isDragging) return;
       this.isDragging = false;
       this.velocity = (this.dragStartY - pointer.y) * 0.5;
-    });
+    };
+    scene.input.on('pointerup', this.pointerUpHandler);
 
     // Mouse wheel
     this.bg.on('wheel', (_p: Phaser.Input.Pointer, _dx: number, dy: number) => {
@@ -128,7 +133,7 @@ export class ListView<T> extends Phaser.GameObjects.Container {
       if (this.renderedItems.has(i)) {
         // Update position
         const obj = this.renderedItems.get(i)!;
-        (obj as unknown as { y: number }).y = i * itemHeight - this.scrollY;
+        (obj as unknown as PositionLike).y = i * itemHeight - this.scrollY;
         continue;
       }
 
@@ -156,6 +161,12 @@ export class ListView<T> extends Phaser.GameObjects.Container {
   get itemCount(): number { return this.items.length; }
 
   destroy(fromScene?: boolean): void {
+    if (this.pointerMoveHandler) {
+      this.scene.input.off('pointermove', this.pointerMoveHandler);
+    }
+    if (this.pointerUpHandler) {
+      this.scene.input.off('pointerup', this.pointerUpHandler);
+    }
     for (const obj of this.renderedItems.values()) obj.destroy();
     this.renderedItems.clear();
     this.maskGraphics.destroy();

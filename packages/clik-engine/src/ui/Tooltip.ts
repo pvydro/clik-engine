@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import type { PositionLike } from '../utils/interfaces';
 
 export interface TooltipConfig {
   /** Body text (or the only text if no `title`). */
@@ -156,7 +157,7 @@ export class Tooltip {
         bodyText.setPosition(0, config.title ? (titleText!.height + 4 + pad) : pad);
 
         // ── Container ───────────────────────────────────────
-        const targetObj = target as unknown as { x: number; y: number };
+        const targetObj = target as unknown as PositionLike;
         const offsetY = config.offsetY ?? -20;
 
         tip = scene.add.container(

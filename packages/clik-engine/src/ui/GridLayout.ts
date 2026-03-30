@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import type { TransformLike } from '../utils/interfaces';
 
 export interface GridLayoutConfig {
   x: number;
@@ -63,7 +64,7 @@ export class GridLayout extends Phaser.GameObjects.Container {
       const x = padding + col * (cellWidth + gap) + cellWidth / 2;
       const y = padding + row * (cellHeight + gap) + cellHeight / 2;
 
-      const go = this.items[i] as unknown as Phaser.GameObjects.Components.Transform;
+      const go = this.items[i] as unknown as TransformLike;
       if (go.setPosition) {
         go.setPosition(x, y);
       }

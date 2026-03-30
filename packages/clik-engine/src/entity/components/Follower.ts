@@ -1,8 +1,8 @@
-import Phaser from 'phaser';
 import { Component } from '../Component';
+import type { PositionLike } from '../../utils/interfaces';
 
 export class Follower extends Component {
-  private target: Phaser.GameObjects.GameObject | null = null;
+  private target: PositionLike | null = null;
   private speed: number;
   private stopDistance: number;
   private mode: 'chase' | 'flee';
@@ -14,7 +14,7 @@ export class Follower extends Component {
     this.mode = mode;
   }
 
-  setTarget(target: Phaser.GameObjects.GameObject | null): this {
+  setTarget(target: PositionLike | null): this {
     this.target = target;
     return this;
   }
@@ -32,8 +32,8 @@ export class Follower extends Component {
   update(delta: number): void {
     if (!this.target) return;
 
-    const tx = (this.target as unknown as { x: number }).x;
-    const ty = (this.target as unknown as { y: number }).y;
+    const tx = this.target.x;
+    const ty = this.target.y;
     const dx = tx - this.entity.x;
     const dy = ty - this.entity.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
@@ -58,8 +58,8 @@ export class Follower extends Component {
 
   getDistanceToTarget(): number {
     if (!this.target) return Infinity;
-    const tx = (this.target as unknown as { x: number }).x;
-    const ty = (this.target as unknown as { y: number }).y;
+    const tx = this.target.x;
+    const ty = this.target.y;
     const dx = tx - this.entity.x;
     const dy = ty - this.entity.y;
     return Math.sqrt(dx * dx + dy * dy);

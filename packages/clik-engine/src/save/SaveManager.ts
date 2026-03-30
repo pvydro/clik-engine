@@ -74,7 +74,9 @@ export class SaveManager {
         try {
           const data: SaveData = JSON.parse(raw);
           slots.push({ slot: i, timestamp: data.timestamp, version: data.version });
-        } catch { /* skip corrupt saves */ }
+        } catch {
+          ConsoleReporter.error(`Corrupt save in slot ${i} — skipping`, 'Use delete(slot) to clear it');
+        }
       }
     }
     return slots;
