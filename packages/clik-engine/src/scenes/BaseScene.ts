@@ -7,6 +7,7 @@ import { SaveManager } from '../save/SaveManager';
 import { EntityRegistry } from '../entity/EntityRegistry';
 import { StateInspector } from '../debug/StateInspector';
 import type { ClikGameConfig } from '../utils/types';
+import type { PluginManager } from '../plugin/PluginManager';
 
 export class BaseScene extends Phaser.Scene {
   protected debugEnabled = false;
@@ -72,12 +73,18 @@ export class BaseScene extends Phaser.Scene {
 
   create(): void {
     ConsoleReporter.scene(`create: ${this.scene.key}`);
+    // Notify plugins
+    const pm = this.game.registry.get('__clikPluginManager') as PluginManager | undefined;
+    pm?.onSceneCreate(this);
   }
 
   update(time: number, delta: number): void {
     if (this._hasError) return;
     this._actions?.update();
     this._entities?.updateAll(delta);
+    // Notify plugins
+    const pm = this.game.registry.get('__clikPluginManager') as PluginManager | undefined;
+    pm?.onSceneUpdate(this, time, delta);
   }
 
   /** Wraps a scene lifecycle method with error handling. Call from subclass overrides if desired. */
@@ -132,6 +139,9 @@ export class BaseScene extends Phaser.Scene {
   shutdown(): void {
     ConsoleReporter.scene(`shutdown: ${this.scene.key}`);
     this._shuttingDown = true;
+    // Notify plugins
+    const pm = this.game?.registry?.get('__clikPluginManager') as PluginManager | undefined;
+    pm?.onSceneShutdown(this);
     this._actions?.destroy();
     this._audio?.destroy();
     this._entities?.clear();

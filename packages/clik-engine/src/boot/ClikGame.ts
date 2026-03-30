@@ -12,6 +12,7 @@ import {
   validateHexColor,
   validatePositiveInt,
 } from '../utils/validation';
+import { PluginManager } from '../plugin/PluginManager';
 
 const VALID_SCALES: readonly ScalePresetType[] = ['mobile-portrait', 'mobile-landscape', 'desktop', 'auto'];
 const VALID_PHYSICS: readonly PhysicsType[] = ['arcade', 'matter', 'none'];
@@ -112,6 +113,14 @@ export function createGame(config: ClikGameConfig): Phaser.Game {
 
   // Store clik config in Phaser's registry for access from scenes
   game.registry.set('__clikConfig', config);
+
+  // Initialize plugin system
+  const pluginManager = new PluginManager();
+  if (config.plugins?.length) {
+    pluginManager.register(config.plugins);
+    pluginManager.init(game, config.plugins);
+  }
+  game.registry.set('__clikPluginManager', pluginManager);
 
   // Expose game globally in dev for debugging
   if (debug) {

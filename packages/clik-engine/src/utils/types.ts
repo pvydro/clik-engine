@@ -1,4 +1,5 @@
-import Phaser from 'phaser';
+import type Phaser from 'phaser';
+import type { ClikPluginConfig } from '../plugin/ClikPlugin';
 
 export interface SceneEntry {
   key: string;
@@ -54,4 +55,5 @@ export interface ClikGameConfig {
   save?: SaveConfig;
   backgroundColor?: string;
   pixelArt?: boolean;
+  plugins?: ClikPluginConfig[];
 }

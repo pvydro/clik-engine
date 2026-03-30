@@ -95,6 +95,15 @@ export type { NumberInputConfig } from './ui/NumberInput';
 export type { ConfirmDialogConfig } from './ui/ConfirmDialog';
 export { setTheme, getTheme, DarkTheme, LightTheme, RetroTheme, NeonTheme } from './ui/Theme';
 export type { Theme, ThemeColors, ThemeSprites } from './ui/Theme';
+export { ToastManager } from './ui/ToastManager';
+export type { ToastManagerConfig, ToastOptions } from './ui/ToastManager';
+export { ModalStack } from './ui/ModalStack';
+export { Dropdown } from './ui/Dropdown';
+export type { DropdownConfig, DropdownOption } from './ui/Dropdown';
+export { Checkbox } from './ui/Checkbox';
+export type { CheckboxConfig } from './ui/Checkbox';
+export { RadioGroup } from './ui/RadioGroup';
+export type { RadioGroupConfig, RadioOption } from './ui/RadioGroup';
 
 // Assets
 export { Preloader } from './assets/Preloader';
@@ -235,6 +244,11 @@ export {
   validateHexColor,
   validatePositiveInt,
 } from './utils/validation';
+
+// Plugin
+export { PluginManager } from './plugin/PluginManager';
+export { isScenePlugin } from './plugin/ClikPlugin';
+export type { ClikPlugin, ClikScenePlugin, ClikPluginConfig } from './plugin/ClikPlugin';
 
 // Network
 export { NetworkManager } from './network/NetworkManager';
