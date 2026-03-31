@@ -304,6 +304,29 @@ export type {
   TimelineEntry,
 } from './playtest/PlaytestTypes';
 
+// PCG (Procedural Content Generation)
+export { PCGRegistry } from './pcg/PCGRegistry';
+export { PCGPlugin } from './pcg/PCGPlugin';
+export { LevelApplier } from './pcg/LevelApplier';
+export type { ApplierConfig } from './pcg/LevelApplier';
+export { DungeonGenerator } from './pcg/generators/DungeonGenerator';
+export { PlatformerGenerator } from './pcg/generators/PlatformerGenerator';
+export { ArenaGenerator } from './pcg/generators/ArenaGenerator';
+export { ReachabilityConstraint } from './pcg/constraints/ReachabilityConstraint';
+export { EntityDensityConstraint } from './pcg/constraints/EntityDensityConstraint';
+export { DifficultyConstraint } from './pcg/constraints/DifficultyConstraint';
+export { shuffleArray, weightedPick, randomPointInRect, noiseSample1D } from './pcg/SeededUtils';
+export { TileType } from './pcg/PCGTypes';
+export type {
+  PCGConfig,
+  GeneratedLevel,
+  EntityPlacement,
+  LevelMetadata,
+  ConstraintResult,
+  LevelConstraint,
+  LevelGenerator,
+} from './pcg/PCGTypes';
+
 // AI
 export { BehaviorTree, Blackboard, BTNode, NodeStatus } from './ai/BehaviorTree';
 export { Sequence, Selector, Parallel, Inverter, Succeeder, Repeater, Wait, Action, Condition } from './ai/nodes/index';
