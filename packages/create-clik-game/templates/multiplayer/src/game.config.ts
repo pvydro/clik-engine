@@ -1,4 +1,4 @@
-import { ClikGameConfig, ScalePreset } from '@pvydro/clik-engine';
+import { ClikGameConfig, ScalePreset } from 'clik-engine';
 import { LobbyScene } from './scenes/LobbyScene';
 import { GameScene } from './scenes/GameScene';
 

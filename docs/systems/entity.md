@@ -10,7 +10,7 @@ Composition-based game object architecture.
 ## Creating Entities
 
 ```typescript
-import { Entity, Health, Movement, Lifetime } from '@pvydro/clik-engine';
+import { Entity, Health, Movement, Lifetime } from 'clik-engine';
 
 const enemy = new Entity(this, 100, 200);
 enemy.entityType = 'enemy';
@@ -56,7 +56,7 @@ const hostiles = this.entities.getByTag('hostile');
 ## Custom Components
 
 ```typescript
-import { Component } from '@pvydro/clik-engine';
+import { Component } from 'clik-engine';
 
 class Inventory extends Component {
   private items: string[] = [];
@@ -89,7 +89,7 @@ entity.getComponent<Inventory>('inventory')?.addItem('key');
 Pre-define entity blueprints:
 
 ```typescript
-import { EntityFactory } from '@pvydro/clik-engine';
+import { EntityFactory } from 'clik-engine';
 
 const factory = new EntityFactory();
 factory.register('enemy', (scene, x, y) => {

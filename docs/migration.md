@@ -59,7 +59,7 @@ const cleanup = Anchor.apply(scene, target, { position: 'top-left' });
 
 ### New Exports
 
-The following are now available from `@pvydro/clik-engine`:
+The following are now available from `clik-engine`:
 
 - Network: `NetworkManager`, `Lobby`, `Room`, `StateSync`, `NetworkSync`
 - AI: `BehaviorTree`, `Blackboard`, `BTNode`, `NodeStatus`, all node types, `Steering`, `SteeringCalculator`, `BehaviorTreeComponent`, `SteeringComponent`

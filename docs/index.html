@@ -62,21 +62,10 @@ npx create-clik-game my-game --template=puzzle
 cd my-game && npm install && npm run dev</code></pre>
 
 <h3>Add to existing project</h3>
-<p>The engine is published as <code>@pvydro/clik-engine</code> on GitHub Packages.</p>
 
-<p>1. Authenticate with GitHub Packages (once per machine):</p>
-<pre><code>npm login --registry=https://npm.pkg.github.com
-# Username: your-github-username
-# Password: your GitHub personal access token (needs read:packages scope)</code></pre>
+<pre><code>npm install clik-engine phaser</code></pre>
 
-<p>2. Add <code>.npmrc</code> to your project root:</p>
-<pre><code>@pvydro:registry=https://npm.pkg.github.com</code></pre>
-
-<p>3. Install:</p>
-<pre><code>npm install @pvydro/clik-engine</code></pre>
-
-<p>4. Import:</p>
-<pre><code>import { createGame, BaseScene, ScalePreset } from '@pvydro/clik-engine';</code></pre>
+<pre><code>import { createGame, BaseScene, ScalePreset } from 'clik-engine';</code></pre>
 
 <h3>From source (engine development)</h3>
 <pre><code>git clone git@github.com:pvydro/clik-engine.git
@@ -88,7 +77,7 @@ npm run build        # library build</code></pre>
 
 <h2 id="config">Game Config</h2>
 <p>One object. That's the whole game setup.</p>
-<pre><code>import { createGame, ScalePreset } from '@pvydro/clik-engine';
+<pre><code>import { createGame, ScalePreset } from 'clik-engine';
 
 createGame({
   name: 'my-game',
@@ -111,7 +100,7 @@ createGame({
 
 <h2 id="scenes">Scenes</h2>
 <p>Extend <code>BaseScene</code>. Call <code>super.create()</code> and <code>super.update()</code>. Everything else is wired for you.</p>
-<pre><code>import { BaseScene } from '@pvydro/clik-engine';
+<pre><code>import { BaseScene } from 'clik-engine';
 
 export class GameScene extends BaseScene {
   create() {
@@ -261,7 +250,7 @@ await UIAnimator.animate(this, panel, 'slideInLeft');
 await UIAnimator.stagger(this, listItems, 'fadeIn', 50);</code></pre>
 
 <h2 id="entities">Entity / Component</h2>
-<pre><code>import { Entity, Health, Movement, Follower, EntityFactory } from '@pvydro/clik-engine';
+<pre><code>import { Entity, Health, Movement, Follower, EntityFactory } from 'clik-engine';
 
 // Build entities
 const player = new Entity(this, 100, 200);

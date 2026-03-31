@@ -1,4 +1,4 @@
-import { BaseScene, Button, Label } from '@pvydro/clik-engine';
+import { BaseScene, Button, Label } from 'clik-engine';
 
 /**
  * Lobby scene — connect to server, create/join room, then start game.

@@ -1,8 +1,5 @@
 {
-  "name": "@pvydro/clik-engine",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  },
+  "name": "clik-engine",
   "repository": {
     "type": "git",
     "url": "https://github.com/pvydro/clik-engine.git"

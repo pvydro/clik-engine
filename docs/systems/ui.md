@@ -5,7 +5,7 @@ All UI is Phaser-native (rendered on canvas, no DOM). Every component is configu
 ## Theme System
 
 ```typescript
-import { setTheme, DarkTheme, LightTheme, RetroTheme, NeonTheme } from '@pvydro/clik-engine';
+import { setTheme, DarkTheme, LightTheme, RetroTheme, NeonTheme } from 'clik-engine';
 
 setTheme(NeonTheme); // All components use neon colors
 ```
@@ -78,7 +78,7 @@ Components that support theming use `getTheme()` for default colors and fonts.
 import {
   Button, TextInput, Dropdown, Checkbox, RadioGroup,
   Slider, Toggle, ToastManager, ModalStack,
-} from '@pvydro/clik-engine';
+} from 'clik-engine';
 
 // In scene create():
 const nameInput = new TextInput(this, { x: 200, y: 100, placeholder: 'Enter name' });

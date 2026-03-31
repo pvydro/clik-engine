@@ -72,7 +72,7 @@ this.room.onStateChanged(state => {
 For real-time games, StateSync handles smooth movement of remote entities:
 
 ```typescript
-import { StateSync, NetworkSync } from '@pvydro/clik-engine';
+import { StateSync, NetworkSync } from 'clik-engine';
 
 const sync = new StateSync(this.network, {
   syncRate: 50,           // Send state every 50ms (20Hz)

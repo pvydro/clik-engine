@@ -1,4 +1,4 @@
-import { BaseScene } from '@pvydro/clik-engine';
+import { BaseScene } from 'clik-engine';
 
 export class GameScene extends BaseScene {
   constructor() {

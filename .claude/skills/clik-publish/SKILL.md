@@ -1,13 +1,13 @@
 ---
 name: clik-publish
-description: Publish @pvydro/clik-engine to GitHub Packages and set up game projects to consume it
+description: Publish clik-engine to npm and set up game projects to consume it
 ---
 
 ## What I do
 
-- Build and publish the engine to GitHub Packages
-- Set up game projects to install @pvydro/clik-engine as a dependency
-- Handle versioning, authentication, and registry configuration
+- Build and publish the engine to the public npm registry
+- Set up game projects to install clik-engine as a dependency
+- Handle versioning and release workflow
 
 ## When to use me
 
@@ -24,67 +24,47 @@ Use `/clik-publish` when:
 Create a release on GitHub — the publish workflow runs automatically:
 1. Go to github.com/pvydro/clik-engine/releases
 2. Click "Create a new release"
-3. Tag: `v0.1.0` (or next version)
-4. Publish — workflow runs tests, builds, publishes to GitHub Packages
+3. Tag: `v0.5.0` (or next version)
+4. Publish — workflow runs tests, builds, publishes to npm
+
+Requires `NPM_TOKEN` secret configured in the GitHub repo settings.
 
 ### Option 2: Manual publish
 ```bash
 cd packages/clik-engine
 npm run test                    # must pass
 npm run build                   # builds to dist/
-npm publish                     # publishes @pvydro/clik-engine
+npm publish --access public     # publishes to npm
 ```
 
-Requires `NODE_AUTH_TOKEN` environment variable set to a GitHub PAT with `write:packages` scope.
+Requires `npm login` or `NPM_TOKEN` environment variable.
 
 ### Versioning
 Before publishing a new version, bump the version in `packages/clik-engine/package.json`:
 ```bash
 cd packages/clik-engine
-npm version patch    # 0.1.0 → 0.1.1
-npm version minor    # 0.1.0 → 0.2.0
-npm version major    # 0.1.0 → 1.0.0
+npm version patch    # 0.4.0 → 0.4.1
+npm version minor    # 0.4.0 → 0.5.0
+npm version major    # 0.4.0 → 1.0.0
 ```
 
 ## Setting Up a Game Project
 
-### 1. Authenticate (once per machine)
-The developer needs a GitHub personal access token with `read:packages` scope:
+### 1. Install
 ```bash
-npm login --registry=https://npm.pkg.github.com
-# Username: github-username
-# Password: github-personal-access-token
+npm install clik-engine phaser
 ```
 
-Or set it via environment variable:
-```bash
-export NPM_TOKEN=ghp_xxxxxxxxxxxx
-echo "//npm.pkg.github.com/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
-```
-
-### 2. Project .npmrc
-Add to the game project root:
-```
-@pvydro:registry=https://npm.pkg.github.com
-```
-This tells npm to fetch `@pvydro/*` packages from GitHub instead of npmjs.com.
-
-### 3. Install
-```bash
-npm install @pvydro/clik-engine
-```
-
-### 4. Import
+### 2. Import
 ```typescript
-import { createGame, BaseScene, ScalePreset } from '@pvydro/clik-engine';
+import { createGame, BaseScene, ScalePreset } from 'clik-engine';
 ```
 
 ### Using create-clik-game
-The CLI scaffolder already includes the `.npmrc` and correct imports:
 ```bash
 npx create-clik-game my-game
 cd my-game
-npm install    # installs @pvydro/clik-engine from GitHub Packages
+npm install
 npm run dev
 ```
 
@@ -92,15 +72,14 @@ npm run dev
 
 | Issue | Fix |
 |-------|-----|
-| `401 Unauthorized` | Run `npm login --registry=https://npm.pkg.github.com` with a valid PAT |
 | `404 Not Found` | Package not published yet — create a GitHub release first |
-| `ENEEDAUTH` | Missing `.npmrc` in project root — add `@pvydro:registry=https://npm.pkg.github.com` |
-| Wrong version | Check `npm view @pvydro/clik-engine versions --registry=https://npm.pkg.github.com` |
+| Wrong version | Check `npm view clik-engine versions` |
+| Types not found | Ensure `"types": "dist/index.d.ts"` in package.json |
 
 ## Package Details
 
-- **Name**: `@pvydro/clik-engine`
-- **Registry**: `https://npm.pkg.github.com`
+- **Name**: `clik-engine`
+- **Registry**: `https://registry.npmjs.org`
 - **Repository**: `github.com/pvydro/clik-engine`
 - **Main**: `dist/clik-engine.js` (ES module)
 - **Types**: `dist/index.d.ts`

@@ -17,14 +17,14 @@ This scaffolds a project with Vite dev server, hot reload, and a starter scene.
 
 ```bash
 npm init -y
-npm install phaser @pvydro/clik-engine
+npm install phaser clik-engine
 npm install -D typescript vite
 ```
 
 Create `src/main.ts`:
 
 ```typescript
-import { createGame, BaseScene, ScalePreset } from '@pvydro/clik-engine';
+import { createGame, BaseScene, ScalePreset } from 'clik-engine';
 
 class GameScene extends BaseScene {
   create() {
@@ -78,7 +78,7 @@ update(time: number, delta: number) {
 ## Adding Entities
 
 ```typescript
-import { Entity, Health, Movement } from '@pvydro/clik-engine';
+import { Entity, Health, Movement } from 'clik-engine';
 
 class GameScene extends BaseScene {
   private player!: Entity;

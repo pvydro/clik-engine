@@ -32,15 +32,11 @@ npx create-clik-game my-game --template=multiplayer
 ## Installing as a Dependency
 
 ```bash
-# Add .npmrc to your project root:
-echo "@pvydro:registry=https://npm.pkg.github.com" > .npmrc
-
-# Install
-npm install @pvydro/clik-engine phaser
+npm install clik-engine phaser
 ```
 
 ```typescript
-import { createGame, BaseScene, ScalePreset } from '@pvydro/clik-engine';
+import { createGame, BaseScene, ScalePreset } from 'clik-engine';
 ```
 
 ## The Config-Driven Approach

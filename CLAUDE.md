@@ -30,7 +30,7 @@ npm run test:watch --workspace=packages/clik-engine  # Watch mode
 
 **Monorepo** (npm workspaces) with these packages:
 
-- `packages/clik-engine/` — Core engine library. Built with Vite in library mode (`es` format), Phaser is an external peer dependency. Entry: `src/index.ts` → `dist/clik-engine.js`. Published as `@pvydro/clik-engine` on GitHub Packages.
+- `packages/clik-engine/` — Core engine library. Built with Vite in library mode (`es` format), Phaser is an external peer dependency. Entry: `src/index.ts` → `dist/clik-engine.js`. Published as `clik-engine` on npm.
 - `packages/create-clik-game/` — CLI scaffolder (`npx create-clik-game <name> [--template=...]`)
 - `packages/clik-server/` — WebSocket matchmaking server (Node.js)
 - `dev-harness/` — Engine playground (SandboxScene, TransitionTest, KitchenSink)

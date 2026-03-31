@@ -1,4 +1,4 @@
-import { BaseScene, StateSync, Label } from '@pvydro/clik-engine';
+import { BaseScene, StateSync, Label } from 'clik-engine';
 
 /**
  * Game scene — multiplayer gameplay with synced player positions.

@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@pvydro/clik-engine": "^0.4.0",
+    "clik-engine": "^0.4.0",
     "phaser": "^3.87.0"
   },
   "devDependencies": {

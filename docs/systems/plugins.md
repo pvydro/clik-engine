@@ -5,7 +5,7 @@ Extend the engine with custom systems that hook into the game lifecycle.
 ## Creating a Plugin
 
 ```typescript
-import type { ClikPlugin } from '@pvydro/clik-engine';
+import type { ClikPlugin } from 'clik-engine';
 
 const FPSCounterPlugin: ClikPlugin = {
   name: 'fps-counter',
@@ -25,7 +25,7 @@ const FPSCounterPlugin: ClikPlugin = {
 ## Scene-Aware Plugins
 
 ```typescript
-import type { ClikScenePlugin } from '@pvydro/clik-engine';
+import type { ClikScenePlugin } from 'clik-engine';
 
 const AutoSavePlugin: ClikScenePlugin = {
   name: 'auto-save',

@@ -11,7 +11,7 @@ import {
   BehaviorTree, Blackboard, NodeStatus,
   Sequence, Selector, Condition, Action, Wait,
   BehaviorTreeComponent,
-} from '@pvydro/clik-engine';
+} from 'clik-engine';
 
 // Build a patrol → chase → attack tree
 const tree = new Selector([
@@ -55,7 +55,7 @@ enemy.addComponent('ai', new BehaviorTreeComponent(tree));
 Physics-based movement for natural NPC locomotion:
 
 ```typescript
-import { SteeringComponent } from '@pvydro/clik-engine';
+import { SteeringComponent } from 'clik-engine';
 
 const enemy = new Entity(this, 200, 200);
 const steering = new SteeringComponent(100, 50); // maxSpeed, maxForce
@@ -83,7 +83,7 @@ steering.separate(otherEnemyPositions, 40);
 For more control, use `SteeringCalculator` directly:
 
 ```typescript
-import { Steering, SteeringCalculator } from '@pvydro/clik-engine';
+import { Steering, SteeringCalculator } from 'clik-engine';
 
 const calc = new SteeringCalculator(100); // maxForce
 calc.add(Steering.seek(pos, target, velocity, maxSpeed), 1.0);
