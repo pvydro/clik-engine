@@ -23,6 +23,7 @@ vi.mock('phaser', () => {
 vi.mock('../../src/debug/DebugOverlay', () => ({ DebugOverlay: class {} }));
 vi.mock('../../src/debug/StateInspector', () => ({ StateInspector: class {} }));
 vi.mock('../../src/debug/GridOverlay', () => ({ GridOverlay: class {} }));
+vi.mock('../../src/debug/DebugConsole', () => ({ DebugConsole: class {} }));
 
 import { ConsoleReporter } from '../../src/debug/ConsoleReporter';
 vi.spyOn(ConsoleReporter, 'error');

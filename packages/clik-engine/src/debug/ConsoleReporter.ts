@@ -7,10 +7,15 @@ export enum ClikLogChannel {
   AUDIO = 'CLIK:AUDIO',
   SAVE  = 'CLIK:SAVE',
   ENGINE = 'CLIK:ENGINE',
+  CONSOLE = 'CLIK:CONSOLE',
+  PLAYTEST = 'CLIK:PLAYTEST',
 }
+
+export type ErrorListener = (message: string, suggestion?: string) => void;
 
 let enabled = true;
 const disabledChannels = new Set<ClikLogChannel>();
+const errorListeners = new Set<ErrorListener>();
 
 export const ConsoleReporter = {
   enable(): void {
@@ -72,6 +77,18 @@ export const ConsoleReporter = {
     if (suggestion) {
       console.error(prefix, `Suggestion: ${suggestion}`);
     }
+    // Notify error listeners (used by PlaytestReporter, DebugConsole, etc.)
+    for (const listener of errorListeners) {
+      try { listener(message, suggestion); } catch { /* isolate listener errors */ }
+    }
+  },
+
+  addErrorListener(listener: ErrorListener): void {
+    errorListeners.add(listener);
+  },
+
+  removeErrorListener(listener: ErrorListener): void {
+    errorListeners.delete(listener);
   },
 
   asset(message: string, data?: unknown): void {
@@ -88,5 +105,13 @@ export const ConsoleReporter = {
 
   engine(message: string, data?: unknown): void {
     this.log(ClikLogChannel.ENGINE, message, data);
+  },
+
+  console(message: string, data?: unknown): void {
+    this.log(ClikLogChannel.CONSOLE, message, data);
+  },
+
+  playtest(message: string, data?: unknown): void {
+    this.log(ClikLogChannel.PLAYTEST, message, data);
   },
 };

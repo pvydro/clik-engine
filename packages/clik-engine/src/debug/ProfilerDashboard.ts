@@ -3,7 +3,7 @@ import { profiler } from './Profiler';
 
 /**
  * Visual profiler overlay scene. Shows FPS graph, section timing bars, and frame stats.
- * Toggle with backtick key (`) or call show()/hide().
+ * Toggle with F3 key or call show()/hide().
  */
 export class ProfilerDashboard extends Phaser.Scene {
   private fpsText!: Phaser.GameObjects.Text;
@@ -43,7 +43,7 @@ export class ProfilerDashboard extends Phaser.Scene {
 
     // Toggle key
     if (this.input.keyboard) {
-      this.toggleKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.BACKTICK);
+      this.toggleKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F3);
     }
   }
 

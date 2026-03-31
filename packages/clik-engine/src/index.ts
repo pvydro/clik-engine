@@ -14,6 +14,7 @@ export { SceneStack } from './scenes/SceneStack';
 
 // Debug
 export { ConsoleReporter, ClikLogChannel } from './debug/ConsoleReporter';
+export type { ErrorListener } from './debug/ConsoleReporter';
 export { DebugOverlay } from './debug/DebugOverlay';
 export { StateInspector } from './debug/StateInspector';
 export { GridOverlay } from './debug/GridOverlay';
@@ -25,6 +26,8 @@ export type { HotStateConfig } from './debug/HotState';
 export { LeakDetector, leakDetector } from './debug/LeakDetector';
 export { VisualTest } from './debug/VisualTest';
 export { ProfilerDashboard } from './debug/ProfilerDashboard';
+export { DebugConsole } from './debug/DebugConsole';
+export type { ConsoleCommand, ConsolePrinter } from './debug/DebugConsole';
 
 // Input
 export { InputManager } from './input/InputManager';
@@ -288,6 +291,18 @@ export type {
   EntityStateSnapshot,
   ErrorData,
 } from './network/protocol';
+
+// Playtest
+export { PlaytestReporter } from './playtest/PlaytestReporter';
+export type {
+  PlaytestConfig,
+  PlaytestReport,
+  InputMetrics,
+  SceneMetrics,
+  EntityMetrics,
+  PerformanceMetrics,
+  TimelineEntry,
+} from './playtest/PlaytestTypes';
 
 // AI
 export { BehaviorTree, Blackboard, BTNode, NodeStatus } from './ai/BehaviorTree';

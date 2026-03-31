@@ -169,6 +169,11 @@ export class BaseScene extends Phaser.Scene {
     }
   }
 
+  /** Returns the entity registry if it has been initialized, without lazy-creating it. */
+  public getEntityRegistry(): EntityRegistry | undefined {
+    return this._entities;
+  }
+
   onResize(width: number, height: number): void {
     // Subclasses override for responsive layout
   }

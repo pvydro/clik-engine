@@ -5,6 +5,7 @@ import { ConsoleReporter } from '../debug/ConsoleReporter';
 import { DebugOverlay } from '../debug/DebugOverlay';
 import { StateInspector } from '../debug/StateInspector';
 import { GridOverlay } from '../debug/GridOverlay';
+import { DebugConsole } from '../debug/DebugConsole';
 import {
   validateNonEmptyString,
   validatePositiveNumber,
@@ -74,7 +75,7 @@ export function createGame(config: ClikGameConfig): Phaser.Game {
 
   // Add debug scenes when debug mode is on
   if (debug) {
-    (scenes as unknown[]).push(DebugOverlay, StateInspector, GridOverlay);
+    (scenes as unknown[]).push(DebugOverlay, StateInspector, GridOverlay, DebugConsole);
   }
 
   const physicsConfig: Phaser.Types.Core.PhysicsConfig = {};
@@ -141,9 +142,13 @@ export function createGame(config: ClikGameConfig): Phaser.Game {
       game.scene.start('__clik_debug_overlay');
       game.scene.start('__clik_state_inspector');
       game.scene.start('__clik_grid_overlay');
+      game.scene.start('__clik_debug_console');
       // Keep debug scenes on top
       game.scene.bringToTop('__clik_debug_overlay');
       game.scene.bringToTop('__clik_state_inspector');
+      game.scene.bringToTop('__clik_debug_console');
+      // Expose console globally for programmatic access (e.g. Claude Preview tools)
+      (globalThis as Record<string, unknown>).__CLIK_CONSOLE = game.scene.getScene('__clik_debug_console');
     }
 
     if (defaultScene && defaultScene !== config.scenes[0]?.key) {
