@@ -72,6 +72,7 @@ jobs:
             if (!pkg.repository) errors.push('missing repository');
             if (!pkg.files || !pkg.files.includes('README.md')) errors.push('files field must include README.md');
             if (!pkg.files || !pkg.files.includes('LICENSE')) errors.push('files field must include LICENSE');
+            if (!pkg.files || !pkg.files.includes('CHANGELOG.md')) errors.push('files field must include CHANGELOG.md');
             if (errors.length > 0) {
               console.error('package.json validation failed:');
               errors.forEach(e => console.error('  - ' + e));
@@ -79,6 +80,26 @@ jobs:
             }
             console.log('package.json validated: ' + pkg.name + '@' + pkg.version);
           "
+
+      - name: Verify CHANGELOG has current version entry
+        run: |
+          cd packages/clik-engine
+          VERSION=$(node -p "require('./package.json').version")
+          if ! grep -q "\[${VERSION}\]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no entry for version ${VERSION}"
+            echo "Add a ## [${VERSION}] section to CHANGELOG.md before publishing."
+            exit 1
+          fi
+          echo "CHANGELOG.md contains entry for v${VERSION}"
+
+      - name: Verify CHANGELOG is in sync with root
+        run: |
+          if ! diff -q CHANGELOG.md packages/clik-engine/CHANGELOG.md > /dev/null 2>&1; then
+            echo "::error::packages/clik-engine/CHANGELOG.md is out of sync with root CHANGELOG.md"
+            echo "Copy the root CHANGELOG.md into packages/clik-engine/ before publishing."
+            exit 1
+          fi
+          echo "CHANGELOG.md files are in sync"
 
       - name: Verify npm pack contents
         run: |
@@ -98,13 +119,14 @@ jobs:
       - name: Verify bundle size
         run: |
           SIZE=$(wc -c < packages/clik-engine/dist/clik-engine.js)
-          echo "Bundle size: $SIZE bytes"
+          echo "Bundle size: $SIZE bytes ($(( SIZE / 1024 ))KB)"
           if [ "$SIZE" -lt 10000 ]; then
             echo "::error::Bundle suspiciously small ($SIZE bytes) — build may have failed silently"
             exit 1
           fi
-          if [ "$SIZE" -gt 1000000 ]; then
-            echo "::error::Bundle too large ($SIZE bytes / $(( SIZE / 1024 ))KB) — check for bundled dependencies"
+          # Match CI limit (400KB) — keeps publish and CI in sync
+          if [ "$SIZE" -gt 409600 ]; then
+            echo "::error::Bundle too large ($SIZE bytes / $(( SIZE / 1024 ))KB) — exceeds 400KB limit"
             exit 1
           fi
           echo "Bundle size OK: $(( SIZE / 1024 ))KB"

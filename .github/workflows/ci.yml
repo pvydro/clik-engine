@@ -55,6 +55,39 @@ jobs:
             exit 1
           fi
 
+      - name: Verify required package files
+        run: |
+          cd packages/clik-engine
+          missing=()
+          [ ! -f README.md ] && missing+=("README.md")
+          [ ! -f LICENSE ] && missing+=("LICENSE")
+          [ ! -f CHANGELOG.md ] && missing+=("CHANGELOG.md")
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "::error::Missing required package files: ${missing[*]}"
+            exit 1
+          fi
+          echo "All required package files present"
+
+      - name: Verify package.json completeness
+        run: |
+          cd packages/clik-engine
+          node -e "
+            const pkg = require('./package.json');
+            const errors = [];
+            if (!pkg.description) errors.push('missing description');
+            if (!pkg.license) errors.push('missing license');
+            if (!pkg.repository) errors.push('missing repository');
+            if (!pkg.files || !pkg.files.includes('README.md')) errors.push('files must include README.md');
+            if (!pkg.files || !pkg.files.includes('LICENSE')) errors.push('files must include LICENSE');
+            if (!pkg.files || !pkg.files.includes('CHANGELOG.md')) errors.push('files must include CHANGELOG.md');
+            if (errors.length > 0) {
+              console.error('package.json validation failed:');
+              errors.forEach(e => console.error('  - ' + e));
+              process.exit(1);
+            }
+            console.log('package.json validated');
+          "
+
       - name: Test server
         run: npm run test --workspace=packages/clik-server
 

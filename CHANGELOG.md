@@ -5,6 +5,20 @@ All notable changes to `clik-engine` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-03-31
+
+### Fixed
+- npm package now explicitly includes README.md, LICENSE, and CHANGELOG.md in the `files` field
+- Added MIT LICENSE file to package
+- Added `description`, `license`, and `keywords` to package.json
+- Fixed broken API Reference link in README
+- DebugConsole backtick toggle no longer flickers (replaced Phaser key polling with DOM edge detection)
+
+### Changed
+- Publish workflow hardened with 8 pre-publish validation gates (required files, package.json fields, CHANGELOG version match, CHANGELOG sync, npm pack contents, bundle size limits)
+- CI workflow now also validates package file presence and package.json completeness
+- Bundle size limit aligned between CI and publish workflows (400KB)
+
 ## [1.1.0] - 2026-03-31
 
 ### Added
