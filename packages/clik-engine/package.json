@@ -4,7 +4,7 @@
     "type": "git",
     "url": "https://github.com/pvydro/clik-engine.git"
   },
-  "version": "1.1.0",
+  "version": "1.1.1",
   "type": "module",
   "main": "dist/clik-engine.js",
   "types": "dist/index.d.ts",
@@ -14,8 +14,28 @@
       "types": "./dist/index.d.ts"
     }
   },
+  "description": "A Claude-native game engine built on PhaserJS. Designed for building games collaboratively with AI.",
+  "license": "MIT",
+  "keywords": [
+    "game-engine",
+    "phaser",
+    "gamedev",
+    "2d",
+    "canvas",
+    "webgl",
+    "ecs",
+    "entity-component",
+    "ai",
+    "behavior-tree",
+    "multiplayer",
+    "claude",
+    "typescript"
+  ],
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "build": "vite build",

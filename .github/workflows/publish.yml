@@ -33,10 +33,97 @@ jobs:
       - name: Build
         run: npm run build --workspace=packages/clik-engine
 
-      - name: Verify bundle exists
-        run: test -f packages/clik-engine/dist/clik-engine.js
+      # ── Pre-publish validation ──────────────────────────────────────
+      # These checks ensure the npm package is complete and professional.
+      # If any check fails, the publish is blocked.
 
+      - name: Verify bundle exists
+        run: |
+          test -f packages/clik-engine/dist/clik-engine.js || { echo "::error::Missing dist/clik-engine.js — build failed"; exit 1; }
+          test -f packages/clik-engine/dist/index.d.ts || { echo "::error::Missing dist/index.d.ts — type declarations not generated"; exit 1; }
+
+      - name: Verify required package files
+        run: |
+          cd packages/clik-engine
+          missing=()
+          [ ! -f README.md ] && missing+=("README.md")
+          [ ! -f LICENSE ] && missing+=("LICENSE")
+          [ ! -f CHANGELOG.md ] && missing+=("CHANGELOG.md")
+          [ ! -f package.json ] && missing+=("package.json")
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "::error::Missing required package files: ${missing[*]}"
+            echo "These files MUST exist in packages/clik-engine/ before publishing."
+            exit 1
+          fi
+          echo "All required files present: README.md, LICENSE, CHANGELOG.md, package.json"
+
+      - name: Verify package.json has required fields
+        run: |
+          cd packages/clik-engine
+          node -e "
+            const pkg = require('./package.json');
+            const errors = [];
+            if (!pkg.name) errors.push('missing name');
+            if (!pkg.version) errors.push('missing version');
+            if (!pkg.description) errors.push('missing description');
+            if (!pkg.license) errors.push('missing license');
+            if (!pkg.main) errors.push('missing main');
+            if (!pkg.types) errors.push('missing types');
+            if (!pkg.repository) errors.push('missing repository');
+            if (!pkg.files || !pkg.files.includes('README.md')) errors.push('files field must include README.md');
+            if (!pkg.files || !pkg.files.includes('LICENSE')) errors.push('files field must include LICENSE');
+            if (errors.length > 0) {
+              console.error('package.json validation failed:');
+              errors.forEach(e => console.error('  - ' + e));
+              process.exit(1);
+            }
+            console.log('package.json validated: ' + pkg.name + '@' + pkg.version);
+          "
+
+      - name: Verify npm pack contents
+        run: |
+          cd packages/clik-engine
+          PACK_OUTPUT=$(npm pack --dry-run 2>&1)
+          echo "$PACK_OUTPUT"
+
+          # Check that key files are in the tarball
+          echo "$PACK_OUTPUT" | grep -q "README.md" || { echo "::error::README.md not in npm tarball"; exit 1; }
+          echo "$PACK_OUTPUT" | grep -q "LICENSE" || { echo "::error::LICENSE not in npm tarball"; exit 1; }
+          echo "$PACK_OUTPUT" | grep -q "CHANGELOG.md" || { echo "::error::CHANGELOG.md not in npm tarball"; exit 1; }
+          echo "$PACK_OUTPUT" | grep -q "clik-engine.js" || { echo "::error::dist/clik-engine.js not in npm tarball"; exit 1; }
+          echo "$PACK_OUTPUT" | grep -q "index.d.ts" || { echo "::error::dist/index.d.ts not in npm tarball"; exit 1; }
+
+          echo "npm pack contents verified"
+
+      - name: Verify bundle size
+        run: |
+          SIZE=$(wc -c < packages/clik-engine/dist/clik-engine.js)
+          echo "Bundle size: $SIZE bytes"
+          if [ "$SIZE" -lt 10000 ]; then
+            echo "::error::Bundle suspiciously small ($SIZE bytes) — build may have failed silently"
+            exit 1
+          fi
+          if [ "$SIZE" -gt 1000000 ]; then
+            echo "::error::Bundle too large ($SIZE bytes / $(( SIZE / 1024 ))KB) — check for bundled dependencies"
+            exit 1
+          fi
+          echo "Bundle size OK: $(( SIZE / 1024 ))KB"
+
+      # ── Publish ─────────────────────────────────────────────────────
       - name: Publish
         run: npm publish --workspace=packages/clik-engine --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Verify published version
+        run: |
+          EXPECTED=$(node -p "require('./packages/clik-engine/package.json').version")
+          echo "Expected version: $EXPECTED"
+          sleep 10
+          PUBLISHED=$(npm view clik-engine version 2>/dev/null || echo "NOT_FOUND")
+          echo "Published version: $PUBLISHED"
+          if [ "$PUBLISHED" != "$EXPECTED" ]; then
+            echo "::warning::Published version ($PUBLISHED) doesn't match expected ($EXPECTED) — npm registry may need time to propagate"
+          else
+            echo "Successfully published clik-engine@$PUBLISHED"
+          fi

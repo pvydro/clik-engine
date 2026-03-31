@@ -2,7 +2,7 @@
 
 A Claude-native game engine built on [PhaserJS](https://phaser.io). Designed from the ground up for building games collaboratively with AI using Claude's Preview MCP tools.
 
-**160+ source files | 17,000+ lines | 1,050+ tests | 330KB bundle**
+**160+ source files | 17,000+ lines | 1,080+ tests | 370KB bundle**
 
 ## Why clik-engine?
 
@@ -122,7 +122,8 @@ export class GameScene extends BaseScene {
 | **Accessibility** | `A11yManager` (color blind modes, font scale, reduced motion — integrated into UIAnimator) |
 | **Analytics** | `AnalyticsManager` (events, pluggable backends) |
 | **Scaling** | `ResponsiveManager` (breakpoints, DPI), `Letterbox` |
-| **Debug** | `DebugOverlay`, `StateInspector`, `ProfilerDashboard` (FPS graph), `ConsoleReporter`, `Profiler`, `SceneInspector`, `HotState`, `LeakDetector`, `GridOverlay`, `VisualTest` |
+| **Debug** | `DebugConsole` (Quake-style command console), `DebugOverlay`, `StateInspector`, `ProfilerDashboard` (FPS graph), `ConsoleReporter`, `Profiler`, `SceneInspector`, `HotState`, `LeakDetector`, `GridOverlay`, `VisualTest` |
+| **Playtest** | `PlaytestReporter` (session recording, input/scene/entity/performance metrics, structured reports for AI analysis) |
 | **Utils** | `Vector2`, `Color`, `SeededRandom`, `ObjectPool`, `Grid2D`, `PriorityQueue`, `SpatialHash`, `findPath` (A*), `GameTimer`, `Cooldown`, `EventBus`, format helpers, validation utilities |
 
 ## Multiplayer
@@ -155,6 +156,62 @@ const tree = new Selector([
 
 entity.addComponent('ai', new BehaviorTreeComponent(tree));
 entity.addComponent('steering', new SteeringComponent(100, 50));
+```
+
+## Debug Console
+
+Toggle with backtick (`` ` ``) when `debug: true`. 14 built-in commands, custom command registration.
+
+```
+> help                    # list all commands
+> entities                # list entities with types/tags/components
+> spawn enemy 400 300     # spawn entity at position
+> kill all                # destroy all entities
+> set score 999           # set game registry value
+> timescale 0.5           # half speed
+> scene list              # list scenes
+> playtest                # show playtest report
+> fps                     # FPS and frame timing
+```
+
+Programmatic access: `window.__CLIK_CONSOLE.exec('entities')`
+
+Register custom commands:
+```typescript
+window.__CLIK_CONSOLE.register('god', () => {
+  player.health = Infinity;
+}, 'Enable god mode');
+```
+
+## Playtest Reporter
+
+Records gameplay sessions and produces structured reports for AI-assisted game design feedback.
+
+```typescript
+import { PlaytestReporter } from 'clik-engine';
+
+createGame({
+  plugins: [
+    { plugin: new PlaytestReporter({ trackEvents: ['player:death', 'score:changed'] }) },
+  ],
+  // ...
+});
+```
+
+```typescript
+// Get human-readable summary (designed for Claude to parse)
+reporter.getSummary();
+// === Playtest Report ===
+// Duration: 45.2s | Avg FPS: 58.3 | FPS drops: 2
+// Scenes: MenuScene (3.1s) → GameScene (38.4s) → GameOverScene (3.7s)
+// Input: 342 actions (7.6/s) | Top: shoot (189), move_left (82)
+// Entities: peak 24 (Enemy: 18, Bullet: 6)
+// Events: player:death x2, score:changed x47
+// Errors: 0
+
+// Structured JSON for programmatic analysis
+reporter.getReport();
+reporter.exportJSON();
 ```
 
 ## Example Games
@@ -193,7 +250,7 @@ clik/
 ## Testing
 
 ```bash
-npm run test                    # 1,050+ tests across 88 files
+npm run test                    # 1,080+ tests across 89 files
 npm run test:coverage           # Coverage report with thresholds
 ```
 
@@ -211,15 +268,15 @@ npm run test:coverage           # Coverage report with thresholds
 - [Getting Started](docs/getting-started.md)
 - [Migration Guide](docs/migration.md)
 - System Guides: [Network](docs/systems/network.md) | [AI](docs/systems/ai.md) | [Entity](docs/systems/entity.md) | [Plugins](docs/systems/plugins.md) | [UI](docs/systems/ui.md)
-- [API Reference](packages/clik-engine/docs/index.html) (TypeDoc)
-- [Changelog](CHANGELOG.md)
+- [API Reference](https://github.com/pvydro/clik-engine/tree/main/packages/clik-engine/docs) (TypeDoc)
+- [Changelog](https://github.com/pvydro/clik-engine/blob/main/CHANGELOG.md)
 
 ## Tech Stack
 
 - **[PhaserJS](https://phaser.io)** v3.87 — Rendering, physics, audio
 - **[Vite](https://vitejs.dev)** — Build, HMR
 - **[TypeScript](https://www.typescriptlang.org)** — Full strict mode
-- **[Vitest](https://vitest.dev)** — 1,050+ tests
+- **[Vitest](https://vitest.dev)** — 1,080+ tests
 - **[TypeDoc](https://typedoc.org)** — API docs
 - **npm workspaces** — Monorepo
 
