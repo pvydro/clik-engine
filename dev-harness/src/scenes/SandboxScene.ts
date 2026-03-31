@@ -60,6 +60,12 @@ export class SandboxScene extends BaseScene {
       onClick: () => this.director.go('sandbox', 'kitchen-sink'),
     });
 
+    new Button(this, {
+      x: width / 2, y: height / 2 + 260,
+      text: 'PCG Lab',
+      onClick: () => this.director.go('sandbox', 'pcg-lab', Transitions.fade(400)),
+    });
+
     this.inspectState('sandbox', () => ({
       frames: this.frameCount,
     }));
