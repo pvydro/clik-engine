@@ -53,9 +53,7 @@ export class DebugConsole extends Phaser.Scene {
   private commands = new Map<string, ConsoleCommand>();
   private cursorVisible = true;
   private cursorTimer?: Phaser.Time.TimerEvent;
-  private toggleKey: Phaser.Input.Keyboard.Key | null = null;
   private keyDownHandler: ((e: KeyboardEvent) => void) | null = null;
-  private updateCounter = 0;
 
   // ── Layout constants (computed in create) ─────────────────────────
   private panelH = 0;
@@ -114,11 +112,6 @@ export class DebugConsole extends Phaser.Scene {
     this.cursor = this.add.rectangle(this.padX + 16, this.inputY + 3, 8, 14, 0x00ff88, 0.8)
       .setDepth(100002).setScrollFactor(0).setVisible(false).setOrigin(0, 0.5);
 
-    // Toggle key (backtick) — only used to detect toggle, input captured via DOM
-    if (this.input.keyboard) {
-      this.toggleKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.BACKTICK);
-    }
-
     // Mouse wheel scroll when open
     this.input.on('wheel', (_pointer: Phaser.Input.Pointer, _gos: Phaser.GameObjects.GameObject[], _dx: number, dy: number) => {
       if (!this.open) return;
@@ -132,16 +125,14 @@ export class DebugConsole extends Phaser.Scene {
     // Register built-in commands
     registerBuiltinCommands(this, this.game);
 
+    // Persistent toggle listener (backtick key via DOM for reliable edge detection)
+    this.attachToggleListener();
+
     this.log('CLIK Debug Console — type "help" for commands', '#888888');
   }
 
   update(): void {
-    // Check toggle key
-    if (this.toggleKey?.isDown && this.updateCounter > 10) {
-      this.toggle();
-      this.updateCounter = 0;
-    }
-    this.updateCounter++;
+    // Toggle is handled entirely via DOM keydown listener (see attachToggleListener)
   }
 
   // ── Public API ────────────────────────────────────────────────────
@@ -247,6 +238,22 @@ export class DebugConsole extends Phaser.Scene {
 
   // ── Keyboard handling ─────────────────────────────────────────────
 
+  /** Persistent listener for backtick toggle — always active while scene exists. */
+  private attachToggleListener(): void {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key !== '`') return;
+      e.stopPropagation();
+      e.preventDefault();
+      // Edge-detect: only toggle on keydown, ignore repeat
+      if (!e.repeat) {
+        this.toggle();
+      }
+    };
+    window.addEventListener('keydown', handler, { capture: true });
+    // Store for cleanup
+    (this as unknown as Record<string, unknown>)._toggleHandler = handler;
+  }
+
   private attachKeyboard(): void {
     if (this.keyDownHandler) return;
     this.keyDownHandler = (e: KeyboardEvent) => this.onKeyDown(e);
@@ -260,12 +267,8 @@ export class DebugConsole extends Phaser.Scene {
   }
 
   private onKeyDown(e: KeyboardEvent): void {
-    // Allow backtick to toggle (close)
-    if (e.key === '`') {
-      e.stopPropagation();
-      e.preventDefault();
-      return;
-    }
+    // Backtick handled by toggle listener
+    if (e.key === '`') return;
 
     // Capture everything while open
     e.stopPropagation();
@@ -447,5 +450,11 @@ export class DebugConsole extends Phaser.Scene {
   shutdown(): void {
     this.detachKeyboard();
     this.stopCursorBlink();
+    // Remove toggle listener
+    const toggleHandler = (this as unknown as Record<string, unknown>)._toggleHandler as
+      ((e: KeyboardEvent) => void) | undefined;
+    if (toggleHandler) {
+      window.removeEventListener('keydown', toggleHandler, { capture: true });
+    }
   }
 }
