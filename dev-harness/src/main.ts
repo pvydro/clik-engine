@@ -1,9 +1,11 @@
-import { createGame, ScalePreset, ConsoleReporter } from 'clik-engine';
+import { createGame, ScalePreset, ConsoleReporter, PlaytestReporter } from 'clik-engine';
 import { SandboxScene } from './scenes/SandboxScene';
 import { TransitionTestScene } from './scenes/TransitionTestScene';
 import { KitchenSink } from './scenes/KitchenSink';
 
 ConsoleReporter.engine('Dev harness booting...');
+
+const playtestReporter = new PlaytestReporter();
 
 const game = createGame({
   name: 'clik-dev-harness',
@@ -16,4 +18,10 @@ const game = createGame({
     { key: 'kitchen-sink', class: KitchenSink },
   ],
   input: { actions: {} },
+  plugins: [
+    { plugin: playtestReporter },
+  ],
 });
+
+// Expose PlaytestReporter globally for Claude Preview tools and console access
+(globalThis as Record<string, unknown>).__PLAYTEST = playtestReporter;

@@ -1,4 +1,4 @@
-import { createGame, ScalePreset } from 'clik-engine';
+import { createGame, ScalePreset, PlaytestReporter } from 'clik-engine';
 import { GameScene } from './scenes/GameScene';
 
 createGame({
@@ -18,4 +18,7 @@ createGame({
       shoot:      { keys: ['SPACE'], touch: 'tap' },
     },
   },
+  plugins: [
+    { plugin: new PlaytestReporter({ trackEvents: ['player:death', 'enemy:killed', 'score:changed'] }) },
+  ],
 });

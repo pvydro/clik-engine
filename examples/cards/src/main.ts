@@ -1,4 +1,4 @@
-import { createGame, ScalePreset } from 'clik-engine';
+import { createGame, ScalePreset, PlaytestReporter } from 'clik-engine';
 import { GameScene } from './scenes/GameScene';
 
 createGame({
@@ -9,4 +9,7 @@ createGame({
   scenes: [{ key: 'game', class: GameScene, default: true }],
   input: { actions: {} },
   save: { slots: 1, version: 1 },
+  plugins: [
+    { plugin: new PlaytestReporter({ trackEvents: ['score:changed', 'level:complete'] }) },
+  ],
 });
