@@ -2,7 +2,9 @@
 
 A Claude-native game engine built on [PhaserJS](https://phaser.io). Designed from the ground up for building games collaboratively with AI using Claude's Preview MCP tools.
 
-**160+ source files | 17,000+ lines | 1,080+ tests | 370KB bundle**
+**180+ source files | 19,000+ lines | 1,148+ tests | 394KB bundle**
+
+**[Live Examples](https://pvydro.github.io/clik-engine/)** — Play the example games in your browser
 
 ## Why clik-engine?
 
@@ -94,7 +96,7 @@ export class GameScene extends BaseScene {
 
 ## Engine Systems
 
-### 27 System Directories
+### 28 System Directories
 
 | System | Key Modules |
 |--------|-------------|
@@ -122,7 +124,8 @@ export class GameScene extends BaseScene {
 | **Accessibility** | `A11yManager` (color blind modes, font scale, reduced motion — integrated into UIAnimator) |
 | **Analytics** | `AnalyticsManager` (events, pluggable backends) |
 | **Scaling** | `ResponsiveManager` (breakpoints, DPI), `Letterbox` |
-| **Debug** | `DebugConsole` (Quake-style command console), `DebugOverlay`, `StateInspector`, `ProfilerDashboard` (FPS graph), `ConsoleReporter`, `Profiler`, `SceneInspector`, `HotState`, `LeakDetector`, `GridOverlay`, `VisualTest` |
+| **PCG** | `PCGRegistry` (strategy pattern), 3 generators (`DungeonGenerator`, `PlatformerGenerator`, `ArenaGenerator`), 3 constraints (`ReachabilityConstraint`, `EntityDensityConstraint`, `DifficultyConstraint`), `LevelApplier` (Phaser bridge), `PCGPlugin` |
+| **Debug** | `DebugConsole` (Quake-style command console, 15 commands), `DebugOverlay`, `StateInspector`, `ProfilerDashboard` (FPS graph), `ConsoleReporter`, `Profiler`, `SceneInspector`, `HotState`, `LeakDetector`, `GridOverlay`, `VisualTest` |
 | **Playtest** | `PlaytestReporter` (session recording, input/scene/entity/performance metrics, structured reports for AI analysis) |
 | **Utils** | `Vector2`, `Color`, `SeededRandom`, `ObjectPool`, `Grid2D`, `PriorityQueue`, `SpatialHash`, `findPath` (A*), `GameTimer`, `Cooldown`, `EventBus`, format helpers, validation utilities |
 
@@ -160,7 +163,7 @@ entity.addComponent('steering', new SteeringComponent(100, 50));
 
 ## Debug Console
 
-Toggle with backtick (`` ` ``) when `debug: true`. 14 built-in commands, custom command registration.
+Toggle with backtick (`` ` ``) when `debug: true`. 15 built-in commands, custom command registration.
 
 ```
 > help                    # list all commands
@@ -214,6 +217,38 @@ reporter.getReport();
 reporter.exportJSON();
 ```
 
+## Procedural Content Generation
+
+Generate playable levels from high-level parameters. Pure data layer (no Phaser dependency except `LevelApplier`), seeded deterministic randomness, constraint-based validation with auto-repair.
+
+```typescript
+import { PCGPlugin } from 'clik-engine';
+
+createGame({
+  plugins: [{ plugin: new PCGPlugin() }],
+  // ...
+});
+
+// Generate a dungeon
+const level = pcgPlugin.registry.generate('dungeon', {
+  width: 50, height: 40, difficulty: 5, seed: 42,
+}, ['reachability', 'difficulty']);
+
+// level.grid     — Grid2D<TileType> (FLOOR, WALL, DOOR, SPAWN, EXIT, HAZARD...)
+// level.entities — EntityPlacement[] (enemies, items with positions)
+// level.spawn    — Vec2 (player start)
+// level.exit     — Vec2 (level goal)
+// level.metadata — { roomCount, pathLength, generationTimeMs, seed, ... }
+```
+
+**3 built-in generators**: `DungeonGenerator` (BSP rooms + corridors), `PlatformerGenerator` (heightmap terrain + platforms), `ArenaGenerator` (symmetric obstacles)
+
+**3 built-in constraints**: `ReachabilityConstraint` (A* path validation + repair), `EntityDensityConstraint` (max per region), `DifficultyConstraint` (enemy count scaling)
+
+Register custom generators and constraints via `registry.registerGenerator()` / `registry.registerConstraint()`.
+
+Debug console: `generate dungeon 50 40 --difficulty 5 --seed 42`
+
 ## Example Games
 
 | Game | What it demonstrates |
@@ -221,11 +256,13 @@ reporter.exportJSON();
 | **2048** | Grid logic, swipe input, procedural audio/music, visual polish (LayeredTile, ComboDisplay, AnimatedHUD) |
 | **Space Shooter** | Physics, procedural particles, combo system, screen effects, difficulty scaling |
 | **Card Match** | State machines, card flip animation, score persistence, UI layering |
+| **PCG Dungeon** | Procedural generation, BSP dungeons, constraint validation, physics collision, floor progression |
 
 ```bash
 npm run dev:2048
 npm run dev:shooter
 npm run dev:cards
+npm run dev:dungeon
 ```
 
 ## Architecture
@@ -237,7 +274,7 @@ clik/
 │   ├── create-clik-game/     # CLI scaffolding (4 templates)
 │   └── clik-server/          # WebSocket matchmaking server
 ├── dev-harness/              # Engine playground
-├── examples/                 # 3 complete games
+├── examples/                 # 4 complete games
 ├── docs/                     # System guides
 │   ├── getting-started.md
 │   ├── migration.md
@@ -250,7 +287,7 @@ clik/
 ## Testing
 
 ```bash
-npm run test                    # 1,080+ tests across 89 files
+npm run test                    # 1,148+ tests across 98 files
 npm run test:coverage           # Coverage report with thresholds
 ```
 
@@ -276,7 +313,7 @@ npm run test:coverage           # Coverage report with thresholds
 - **[PhaserJS](https://phaser.io)** v3.87 — Rendering, physics, audio
 - **[Vite](https://vitejs.dev)** — Build, HMR
 - **[TypeScript](https://www.typescriptlang.org)** — Full strict mode
-- **[Vitest](https://vitest.dev)** — 1,080+ tests
+- **[Vitest](https://vitest.dev)** — 1,148+ tests
 - **[TypeDoc](https://typedoc.org)** — API docs
 - **npm workspaces** — Monorepo
 

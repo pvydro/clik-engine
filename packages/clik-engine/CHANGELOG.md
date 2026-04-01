@@ -5,6 +5,21 @@ All notable changes to `clik-engine` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-03-31
+
+### Added
+- **Procedural Content Generation (PCG) plugin**: Complete level generation system with strategy pattern registry, seeded deterministic randomness, and constraint-based validation with auto-repair
+- **3 built-in generators**: `DungeonGenerator` (BSP rooms + L-shaped corridors), `PlatformerGenerator` (heightmap terrain + floating platforms), `ArenaGenerator` (symmetric obstacle rings)
+- **3 built-in constraints**: `ReachabilityConstraint` (A* path validation, flood-fill repair), `EntityDensityConstraint` (max entities per region), `DifficultyConstraint` (enemy count scaling ±30%)
+- **PCGRegistry**: Central registry with `generate()` method — retry logic (up to 3 attempts), constraint repair, ConsoleReporter logging
+- **LevelApplier**: Phaser bridge for converting `GeneratedLevel` → tilemap + entities (only Phaser-dependent PCG file)
+- **PCGPlugin**: ClikPlugin wrapper that registers all built-ins, exposes `window.__CLIK_PCG` in debug mode
+- **SeededUtils**: `shuffleArray`, `weightedPick`, `randomPointInRect`, `noiseSample1D` — all using `SeededRandom`
+- **DebugConsole `generate` command**: `generate dungeon 50 40 --difficulty 5 --seed 42 --constraint reachability`
+- **PCG Dungeon example** (`examples/pcg-dungeon/`): Playable dungeon crawler with floor progression, item collection, physics collision, difficulty scaling — zero external assets
+- **PCG Lab scene** in dev-harness: Visualization tool comparing all 3 generators with constraint toggling, seed/difficulty controls
+- 68 new tests across 9 test files (1,148 total)
+
 ## [1.1.1] - 2026-03-31
 
 ### Fixed
