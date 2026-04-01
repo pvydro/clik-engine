@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  packages: write
 
 jobs:
   publish:
@@ -149,3 +150,37 @@ jobs:
           else
             echo "Successfully published clik-engine@$PUBLISHED"
           fi
+
+  publish-gpr:
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: '@pvydro'
+
+      - run: npm ci
+
+      - name: Build
+        run: npm run build --workspace=packages/clik-engine
+
+      - name: Scope package for GitHub Packages
+        run: |
+          cd packages/clik-engine
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            pkg.name = '@pvydro/clik-engine';
+            pkg.publishConfig = { registry: 'https://npm.pkg.github.com' };
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+            console.log('Scoped package name: ' + pkg.name);
+          "
+
+      - name: Publish to GitHub Packages
+        run: npm publish --workspace=packages/clik-engine --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
