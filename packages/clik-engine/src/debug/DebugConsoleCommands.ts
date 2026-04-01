@@ -238,6 +238,62 @@ export function registerBuiltinCommands(con: DebugConsole, game: Phaser.Game): v
     }
   }, 'Show FPS and performance metrics');
 
+  // ── generate ──────────────────────────────────────────────────────
+  con.register('generate', (args, out) => {
+    const parts = args.trim().split(/\s+/);
+    const generatorName = parts[0];
+    if (!generatorName) {
+      out.error('Usage: generate <generator> [width] [height] [--difficulty N] [--seed N]');
+      out.log('Generators: check window.__CLIK_PCG.listGenerators()');
+      return;
+    }
+
+    const pcg = (globalThis as Record<string, unknown>).__CLIK_PCG as
+      { generate?: (name: string, config: Record<string, unknown>, constraints?: string[]) => { metadata: Record<string, unknown>; entities: unknown[]; spawn: { x: number; y: number }; exit: { x: number; y: number } };
+        listGenerators?: () => string[];
+        listConstraints?: () => string[] } | undefined;
+
+    if (!pcg?.generate) {
+      out.warn('PCGPlugin not registered. Add PCGPlugin to ClikGameConfig.plugins.');
+      return;
+    }
+
+    const width = parts[1] ? parseInt(parts[1], 10) : 30;
+    const height = parts[2] ? parseInt(parts[2], 10) : 30;
+
+    // Parse flags
+    let difficulty: number | undefined;
+    let seed: number | undefined;
+    const constraints: string[] = [];
+    for (let i = 3; i < parts.length; i++) {
+      if (parts[i] === '--difficulty' && parts[i + 1]) {
+        difficulty = parseInt(parts[i + 1], 10);
+        i++;
+      } else if (parts[i] === '--seed' && parts[i + 1]) {
+        seed = parseInt(parts[i + 1], 10);
+        i++;
+      } else if (parts[i] === '--constraint' && parts[i + 1]) {
+        constraints.push(parts[i + 1]);
+        i++;
+      }
+    }
+
+    try {
+      const config: Record<string, unknown> = { width, height };
+      if (difficulty !== undefined) config.difficulty = difficulty;
+      if (seed !== undefined) config.seed = seed;
+
+      const level = pcg.generate(generatorName, config, constraints.length > 0 ? constraints : undefined);
+      out.log(`Generated "${generatorName}" level (${width}x${height})`);
+      out.log(`  Seed: ${level.metadata.seed} | Difficulty: ${level.metadata.difficulty}`);
+      out.log(`  Spawn: (${level.spawn.x}, ${level.spawn.y}) | Exit: (${level.exit.x}, ${level.exit.y})`);
+      out.log(`  Entities: ${level.entities.length} | Time: ${(level.metadata.generationTimeMs as number).toFixed(1)}ms`);
+      if (level.metadata.roomCount) out.log(`  Rooms: ${level.metadata.roomCount}`);
+    } catch (err) {
+      out.error(`Generation failed: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }, 'Generate a PCG level (generate <type> [w] [h] [--difficulty N] [--seed N] [--constraint name])');
+
   // ── playtest ──────────────────────────────────────────────────────
   con.register('playtest', (args, out) => {
     const pm = game.registry.get('__clikPluginManager') as

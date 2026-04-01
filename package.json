@@ -8,13 +8,15 @@
     "dev-harness",
     "examples/2048",
     "examples/shooter",
-    "examples/cards"
+    "examples/cards",
+    "examples/pcg-dungeon"
   ],
   "scripts": {
     "dev": "npm run dev --workspace=dev-harness",
     "dev:2048": "npm run dev --workspace=examples/2048",
     "dev:shooter": "npm run dev --workspace=examples/shooter",
     "dev:cards": "npm run dev --workspace=examples/cards",
+    "dev:dungeon": "npm run dev --workspace=examples/pcg-dungeon",
     "build": "npm run build --workspace=packages/clik-engine",
     "build:cli": "npm run build --workspace=packages/create-clik-game",
     "test": "npm run test --workspace=packages/clik-engine"

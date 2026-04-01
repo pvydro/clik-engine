@@ -24,6 +24,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev", "--workspace=examples/cards"],
       "port": 5176
+    },
+    {
+      "name": "example-pcg-dungeon",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--workspace=examples/pcg-dungeon"],
+      "port": 5177
     }
   ]
 }

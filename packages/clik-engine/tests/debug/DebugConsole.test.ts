@@ -83,8 +83,8 @@ describe('DebugConsoleCommands', () => {
     registerBuiltinCommands(con as never, game as never);
   });
 
-  it('registers all 14 built-in commands', () => {
-    expect(con.register).toHaveBeenCalledTimes(14);
+  it('registers all 15 built-in commands', () => {
+    expect(con.register).toHaveBeenCalledTimes(15);
     const names = [...con._commands.keys()];
     expect(names).toContain('help');
     expect(names).toContain('clear');
@@ -99,6 +99,7 @@ describe('DebugConsoleCommands', () => {
     expect(names).toContain('resume');
     expect(names).toContain('inspect');
     expect(names).toContain('fps');
+    expect(names).toContain('generate');
     expect(names).toContain('playtest');
   });
 
