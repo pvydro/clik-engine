@@ -134,7 +134,14 @@ jobs:
 
       # ── Publish ─────────────────────────────────────────────────────
       - name: Publish
-        run: npm publish --workspace=packages/clik-engine --access public
+        run: |
+          VERSION=$(node -p "require('./packages/clik-engine/package.json').version")
+          PUBLISHED=$(npm view clik-engine version 2>/dev/null || echo "NOT_FOUND")
+          if [ "$PUBLISHED" = "$VERSION" ]; then
+            echo "::notice::clik-engine@$VERSION already published to npmjs.org — skipping"
+          else
+            npm publish --workspace=packages/clik-engine --access public
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -181,6 +188,13 @@ jobs:
           "
 
       - name: Publish to GitHub Packages
-        run: npm publish --workspace=packages/clik-engine --access public
+        run: |
+          VERSION=$(node -p "require('./packages/clik-engine/package.json').version")
+          PUBLISHED=$(npm view @pvydro/clik-engine version --registry=https://npm.pkg.github.com 2>/dev/null || echo "NOT_FOUND")
+          if [ "$PUBLISHED" = "$VERSION" ]; then
+            echo "::notice::@pvydro/clik-engine@$VERSION already published to GitHub Packages — skipping"
+          else
+            npm publish --workspace=packages/clik-engine --access public
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
