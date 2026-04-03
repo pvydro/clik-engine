@@ -24,11 +24,22 @@ export class CombatManager {
   private registry: EntityRegistry;
   private damageCallbacks: ((event: DamageEvent) => void)[] = [];
   private killCallbacks: ((event: DamageEvent) => void)[] = [];
+  private collisionFilter: ((attacker: Entity, defender: Entity) => boolean) | null = null;
   /** Max distance for spatial neighbor query (increase for faster projectiles) */
   queryRadius = 300;
 
   constructor(registry: EntityRegistry) {
     this.registry = registry;
+  }
+
+  /**
+   * Set a filter function for collision pairs.
+   * Return true to allow the collision, false to skip it.
+   * Useful for team/faction filtering (e.g., skip friendly fire).
+   */
+  setFilter(filter: (attacker: Entity, defender: Entity) => boolean): this {
+    this.collisionFilter = filter;
+    return this;
   }
 
   /** Check all hitbox vs hurtbox collisions this frame */
@@ -53,6 +64,7 @@ export class CombatManager {
 
       for (const defender of candidates) {
         if (!defender.active || defender === attacker) continue;
+        if (this.collisionFilter && !this.collisionFilter(attacker, defender)) continue;
         const hurtbox = defender.getComponent<Hurtbox>('hurtbox');
         if (!hurtbox || hurtbox.isInvincible) continue;
 
