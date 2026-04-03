@@ -197,6 +197,19 @@ export { ShaderManager } from './effects/ShaderManager';
 export { EffectPresets } from './effects/EffectPresets';
 export { CustomShaderPipeline, ShaderEffects } from './effects/CustomShader';
 export type { ShaderUniform } from './effects/CustomShader';
+export { ImpactDistortion } from './effects/ImpactDistortion';
+export type { ImpactDistortionConfig } from './effects/ImpactDistortion';
+export { ChromaticAberration } from './effects/ChromaticAberration';
+export type { ChromaticConfig } from './effects/ChromaticAberration';
+export { MotionBlur } from './effects/MotionBlur';
+export type { MotionBlurConfig } from './effects/MotionBlur';
+export { GlitchEffect } from './effects/GlitchEffect';
+export type { GlitchConfig } from './effects/GlitchEffect';
+export { ColorGrading, ColorGradingPresets } from './effects/ColorGrading';
+export type { ColorGradingPreset } from './effects/ColorGrading';
+export { TimeEffects } from './effects/TimeEffects';
+export { EffectComposer } from './effects/EffectComposer';
+export type { ComposedEffect, EffectStep } from './effects/EffectComposer';
 
 // Animation
 export { AnimationHelper, AnimationStateController } from './animation/AnimationManager';
