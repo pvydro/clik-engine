@@ -13,14 +13,14 @@ npm run dev:shooter                                  # Space Shooter example (po
 npm run dev:cards                                    # Card Match example (port 5176)
 
 # Build & Quality
-npm run build                                        # Build engine library (Vite, ~120 ES modules)
+npm run build                                        # Build engine library (Vite, ~200 ES modules)
 npm run typecheck --workspace=packages/clik-engine   # TypeScript type checking (tsc --noEmit)
 npm run lint --workspace=packages/clik-engine        # ESLint (src/*.ts only)
 npm run format --workspace=packages/clik-engine      # Prettier (semi, singleQuote, 120 printWidth)
 npm run docs --workspace=packages/clik-engine        # TypeDoc API docs
 
 # Testing (Vitest)
-npm run test                                         # Run all tests (~88 files, ~1050 tests)
+npm run test                                         # Run all tests (~165 files, ~1784 tests)
 npm run test -- tests/utils/Vector2.test.ts          # Run a single test file
 npm run test -- -t "pattern"                         # Filter by test name
 npm run test:watch --workspace=packages/clik-engine  # Watch mode
@@ -54,7 +54,17 @@ This means: `this.actions`, `this.director`, `this.audio`, `this.save`, `this.en
 
 ### Entity/Component System
 
-`Entity` extends Phaser Container. Components are added via `entity.addComponent()`. `EntityRegistry` maintains O(1) indexes by type and tag — use `getByType()` / `getByTag()` instead of filtering. `BaseScene.update()` automatically calls `entityRegistry.updateAll()`.
+`Entity` extends Phaser Container. Components are added via `entity.addComponent()`. `EntityRegistry` maintains O(1) indexes by type, tag, and component name — use `getByType()` / `getByTag()` / `getByComponent()` instead of filtering. `BaseScene.update()` automatically calls `entityRegistry.updateAll()`.
+
+**Pooling:** `EntityPool` reuses entities without create/destroy overhead. `Entity.activate(x, y)` resets position/tags/components, `Entity.deactivate()` hides without destroying. All components implement `reset()` for pool compatibility. `EntityFactory.createPool()` / `acquirePooled()` / `releasePooled()` manage pools.
+
+**Spatial queries:** `EntityRegistry.enableSpatial({ cellSize })` connects the `SpatialHash`. Tag entities with `'spatial'` for tracking. Query with `getNearby(x, y, radius)` and `getInRect(x, y, w, h)`.
+
+**Combat system:** `Hitbox` / `Hurtbox` components define AABB collision volumes. `CombatManager` does broad-phase via spatial + component index, narrow-phase AABB. `Health.takeDamage(DamageEvent)` supports type modifiers, shields, and invincibility frames.
+
+**Movement components:** `Movement` (velocity+friction), `HomingMovement`, `SineMovement`, `CircularMovement`, `SplineMovement` (Catmull-Rom), `AcceleratingMovement` (with easing), `CullOffscreen` (auto-despawn, pool-aware).
+
+**Bullet patterns:** `BulletEmitter` component with 7 pattern types (radial, aimed, spiral, ring, shotgun, stream, random-spread). `WaveManager` sequences enemy spawns with delayBefore/delayAfter and wave completion detection.
 
 ### Network System
 
@@ -68,9 +78,51 @@ Extensible via `ClikPlugin` interface (init/destroy lifecycle) and `ClikScenePlu
 
 `BehaviorTree` with `Blackboard` shared data, 8 node types (Sequence, Selector, Parallel, Inverter, Succeeder, Repeater, Wait, Action, Condition). `Steering` behaviors (seek, flee, arrive, pursue, evade, wander, obstacle avoidance, separation, alignment, cohesion). `SteeringCalculator` for weighted force composition.
 
+**Advanced AI:** `PathSteering` combines A* pathfinding with steering for smooth path following. `SquadCoordinator` manages attack tokens, formations (circle/line), and roles (attacker/flanker/supporter). `UtilityAI` scores actions via consideration curves. `DirectorAI` monitors player performance and adjusts difficulty dynamically (L4D-style). `GOAPPlanner` plans action sequences via A* over world state. `AIAnimationAdapter` bridges AI decisions with `AnimationStateMachine`.
+
+### Animation System
+
+`SpriteAnimator` for basic play/chain/face. `AnimationEventSystem` for frame-accurate gameplay callbacks. `AnimationStateMachine` with cancel windows, priority levels, and auto-transitions. `BlendTree1D`/`BlendTree2D` for parameter-driven animation selection. `AnimationLayerStack` for multi-layer animation (legs + torso). `CancelWindow` + `ComboGraph` for fighting-game combo routing with `InputBuffer` integration. `DirectionalResolver` for 4-way/8-way animation variants with flipX fallback. `AnimatorComponent` wraps ASM for entity attachment.
+
+### Hierarchical FSM
+
+`HierarchicalStateMachine` extends the flat `StateMachine` with composite states (child FSMs), event-driven transitions with priority queue, timeout transitions, state tags (`hasTag('invincible')`), and shallow/deep history for re-entry. `ParallelRegion` runs multiple FSMs simultaneously with cross-region guards. `AnimationBinding` declaratively syncs HFSM states with `AnimationStateMachine`.
+
+### Visual Effects
+
+`ShaderManager` with post-FX presets (blur, bloom, vignette, pixelate, CRT, dream). `ImpactDistortion` for screen ripple. `ChromaticAberration` for RGB offset pulses. `MotionBlur` for velocity-based blur. `GlitchEffect` for pixelation + hue shift. `ColorGrading` with presets (normal, desaturated, warm, cold, noir, toxic). `TimeEffects` for hitstop (frame freeze) and slow-motion. `EffectComposer` chains effects with presets: criticalHit, heavyImpact, death, dashBurst, corruption.
+
+### Camera System
+
+`CameraManager` with follow (lerp, deadzone), shake presets, pan/zoom/fade/flash. **Camera prediction** (velocity-based look-ahead). **Directional shake** (`shakeDirectional`, `shakeFrom`). **Screen boundary framing** (`lockToBounds`, `transitionBounds`). `DynamicZoom` auto-adjusts zoom to frame multiple weighted targets. `ParallaxManager` for multi-layer scroll rates. `OrbitalCamera` for cinematic orbits with `transitionToFollow()`. `MultiCamera` for split-screen and minimap.
+
+### Physics Enhancements
+
+`PhysicsBody`, `CollisionBuilder`, `CollisionGroups`, `Raycast`, `PhysicsPool`, `MovingPlatform` (existing). **New:** `TriggerZone` for enter/stay/exit detection (AABB + circle, tag/type filtering). `CollisionEventTracker` for per-pair enter/stay/exit lifecycle. `ContinuousCollision` (swept AABB) prevents fast-projectile tunneling. `Destructible` component for breakable environment (health stages, callbacks). `VerletChain` for rope/chain physics.
+
+### Audio Enhancements
+
+`AudioManager`, `ProceduralAudio`, `ProceduralMusic` (existing). **New:** `SpatialAudio` for position-based panning + volume falloff. `SoundPool` for pre-allocated simultaneous playback with voice stealing. `AudioMixer` for ducking profiles (auto-lower music on loud SFX). `BeatSync` for rhythm-based gameplay (BPM callbacks, beat progress, quantization).
+
+### Particles
+
+`ParticleManager`, `GraphicsParticles`, `TrailRenderer` (existing). **New:** `GPUParticleEmitter` with flat Float32Array pool for zero-allocation gameplay (5K-10K particles). `ParticleCollision` for AABB bouncing. `ForceField` (attractor, repeller, vortex, wind, turbulence). `CombatParticlePresets` (slashSparks, bulletSparks, dashTrail, shieldBreak, healGlow, explosionCore, explosionDebris, bloodSplatter).
+
+### Tilemap Enhancements
+
+`TilemapManager` (existing). **New:** `TileEffects` for property-based enter/stay/exit lifecycle (hazard, ice, slow). `DestructibleTiles` with per-tile health and visual damage stages. `AnimatedTiles` for frame cycling. `CollisionRebuilder` for batched collision updates. `TileLighting` with flood-fill light propagation, dynamic sources, opaque blocking.
+
+### Network / Multiplayer
+
+`NetworkManager`, `Lobby`, `Room`, `StateSync` (existing). **New:** `InputPrediction` for client-side input with server correction. `RollbackManager` for GGPO-style frame snapshots and re-simulation. `LagCompensation` for server-side historical hit verification. `DeltaCompression` for changed-field-only bandwidth reduction. `LatencyMonitor` for RTT/jitter measurement.
+
+### PCG Enhancements
+
+`DungeonGenerator`, `PlatformerGenerator`, `ArenaGenerator` (existing). **New:** `EncounterPlacer` for topology-aware enemy/boss placement. `LootGenerator` with weighted rarity tables. `BiomeGenerator` for themed regions with transition blending. `PathBrancher` for optional treasure/challenge/secret corridors. `HazardPlacer` for environmental hazards with spacing rules. `PCGValidator` for multi-constraint validation with auto-repair.
+
 ### Input Provider Architecture
 
-`InputManager` delegates to three providers: `KeyboardProvider`, `TouchProvider`, `GamepadProvider`. Each implements `InputProvider` interface. `InputBuffer` for fighting-game input sequences. `RemapHelper` for settings menu key rebinding.
+`InputManager` delegates to three providers: `KeyboardProvider`, `TouchProvider`, `GamepadProvider`. Each implements `InputProvider` interface. `InputBuffer` for fighting-game input sequences. `RemapHelper` for settings menu key rebinding. Action bindings support `keys`, `touch` (tap/swipe gestures), `pointer: 'down'` (mouse click, fires immediately and stays active while held), and `gamepad`.
 
 ## Key Conventions
 
