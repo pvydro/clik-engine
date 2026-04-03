@@ -199,6 +199,13 @@ export type { ParticleShape } from './particles/GraphicsParticles';
 export { TrailRenderer } from './particles/TrailRenderer';
 export type { TrailConfig } from './particles/TrailRenderer';
 export { AdvancedParticlePresets } from './particles/AdvancedPresets';
+export { GPUParticleEmitter } from './particles/GPUParticles';
+export type { GPUEmitterConfig, GPUParticle } from './particles/GPUParticles';
+export { ParticleCollision } from './particles/ParticleCollision';
+export type { ParticleRect, BouncingParticle, ParticleCollisionConfig } from './particles/ParticleCollision';
+export { ForceField } from './particles/ForceField';
+export type { ForceFieldType, ForceFieldConfig, ForceTarget } from './particles/ForceField';
+export { CombatParticlePresets } from './particles/CombatPresets';
 
 // Effects
 export { ShaderManager } from './effects/ShaderManager';
