@@ -20,6 +20,9 @@ export class TouchProvider implements InputProvider {
   private swipeState: SwipeState = { startX: 0, startY: 0, startTime: 0, active: false };
   private lastSwipe: string | null = null;
   private swipeConsumed = false;
+  private pointerIsDown = false;
+  /** Latched flag: set on pointerdown, cleared after InputManager reads it */
+  private pointerDownThisFrame = false;
   private pointerDownHandler: ((pointer: Phaser.Input.Pointer) => void) | null = null;
   private pointerUpHandler: ((pointer: Phaser.Input.Pointer) => void) | null = null;
 
@@ -33,6 +36,8 @@ export class TouchProvider implements InputProvider {
     this.swipeMaxTime = swipeMaxTime;
 
     this.pointerDownHandler = (pointer: Phaser.Input.Pointer) => {
+      this.pointerIsDown = true;
+      this.pointerDownThisFrame = true;
       this.swipeState = {
         startX: pointer.x,
         startY: pointer.y,
@@ -45,6 +50,7 @@ export class TouchProvider implements InputProvider {
     scene.input.on('pointerdown', this.pointerDownHandler);
 
     this.pointerUpHandler = (pointer: Phaser.Input.Pointer) => {
+      this.pointerIsDown = false;
       if (!this.swipeState.active) return;
       this.swipeState.active = false;
 
@@ -78,11 +84,20 @@ export class TouchProvider implements InputProvider {
   }
 
   update(): void {
-    // Touch state managed via event handlers
+    // No-op: state managed via event handlers.
+    // pointerDownThisFrame is cleared after isActionDown reads it.
   }
 
-  isActionDown(_action: string): boolean {
-    return false; // Touch gestures are one-shot, use consumeAction
+  isActionDown(action: string): boolean {
+    // pointer: 'down' binding — true while held OR on the frame it was pressed
+    const pointerBinding = this.actionMap.getPointer(action);
+    if (pointerBinding === 'down' && (this.pointerIsDown || this.pointerDownThisFrame)) return true;
+    return false;
+  }
+
+  /** @internal Called by InputManager after all actions have been polled */
+  endFrame(): void {
+    this.pointerDownThisFrame = false;
   }
 
   consumeAction(action: string): boolean {

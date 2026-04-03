@@ -15,7 +15,7 @@ createGame({
       move_right: { keys: ['RIGHT', 'D'] },
       move_up:    { keys: ['UP', 'W'] },
       move_down:  { keys: ['DOWN', 'S'] },
-      shoot:      { keys: ['SPACE'], touch: 'tap' },
+      shoot:      { keys: ['SPACE'], pointer: 'down' },
     },
   },
   plugins: [

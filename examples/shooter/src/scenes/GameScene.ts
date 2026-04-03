@@ -3,7 +3,7 @@ import {
   GraphicsParticles, ScorePopup, ComboDisplay, AnimatedHUD,
   GameFeelPresets, SceneUtils,
   Entity, EntityFactory, EntityPool,
-  Movement, Health, Hitbox, Hurtbox, CullOffscreen, Lifetime,
+  Movement, Health, Hitbox, Hurtbox, CullOffscreen,
   CombatManager,
 } from 'clik-engine';
 import type { DamageEvent } from 'clik-engine';
@@ -53,6 +53,12 @@ export class GameScene extends BaseScene {
     // Entity factory + prefabs
     this.factory = new EntityFactory().useRegistry(this.entities);
 
+    // Pools (created before prefabs so CullOffscreen can reference them)
+    this.bulletPool = new EntityPool(this.factory, this, { prefabName: 'bullet', maxSize: 50 });
+    this.bulletPool.useRegistry(this.entities);
+    this.enemyPool = new EntityPool(this.factory, this, { prefabName: 'enemy', maxSize: 30 });
+    this.enemyPool.useRegistry(this.entities);
+
     this.factory.register('bullet', (scene, x, y) => {
       const e = new Entity(scene, x, y);
       e.entityType = 'bullet';
@@ -62,7 +68,7 @@ export class GameScene extends BaseScene {
       e.addComponent('hitbox', new Hitbox([
         { offsetX: -2, offsetY: -6, width: 4, height: 12, damageAmount: 10, damageType: 'physical' },
       ]));
-      e.addComponent('lifetime', new Lifetime(3000));
+      e.addComponent('cull', new CullOffscreen(50).usePool(this.bulletPool));
       e.addTag('spatial');
       return e;
     });
@@ -75,18 +81,18 @@ export class GameScene extends BaseScene {
       e.add(rect);
       e.addComponent('movement', new Movement(120));
       e.addComponent('health', new Health(10));
+      e.addComponent('hitbox', new Hitbox([
+        { offsetX: -size / 2, offsetY: -size / 2, width: size, height: size, damageAmount: 1, damageType: 'physical' },
+      ]));
       e.addComponent('hurtbox', new Hurtbox([
         { offsetX: -size / 2, offsetY: -size / 2, width: size, height: size },
       ]));
-      e.addComponent('cull', new CullOffscreen(30));
+      e.addComponent('cull', new CullOffscreen(50).usePool(this.enemyPool));
       e.addTag('spatial');
       return e;
     });
 
-    // Pools
-    this.bulletPool = this.factory.createPool('bullet', this, { maxSize: 50 });
     this.bulletPool.prewarm(20);
-    this.enemyPool = this.factory.createPool('enemy', this, { maxSize: 30 });
 
     // Starfield
     for (let i = 0; i < 80; i++) {
@@ -121,14 +127,12 @@ export class GameScene extends BaseScene {
     this.combat.onDamage((event: DamageEvent) => {
       if (event.target === this.player) {
         this.onPlayerHit(event);
-      } else {
-        this.onEnemyKill(event);
       }
     });
 
     this.combat.onKill((event: DamageEvent) => {
       if (event.target !== this.player) {
-        this.enemyPool.release(event.target);
+        this.onEnemyKill(event);
       }
     });
 
@@ -141,7 +145,7 @@ export class GameScene extends BaseScene {
     });
     this.hud.updateCounter('lives', this.lives);
 
-    this.add.text(width / 2, height - 16, 'WASD/Arrows to move, Space to shoot', {
+    this.add.text(width / 2, height - 16, 'WASD/Arrows + click/space to shoot', {
       fontSize: '11px', fontFamily: 'monospace', color: '#444',
     }).setOrigin(0.5).setScrollFactor(0);
 
@@ -224,6 +228,7 @@ export class GameScene extends BaseScene {
   private shoot(): void {
     const bullet = this.bulletPool.acquire(this.player.x, this.player.y - 20);
     if (!bullet) return;
+    bullet.addTag('spatial');
     const movement = bullet.getComponent<Movement>('movement')!;
     movement.setVelocity(0, -600);
     this.audio.procedural.tone({ frequency: 800, type: 'sine', duration: 0.04, volume: 0.1 });
@@ -233,6 +238,7 @@ export class GameScene extends BaseScene {
     const x = Phaser.Math.Between(40, this.scale.width - 40);
     const enemy = this.enemyPool.acquire(x, -20);
     if (!enemy) return;
+    enemy.addTag('spatial');
     const speed = Phaser.Math.Between(80, 150 + this.difficulty * 20);
     const movement = enemy.getComponent<Movement>('movement')!;
     movement.setVelocity(Phaser.Math.Between(-30, 30), speed);
@@ -243,8 +249,9 @@ export class GameScene extends BaseScene {
     const ex = event.target.x;
     const ey = event.target.y;
 
-    // Release bullet back to pool
-    this.bulletPool.release(event.source!);
+    // Release both bullet and enemy back to their pools
+    if (event.source) this.bulletPool.release(event.source);
+    this.enemyPool.release(event.target);
 
     this.combo++;
     this.comboTimer = this.COMBO_WINDOW;

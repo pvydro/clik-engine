@@ -1,8 +1,20 @@
+import type { Entity } from '../Entity';
 import { EntityRegistry } from '../EntityRegistry';
 import { Hitbox } from '../components/Hitbox';
 import { Hurtbox } from '../components/Hurtbox';
 import { Health } from '../components/Health';
 import type { DamageEvent, WorldBox } from './DamageTypes';
+
+let nextEntityId = 1;
+const entityIds = new WeakMap<Entity, number>();
+function getEntityId(entity: Entity): number {
+  let id = entityIds.get(entity);
+  if (id === undefined) {
+    id = nextEntityId++;
+    entityIds.set(entity, id);
+  }
+  return id;
+}
 
 /**
  * Manages combat collision detection between hitboxes and hurtboxes.
@@ -12,6 +24,8 @@ export class CombatManager {
   private registry: EntityRegistry;
   private damageCallbacks: ((event: DamageEvent) => void)[] = [];
   private killCallbacks: ((event: DamageEvent) => void)[] = [];
+  /** Max distance for spatial neighbor query (increase for faster projectiles) */
+  queryRadius = 300;
 
   constructor(registry: EntityRegistry) {
     this.registry = registry;
@@ -21,7 +35,7 @@ export class CombatManager {
   checkCollisions(): DamageEvent[] {
     const events: DamageEvent[] = [];
     const hitboxEntities = this.registry.getByComponent('hitbox');
-    const processed = new Set<string>();
+    const processed = new Set<number>();
 
     for (const attacker of hitboxEntities) {
       if (!attacker.active) continue;
@@ -30,9 +44,11 @@ export class CombatManager {
       const attackBoxes = hitbox.getWorldBoxes();
       if (attackBoxes.length === 0) continue;
 
+      const attackerId = getEntityId(attacker);
+
       // Use spatial query if available, otherwise check all hurtbox entities
       const candidates = this.registry.isSpatialEnabled
-        ? this.registry.getNearby(attacker.x, attacker.y, 200)
+        ? this.registry.getNearby(attacker.x, attacker.y, this.queryRadius)
         : this.registry.getByComponent('hurtbox');
 
       for (const defender of candidates) {
@@ -40,9 +56,10 @@ export class CombatManager {
         const hurtbox = defender.getComponent<Hurtbox>('hurtbox');
         if (!hurtbox || hurtbox.isInvincible) continue;
 
-        // Deduplicate per attacker/defender pair this frame
-        const pairKey = `${attacker.x},${attacker.y}-${defender.x},${defender.y}`;
-        if (processed.has(pairKey)) continue;
+        // Deduplicate per attacker/defender pair this frame using stable IDs
+        const defenderId = getEntityId(defender);
+        const pairId = attackerId * 100000 + defenderId;
+        if (processed.has(pairId)) continue;
 
         const defenseBoxes = hurtbox.getWorldBoxes();
         if (defenseBoxes.length === 0) continue;
@@ -54,7 +71,6 @@ export class CombatManager {
           for (const dBox of defenseBoxes) {
             if (aabbIntersects(aBox, dBox)) {
               hit = true;
-              // Find the matching hitbox def for damage info
               const matchingDef = hitbox.getBoxes().find(b => b.tag === aBox.tag);
               if (matchingDef) hitboxDef = matchingDef;
               break;
@@ -64,7 +80,7 @@ export class CombatManager {
         }
 
         if (hit) {
-          processed.add(pairKey);
+          processed.add(pairId);
           const event: DamageEvent = {
             source: attacker,
             target: defender,

@@ -50,6 +50,7 @@ export class InputManager {
 
       // Check all providers
       if (this.keyboard.isActionDown(action)) down = true;
+      if (this.touch.isActionDown(action)) down = true;
       if (this.touch.consumeAction(action)) down = true;
       if (this.gamepad.isActionDown(action)) down = true;
 
@@ -59,6 +60,9 @@ export class InputManager {
         ConsoleReporter.input(`action pressed: ${action}`);
       }
     }
+
+    // Clear latched pointer state after all actions polled
+    this.touch.endFrame();
   }
 
   isDown(action: string): boolean {

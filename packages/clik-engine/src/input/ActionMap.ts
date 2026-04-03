@@ -23,6 +23,10 @@ export class ActionMap {
     return this.actions.get(action)?.touch;
   }
 
+  getPointer(action: string): string | undefined {
+    return this.actions.get(action)?.pointer;
+  }
+
   getGamepad(action: string): string | undefined {
     return this.actions.get(action)?.gamepad;
   }

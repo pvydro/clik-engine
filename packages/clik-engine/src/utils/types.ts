@@ -13,6 +13,8 @@ export interface SceneEntry {
 export interface ActionBinding {
   keys?: string[];
   touch?: 'tap' | 'swipe_left' | 'swipe_right' | 'swipe_up' | 'swipe_down';
+  /** Pointer/mouse binding: 'down' fires immediately on press and stays active while held */
+  pointer?: 'down';
   gamepad?: string;
 }
 
