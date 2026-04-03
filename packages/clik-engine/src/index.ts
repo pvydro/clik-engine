@@ -384,6 +384,18 @@ export type {
 export { BehaviorTree, Blackboard, BTNode, NodeStatus } from './ai/BehaviorTree';
 export { Sequence, Selector, Parallel, Inverter, Succeeder, Repeater, Wait, Action, Condition } from './ai/nodes/index';
 export { Steering, SteeringCalculator } from './ai/SteeringBehaviors';
+export { PathSteering } from './ai/PathSteering';
+export type { PathSteeringConfig } from './ai/PathSteering';
+export { SquadCoordinator } from './ai/SquadCoordinator';
+export type { SquadRole, SquadMember, FormationSlot } from './ai/SquadCoordinator';
+export { UtilityAI } from './ai/UtilityAI';
+export type { Consideration, CurveType, ActionScore } from './ai/UtilityAI';
+export { DirectorAI } from './ai/DirectorAI';
+export type { DirectorConfig } from './ai/DirectorAI';
+export { GOAPPlanner } from './ai/GOAP';
+export type { GOAPAction, WorldState } from './ai/GOAP';
+export { AIAnimationAdapter } from './ai/AIAnimationAdapter';
+export type { AIAnimMapping } from './ai/AIAnimationAdapter';
 
 // Types
 export type {
