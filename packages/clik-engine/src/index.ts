@@ -126,6 +126,14 @@ export type { ValidationResult } from './assets/ManifestValidator';
 export { AudioManager } from './audio/AudioManager';
 export { ProceduralAudio } from './audio/ProceduralAudio';
 export { ProceduralMusic } from './audio/ProceduralMusic';
+export { SpatialAudio } from './audio/SpatialAudio';
+export type { SpatialAudioConfig } from './audio/SpatialAudio';
+export { SoundPool } from './audio/SoundPool';
+export type { SoundPoolConfig } from './audio/SoundPool';
+export { AudioMixer } from './audio/AudioMixer';
+export type { DuckProfile } from './audio/AudioMixer';
+export { BeatSync } from './audio/BeatSync';
+export type { BeatSyncConfig, BeatCallback, MeasureCallback } from './audio/BeatSync';
 
 // Save
 export { SaveManager } from './save/SaveManager';
