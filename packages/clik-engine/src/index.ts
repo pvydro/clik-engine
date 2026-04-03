@@ -250,6 +250,16 @@ export { AnimatorComponent } from './entity/components/AnimatorComponent';
 // Tilemap
 export { TilemapManager } from './tilemap/TilemapManager';
 export type { TilemapConfig, SpawnPoint } from './tilemap/TilemapManager';
+export { TileEffects } from './tilemap/TileEffects';
+export type { TileEffectDef } from './tilemap/TileEffects';
+export { DestructibleTiles } from './tilemap/DestructibleTiles';
+export type { TileHealth, DestructibleTileConfig } from './tilemap/DestructibleTiles';
+export { AnimatedTiles } from './tilemap/AnimatedTiles';
+export type { AnimatedTileDef, TileUpdate } from './tilemap/AnimatedTiles';
+export { CollisionRebuilder } from './tilemap/CollisionRebuilder';
+export type { DirtyTile } from './tilemap/CollisionRebuilder';
+export { TileLighting } from './tilemap/TileLighting';
+export type { LightSource } from './tilemap/TileLighting';
 
 // Entity
 export { Entity } from './entity/Entity';
