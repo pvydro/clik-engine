@@ -148,6 +148,11 @@ export { CollisionGroups } from './physics/CollisionGroups';
 // FSM
 export { StateMachine } from './fsm/StateMachine';
 export type { StateHooks, TransitionRule } from './fsm/State';
+export { HierarchicalStateMachine } from './fsm/HierarchicalStateMachine';
+export type { HierarchicalStateConfig, EventTransitionDef, TimeoutTransitionDef, FSMEvent, HistoryMode } from './fsm/HierarchicalStateMachine';
+export { ParallelRegion } from './fsm/ParallelRegion';
+export { AnimationBinding } from './fsm/AnimationBinding';
+export type { AnimBindingConfig } from './fsm/AnimationBinding';
 
 // Tween
 export { tween, tweenSequence, TweenPresets } from './tween/TweenHelper';
