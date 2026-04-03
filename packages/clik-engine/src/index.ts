@@ -144,6 +144,16 @@ export { MovingPlatform } from './physics/MovingPlatform';
 export type { PlatformWaypoint } from './physics/MovingPlatform';
 export { PhysicsPool } from './physics/PhysicsPool';
 export { CollisionGroups } from './physics/CollisionGroups';
+export { TriggerZone } from './physics/TriggerZone';
+export type { TriggerZoneConfig, TriggerShape, TriggerCallback } from './physics/TriggerZone';
+export { CollisionEventTracker } from './physics/PhysicsEvents';
+export type { CollisionEvent, CollisionPhase, CollisionCallback } from './physics/PhysicsEvents';
+export { ContinuousCollision } from './physics/ContinuousCollision';
+export type { AABB, SweptResult } from './physics/ContinuousCollision';
+export { Destructible } from './physics/Destructible';
+export type { DestructibleConfig } from './physics/Destructible';
+export { VerletChain } from './physics/VerletChain';
+export type { VerletChainConfig } from './physics/VerletChain';
 
 // FSM
 export { StateMachine } from './fsm/StateMachine';
