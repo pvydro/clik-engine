@@ -5,6 +5,16 @@ All notable changes to `clik-engine` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-04-03
+
+### Added
+
+- **CombatManager.setFilter()**: collision pair filtering for team/faction-based combat (prevents friendly fire)
+- **Performance benchmarks**: Vitest bench suite for EntityPool (500 entities), GPUParticleEmitter (10K particles), A* pathfinding (100x100 grids), CombatManager (200 hitbox/hurtbox entities)
+- **Platformer example**: side-scrolling action with parallel locomotion + combat HSMs, wall-jump, dash, attack combos (CancelWindow + ComboGraph + InputBuffer), DestructibleTiles, TileEffects, ParallaxManager, SquadCoordinator
+- **Twin-Stick Shooter example**: top-down arena with BulletEmitter (3 weapon types), WaveManager + DirectorAI adaptive difficulty, GPUParticleEmitter, DynamicZoom, EffectComposer, TimeEffects, SpatialAudio
+- **Boss Fight example**: 3-phase boss with HierarchicalStateMachine (child FSMs per phase), OrbitalCamera intro, BeatSync rhythm attacks, ColorGrading transitions, ForceField vortex, DestructibleTiles arena
+
 ## [2.0.0] - 2026-04-03
 
 ### Added — Action-Game Engine Overhaul (11 workstreams)
