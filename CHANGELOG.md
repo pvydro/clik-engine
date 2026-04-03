@@ -5,6 +5,33 @@ All notable changes to `clik-engine` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-04-03
+
+### Added — Action-Game Engine Overhaul (11 workstreams)
+
+- **Entity pooling**: `EntityPool` with acquire/release, `Component.reset()`, `Entity.activate()/deactivate()`
+- **Spatial queries**: `EntityRegistry.enableSpatial()`, `getNearby()`, `getInRect()`, `getByComponent()`
+- **Combat system**: `CombatManager`, `Hitbox`/`Hurtbox`, `Health.takeDamage()` with shields/modifiers/iframes
+- **Bullet patterns**: `BulletEmitter` (7 patterns), `WaveManager` with wave completion detection
+- **Movement**: `HomingMovement`, `SineMovement`, `CircularMovement`, `SplineMovement`, `AcceleratingMovement`, `CullOffscreen`
+- **Animation**: `AnimationStateMachine`, `BlendTree1D`/`2D`, `AnimationLayerStack`, `CancelWindow`, `ComboGraph`, `DirectionalResolver`, `AnimatorComponent`
+- **Hierarchical FSM**: `HierarchicalStateMachine` (composite states, events, timeouts, tags, history), `ParallelRegion`, `AnimationBinding`
+- **Advanced AI**: `PathSteering`, `SquadCoordinator`, `UtilityAI`, `DirectorAI`, `GOAPPlanner`, `AIAnimationAdapter`
+- **Visual effects**: `ImpactDistortion`, `ChromaticAberration`, `MotionBlur`, `GlitchEffect`, `ColorGrading`, `TimeEffects` (hitstop/slow-mo), `EffectComposer` with 5 presets
+- **Camera**: prediction, directional shake, `DynamicZoom`, `ParallaxManager`, `OrbitalCamera`, boundary framing
+- **Physics**: `TriggerZone`, `CollisionEventTracker`, `ContinuousCollision` (swept AABB), `Destructible`, `VerletChain`
+- **Audio**: `SpatialAudio`, `SoundPool`, `AudioMixer` (ducking), `BeatSync`
+- **Particles**: `GPUParticleEmitter`, `ParticleCollision`, `ForceField` (5 types), `CombatParticlePresets` (8 presets)
+- **Tilemap**: `TileEffects`, `DestructibleTiles`, `AnimatedTiles`, `CollisionRebuilder`, `TileLighting`
+- **Network**: `InputPrediction`, `RollbackManager`, `LagCompensation`, `DeltaCompression`, `LatencyMonitor`
+- **PCG**: `EncounterPlacer`, `LootGenerator`, `BiomeGenerator`, `PathBrancher`, `HazardPlacer`, `PCGValidator`
+- **Input**: `pointer: 'down'` binding for immediate mouse/touch response
+
+### Changed
+- Shooter example refactored to entity system
+- CI bundle limit raised to 1MB warning-only
+- ~70 new source files, ~68 new test files, 1784 total tests (up from 1161)
+
 ## [1.2.0] - 2026-03-31
 
 ### Added
