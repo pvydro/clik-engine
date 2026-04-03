@@ -9,7 +9,10 @@
     "examples/2048",
     "examples/shooter",
     "examples/cards",
-    "examples/pcg-dungeon"
+    "examples/pcg-dungeon",
+    "examples/twin-stick",
+    "examples/boss-fight",
+    "examples/platformer"
   ],
   "scripts": {
     "dev": "npm run dev --workspace=dev-harness",
@@ -17,8 +20,12 @@
     "dev:shooter": "npm run dev --workspace=examples/shooter",
     "dev:cards": "npm run dev --workspace=examples/cards",
     "dev:dungeon": "npm run dev --workspace=examples/pcg-dungeon",
+    "dev:twin-stick": "npm run dev --workspace=examples/twin-stick",
+    "dev:boss-fight": "npm run dev --workspace=examples/boss-fight",
+    "dev:platformer": "npm run dev --workspace=examples/platformer",
     "build": "npm run build --workspace=packages/clik-engine",
     "build:cli": "npm run build --workspace=packages/create-clik-game",
-    "test": "npm run test --workspace=packages/clik-engine"
+    "test": "npm run test --workspace=packages/clik-engine",
+    "bench": "npm run bench --workspace=packages/clik-engine"
   }
 }
