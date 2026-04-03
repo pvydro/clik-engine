@@ -368,6 +368,15 @@ export { Lobby } from './network/Lobby';
 export { Room } from './network/Room';
 export { StateSync } from './network/StateSync';
 export type { StateSyncConfig } from './network/StateSync';
+export { InputPrediction } from './network/Prediction';
+export type { PredictedInput, PredictionCorrection } from './network/Prediction';
+export { RollbackManager } from './network/Rollback';
+export type { RollbackConfig, RollbackResult } from './network/Rollback';
+export { LagCompensation } from './network/LagCompensation';
+export type { HistoricalState } from './network/LagCompensation';
+export { DeltaCompression } from './network/DeltaCompression';
+export type { DeltaPacket } from './network/DeltaCompression';
+export { LatencyMonitor } from './network/LatencyMonitor';
 export type {
   ConnectionState,
   RoomState,
