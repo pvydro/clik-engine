@@ -175,6 +175,13 @@ export { CameraManager } from './camera/CameraManager';
 export type { FollowConfig } from './camera/CameraManager';
 export { MultiCamera } from './camera/MultiCamera';
 export type { SplitScreenConfig, MinimapConfig } from './camera/MultiCamera';
+export type { PredictionConfig, BoundsLock } from './camera/CameraManager';
+export { DynamicZoom } from './camera/DynamicZoom';
+export type { DynamicZoomConfig, ZoomTarget } from './camera/DynamicZoom';
+export { ParallaxManager } from './camera/ParallaxManager';
+export type { ParallaxLayerConfig } from './camera/ParallaxManager';
+export { OrbitalCamera } from './camera/OrbitalCamera';
+export type { OrbitalConfig } from './camera/OrbitalCamera';
 
 // Particles
 export { ParticleManager, ParticlePresets } from './particles/ParticleManager';

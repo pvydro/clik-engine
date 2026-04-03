@@ -9,8 +9,28 @@ export interface FollowConfig {
   deadzone?: { width: number; height: number };
 }
 
+export interface PredictionConfig {
+  /** How far ahead to look based on velocity (multiplier, default: 0.3) */
+  strength?: number;
+  /** Damping to smooth prediction changes (0-1, default: 0.05) */
+  damping?: number;
+  /** Maximum prediction offset in pixels */
+  maxOffset?: number;
+}
+
+export interface BoundsLock {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 export class CameraManager {
   private scene: Phaser.Scene;
+  private predictionConfig: PredictionConfig | null = null;
+  private predictionOffset = { x: 0, y: 0 };
+  private lastTargetPos = { x: 0, y: 0 };
+  private boundsLock: BoundsLock | null = null;
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -169,8 +189,118 @@ export class CameraManager {
            worldY <= bounds.y + bounds.height + margin;
   }
 
+  // --- Camera Prediction ---
+
+  /** Enable velocity-based look-ahead. Call updatePrediction() each frame. */
+  enablePrediction(config?: PredictionConfig): this {
+    this.predictionConfig = {
+      strength: config?.strength ?? 0.3,
+      damping: config?.damping ?? 0.05,
+      maxOffset: config?.maxOffset ?? 150,
+    };
+    return this;
+  }
+
+  /** Disable prediction */
+  disablePrediction(): this {
+    this.predictionConfig = null;
+    this.predictionOffset = { x: 0, y: 0 };
+    return this;
+  }
+
+  /**
+   * Update prediction offset based on target velocity. Call each frame.
+   * Adjusts the follow offset to lead the camera in the movement direction.
+   */
+  updatePrediction(targetX: number, targetY: number, delta: number): void {
+    if (!this.predictionConfig) return;
+
+    const dt = delta / 1000;
+    const vx = (targetX - this.lastTargetPos.x) / (dt || 1);
+    const vy = (targetY - this.lastTargetPos.y) / (dt || 1);
+    this.lastTargetPos.x = targetX;
+    this.lastTargetPos.y = targetY;
+
+    const { strength, damping, maxOffset } = this.predictionConfig;
+    const targetOffX = Math.max(-maxOffset!, Math.min(maxOffset!, vx * strength!));
+    const targetOffY = Math.max(-maxOffset!, Math.min(maxOffset!, vy * strength!));
+
+    this.predictionOffset.x += (targetOffX - this.predictionOffset.x) * damping!;
+    this.predictionOffset.y += (targetOffY - this.predictionOffset.y) * damping!;
+  }
+
+  /** Get current prediction offset (add to camera follow offset) */
+  getPredictionOffset(): { x: number; y: number } {
+    return { ...this.predictionOffset };
+  }
+
+  // --- Directional Shake ---
+
+  /** Shake the camera in a specific direction */
+  shakeDirectional(dirX: number, dirY: number, duration = 200, intensity = 10): void {
+    const cam = this.main;
+    const len = Math.sqrt(dirX * dirX + dirY * dirY) || 1;
+    const nx = dirX / len;
+    const ny = dirY / len;
+    const startScrollX = cam.scrollX;
+    const startScrollY = cam.scrollY;
+
+    this.scene.tweens.addCounter({
+      from: intensity,
+      to: 0,
+      duration,
+      ease: 'Sine.easeOut',
+      onUpdate: (tween: Phaser.Tweens.Tween) => {
+        const v = tween.getValue() ?? 0;
+        const noise = Math.sin(tween.elapsed * 0.05) * v;
+        cam.setScroll(startScrollX + nx * noise, startScrollY + ny * noise);
+      },
+      onComplete: () => {
+        cam.setScroll(startScrollX, startScrollY);
+      },
+    });
+  }
+
+  /** Shake from a world position (direction = position → camera center) */
+  shakeFrom(worldX: number, worldY: number, duration = 200, intensity = 10): void {
+    const center = this.getPosition();
+    const dx = center.x - worldX;
+    const dy = center.y - worldY;
+    this.shakeDirectional(dx, dy, duration, intensity);
+  }
+
+  // --- Screen Boundary Framing ---
+
+  /** Lock camera to a rectangular area (boss arena, room) */
+  lockToBounds(bounds: BoundsLock): this {
+    this.boundsLock = bounds;
+    this.main.setBounds(bounds.x, bounds.y, bounds.width, bounds.height);
+    return this;
+  }
+
+  /** Release bounds lock and restore world bounds */
+  unlockBounds(): this {
+    this.boundsLock = null;
+    this.main.removeBounds();
+    return this;
+  }
+
+  /** Smoothly transition to a new bounds lock */
+  async transitionBounds(bounds: BoundsLock, duration = 500): Promise<void> {
+    const center = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
+    await this.panTo(center.x, center.y, duration);
+    this.lockToBounds(bounds);
+  }
+
+  /** Get current bounds lock */
+  getBoundsLock(): BoundsLock | null {
+    return this.boundsLock;
+  }
+
   /** Clean up camera state */
   destroy(): void {
     this.stopFollow();
+    this.predictionConfig = null;
+    this.boundsLock = null;
   }
 }
