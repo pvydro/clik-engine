@@ -417,6 +417,18 @@ export { EntityDensityConstraint } from './pcg/constraints/EntityDensityConstrai
 export { DifficultyConstraint } from './pcg/constraints/DifficultyConstraint';
 export { shuffleArray, weightedPick, randomPointInRect, noiseSample1D } from './pcg/SeededUtils';
 export { TileType } from './pcg/PCGTypes';
+export { EncounterPlacer } from './pcg/generators/EncounterPlacer';
+export type { EncounterConfig } from './pcg/generators/EncounterPlacer';
+export { LootGenerator } from './pcg/generators/LootGenerator';
+export type { LootTableEntry, LootConfig } from './pcg/generators/LootGenerator';
+export { BiomeGenerator } from './pcg/generators/BiomeGenerator';
+export type { BiomeDef, BiomeConfig } from './pcg/generators/BiomeGenerator';
+export { PathBrancher } from './pcg/generators/PathBrancher';
+export type { BranchDef, PathBrancherConfig } from './pcg/generators/PathBrancher';
+export { HazardPlacer } from './pcg/generators/HazardPlacer';
+export type { HazardDef, HazardPlacerConfig } from './pcg/generators/HazardPlacer';
+export { PCGValidator } from './pcg/PCGValidator';
+export type { ValidationResult as PCGValidationResult } from './pcg/PCGValidator';
 export type {
   PCGConfig,
   GeneratedLevel,
