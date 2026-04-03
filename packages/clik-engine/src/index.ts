@@ -226,6 +226,10 @@ export { SplineMovement } from './entity/components/SplineMovement';
 export { AcceleratingMovement, MovementEasing } from './entity/components/AcceleratingMovement';
 export type { EasingFn } from './entity/components/AcceleratingMovement';
 export { CullOffscreen } from './entity/components/CullOffscreen';
+export { BulletEmitter } from './entity/components/BulletEmitter';
+export { WaveManager } from './entity/combat/WaveManager';
+export type { SpawnDef, WaveDef } from './entity/combat/WaveManager';
+export type { PatternType, PatternConfig, BulletConfig } from './entity/combat/BulletPattern';
 
 // Analytics
 export { AnalyticsManager } from './analytics/AnalyticsManager';
