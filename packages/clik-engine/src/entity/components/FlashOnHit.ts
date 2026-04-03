@@ -52,4 +52,8 @@ export class FlashOnHit extends Component {
   isFlashing(): boolean {
     return this.flashing;
   }
+
+  reset(): void {
+    this.flashing = false;
+  }
 }

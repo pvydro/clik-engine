@@ -12,4 +12,7 @@ export abstract class Component {
 
   /** Called when the component is removed or entity is destroyed */
   onDetach(): void {}
+
+  /** Called when the owning entity is recycled from a pool. Reset internal state to defaults. */
+  reset(): void {}
 }

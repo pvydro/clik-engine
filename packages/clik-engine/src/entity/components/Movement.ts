@@ -62,4 +62,9 @@ export class Movement extends Component {
   isMoving(): boolean {
     return this.velocityX !== 0 || this.velocityY !== 0;
   }
+
+  reset(): void {
+    this.velocityX = 0;
+    this.velocityY = 0;
+  }
 }

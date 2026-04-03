@@ -66,4 +66,10 @@ export class Spawner extends Component {
   onDetach(): void {
     this.destroyAllSpawned();
   }
+
+  reset(): void {
+    this.elapsed = 0;
+    this.spawned = [];
+    this.active = true;
+  }
 }

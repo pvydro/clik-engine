@@ -8,6 +8,9 @@ export class Entity extends Phaser.GameObjects.Container {
   private registry: EntityRegistry | null = null;
   public entityType = 'entity';
 
+  /** @internal Prefab name used by EntityPool to track pool origin */
+  _poolPrefab: string | undefined;
+
   constructor(scene: Phaser.Scene, x = 0, y = 0) {
     super(scene, x, y);
     scene.add.existing(this);
@@ -18,10 +21,16 @@ export class Entity extends Phaser.GameObjects.Container {
     this.registry = registry;
   }
 
+  /** @internal Used by EntityRegistry to access the registry reference */
+  getRegistry(): EntityRegistry | null {
+    return this.registry;
+  }
+
   addComponent<T extends Component>(name: string, component: T): T {
     component.entity = this;
     this.components.set(name, component);
     component.onAttach();
+    this.registry?.onComponentAdded(this, name);
     return component;
   }
 
@@ -38,7 +47,13 @@ export class Entity extends Phaser.GameObjects.Container {
     if (comp) {
       comp.onDetach();
       this.components.delete(name);
+      this.registry?.onComponentRemoved(this, name);
     }
+  }
+
+  /** Get all component names on this entity */
+  getComponentNames(): string[] {
+    return Array.from(this.components.keys());
   }
 
   addTag(tag: string): this {
@@ -70,6 +85,40 @@ export class Entity extends Phaser.GameObjects.Container {
         comp.update(delta);
       }
     }
+  }
+
+  /**
+   * Reactivate a pooled entity at a new position.
+   * Resets position, visibility, alpha, clears tags, and calls reset() on all components.
+   */
+  activate(x: number, y: number): void {
+    this.x = x;
+    this.y = y;
+    this.active = true;
+    this.visible = true;
+    this.setAlpha(1);
+
+    // Clear tags (notifying registry)
+    for (const tag of Array.from(this.tags)) {
+      this.removeTag(tag);
+    }
+
+    // Reset all components
+    for (const comp of this.components.values()) {
+      comp.enabled = true;
+      comp.reset();
+    }
+  }
+
+  /**
+   * Deactivate a pooled entity without destroying it.
+   * Components remain attached but entity is hidden and inactive.
+   */
+  deactivate(): void {
+    this.active = false;
+    this.visible = false;
+    this.x = -9999;
+    this.y = -9999;
   }
 
   /** Get debug state for StateInspector */

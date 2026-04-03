@@ -68,4 +68,8 @@ export class Follower extends Component {
   hasTarget(): boolean {
     return this.target !== null;
   }
+
+  reset(): void {
+    this.target = null;
+  }
 }

@@ -4,6 +4,7 @@ export class EntityRegistry {
   private entities: Set<Entity> = new Set();
   private typeIndex: Map<string, Set<Entity>> = new Map();
   private tagIndex: Map<string, Set<Entity>> = new Map();
+  private componentIndex: Map<string, Set<Entity>> = new Map();
 
   register(entity: Entity): void {
     this.entities.add(entity);
@@ -13,7 +14,11 @@ export class EntityRegistry {
     for (const tag of entity.getTags()) {
       this.addToIndex(this.tagIndex, tag, entity);
     }
-    // Listen for tag changes
+    // Index existing components
+    for (const name of entity.getComponentNames()) {
+      this.addToIndex(this.componentIndex, name, entity);
+    }
+    // Listen for tag/component changes
     entity.setRegistry(this);
   }
 
@@ -22,6 +27,9 @@ export class EntityRegistry {
     this.removeFromIndex(this.typeIndex, entity.entityType, entity);
     for (const tag of entity.getTags()) {
       this.removeFromIndex(this.tagIndex, tag, entity);
+    }
+    for (const name of entity.getComponentNames()) {
+      this.removeFromIndex(this.componentIndex, name, entity);
     }
     entity.setRegistry(null);
   }
@@ -34,6 +42,16 @@ export class EntityRegistry {
   /** Called by Entity when a tag is removed */
   onTagRemoved(entity: Entity, tag: string): void {
     this.removeFromIndex(this.tagIndex, tag, entity);
+  }
+
+  /** Called by Entity when a component is added */
+  onComponentAdded(entity: Entity, name: string): void {
+    this.addToIndex(this.componentIndex, name, entity);
+  }
+
+  /** Called by Entity when a component is removed */
+  onComponentRemoved(entity: Entity, name: string): void {
+    this.removeFromIndex(this.componentIndex, name, entity);
   }
 
   /** Update all registered entity components */
@@ -78,6 +96,20 @@ export class EntityRegistry {
     return undefined;
   }
 
+  /** Query by component name — O(1) via index */
+  getByComponent(name: string): Entity[] {
+    const set = this.componentIndex.get(name);
+    return set ? Array.from(set) : [];
+  }
+
+  /** Get the first entity with a given component */
+  findByComponent(name: string): Entity | undefined {
+    const set = this.componentIndex.get(name);
+    if (!set) return undefined;
+    for (const entity of set) return entity;
+    return undefined;
+  }
+
   /** Count active entities */
   get count(): number {
     return this.entities.size;
@@ -92,6 +124,7 @@ export class EntityRegistry {
     this.entities.clear();
     this.typeIndex.clear();
     this.tagIndex.clear();
+    this.componentIndex.clear();
   }
 
   /** Remove destroyed entities from the registry */

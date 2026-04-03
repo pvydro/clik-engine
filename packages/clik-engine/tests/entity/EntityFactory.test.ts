@@ -28,6 +28,7 @@ vi.mock('../../src/entity/Entity', () => {
         this.y = y;
       }
       getTags() { return []; }
+      getComponentNames() { return []; }
       setRegistry() {}
     },
   };

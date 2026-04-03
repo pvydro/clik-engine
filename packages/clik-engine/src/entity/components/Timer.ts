@@ -44,4 +44,8 @@ export class Timer extends Component {
   onDetach(): void {
     this.timers.clear();
   }
+
+  reset(): void {
+    this.timers.clear();
+  }
 }

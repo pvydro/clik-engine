@@ -52,4 +52,10 @@ export class Oscillator extends Component {
     this.originY = this.entity.y;
     this.elapsed = 0;
   }
+
+  reset(): void {
+    this.elapsed = 0;
+    this.originX = this.entity.x;
+    this.originY = this.entity.y;
+  }
 }

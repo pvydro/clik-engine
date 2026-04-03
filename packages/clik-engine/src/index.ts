@@ -194,6 +194,8 @@ export { Component } from './entity/Component';
 export { EntityRegistry } from './entity/EntityRegistry';
 export { EntityFactory } from './entity/EntityFactory';
 export type { EntityBuilder } from './entity/EntityFactory';
+export { EntityPool } from './entity/EntityPool';
+export type { EntityPoolConfig } from './entity/EntityPool';
 export { Health } from './entity/components/Health';
 export { Movement } from './entity/components/Movement';
 export { Timer as TimerComponent } from './entity/components/Timer';

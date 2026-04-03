@@ -31,6 +31,7 @@ function makeEntity(type = 'test', tags: string[] = []) {
       return entity;
     },
     hasTag: (tag: string) => storedTags.has(tag),
+    getComponentNames: () => [] as string[],
     updateComponents: vi.fn(),
     destroy: vi.fn().mockImplementation(() => { entity.active = false; }),
   };

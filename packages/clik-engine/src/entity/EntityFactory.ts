@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Entity } from './Entity';
 import { EntityRegistry } from './EntityRegistry';
+import { EntityPool, EntityPoolConfig } from './EntityPool';
 import { ConsoleReporter } from '../debug/ConsoleReporter';
 
 export type EntityBuilder = (scene: Phaser.Scene, x: number, y: number) => Entity;
@@ -25,6 +26,7 @@ export type EntityBuilder = (scene: Phaser.Scene, x: number, y: number) => Entit
 export class EntityFactory {
   private prefabs: Map<string, EntityBuilder> = new Map();
   private registry: EntityRegistry | null = null;
+  private pools: Map<string, EntityPool> = new Map();
 
   /** Optionally link to an EntityRegistry for automatic registration */
   useRegistry(registry: EntityRegistry): this {
@@ -78,5 +80,55 @@ export class EntityFactory {
   /** Remove a prefab registration */
   unregister(name: string): void {
     this.prefabs.delete(name);
+  }
+
+  /** Create an entity pool for a registered prefab */
+  createPool(name: string, scene: Phaser.Scene, config?: Partial<Omit<EntityPoolConfig, 'prefabName'>>): EntityPool {
+    const pool = new EntityPool(this, scene, {
+      prefabName: name,
+      ...config,
+    });
+    if (this.registry) {
+      pool.useRegistry(this.registry);
+    }
+    this.pools.set(name, pool);
+    return pool;
+  }
+
+  /** Acquire an entity from its prefab pool (creates pool lazily if needed) */
+  acquirePooled(name: string, scene: Phaser.Scene, x: number, y: number): Entity | null {
+    let pool = this.pools.get(name);
+    if (!pool) {
+      pool = this.createPool(name, scene);
+    }
+    return pool.acquire(x, y);
+  }
+
+  /** Release an entity back to its pool */
+  releasePooled(entity: Entity): void {
+    const prefab = entity._poolPrefab;
+    if (!prefab) {
+      ConsoleReporter.error('EntityFactory.releasePooled: entity has no pool origin');
+      return;
+    }
+    const pool = this.pools.get(prefab);
+    if (!pool) {
+      ConsoleReporter.error(`EntityFactory.releasePooled: no pool for prefab '${prefab}'`);
+      return;
+    }
+    pool.release(entity);
+  }
+
+  /** Get a pool by prefab name */
+  getPool(name: string): EntityPool | undefined {
+    return this.pools.get(name);
+  }
+
+  /** Destroy all pools */
+  destroyPools(): void {
+    for (const pool of this.pools.values()) {
+      pool.destroy();
+    }
+    this.pools.clear();
   }
 }
