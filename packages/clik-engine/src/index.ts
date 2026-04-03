@@ -183,6 +183,19 @@ export { SpriteAnimator } from './animation/SpriteAnimator';
 export { AnimationBlender } from './animation/AnimationBlender';
 export { AnimationEventSystem } from './animation/AnimationEvents';
 export type { AnimationEventDef } from './animation/AnimationEvents';
+export { AnimationStateMachine } from './animation/AnimationStateMachine';
+export type { AnimStateConfig, AnimTransitionConfig, TransitionType } from './animation/AnimationStateMachine';
+export { BlendTree1D, BlendTree2D } from './animation/BlendTree';
+export type { BlendEntry1D, BlendEntry2D, BlendResult } from './animation/BlendTree';
+export { AnimationLayerStack } from './animation/AnimationLayer';
+export type { LayerConfig, LayerBlendMode } from './animation/AnimationLayer';
+export { CancelWindow } from './animation/CancelWindow';
+export type { CancelWindowDef } from './animation/CancelWindow';
+export { ComboGraph } from './animation/ComboGraph';
+export type { ComboEdge } from './animation/ComboGraph';
+export { DirectionalResolver } from './animation/DirectionalResolver';
+export type { DirectionMode, DirectionalResult } from './animation/DirectionalResolver';
+export { AnimatorComponent } from './entity/components/AnimatorComponent';
 
 // Tilemap
 export { TilemapManager } from './tilemap/TilemapManager';
