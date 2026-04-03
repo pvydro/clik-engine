@@ -219,6 +219,13 @@ export { Hitbox } from './entity/components/Hitbox';
 export { Hurtbox } from './entity/components/Hurtbox';
 export { CombatManager } from './entity/combat/CombatManager';
 export type { DamageEvent, DamageType, DamageModifier, HitboxDef, HurtboxDef, WorldBox } from './entity/combat/DamageTypes';
+export { HomingMovement } from './entity/components/HomingMovement';
+export { SineMovement } from './entity/components/SineMovement';
+export { CircularMovement } from './entity/components/CircularMovement';
+export { SplineMovement } from './entity/components/SplineMovement';
+export { AcceleratingMovement, MovementEasing } from './entity/components/AcceleratingMovement';
+export type { EasingFn } from './entity/components/AcceleratingMovement';
+export { CullOffscreen } from './entity/components/CullOffscreen';
 
 // Analytics
 export { AnalyticsManager } from './analytics/AnalyticsManager';
