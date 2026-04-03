@@ -215,6 +215,10 @@ export type { OscillateAxis } from './entity/components/Oscillator';
 export { BehaviorTreeComponent } from './entity/components/BehaviorTreeComponent';
 export { SteeringComponent } from './entity/components/SteeringComponent';
 export { NetworkSync } from './entity/components/NetworkSync';
+export { Hitbox } from './entity/components/Hitbox';
+export { Hurtbox } from './entity/components/Hurtbox';
+export { CombatManager } from './entity/combat/CombatManager';
+export type { DamageEvent, DamageType, DamageModifier, HitboxDef, HurtboxDef, WorldBox } from './entity/combat/DamageTypes';
 
 // Analytics
 export { AnalyticsManager } from './analytics/AnalyticsManager';
