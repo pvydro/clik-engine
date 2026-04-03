@@ -1,10 +1,18 @@
 import { Entity } from './Entity';
+import { SpatialHash } from '../utils/spatial';
+
+export interface SpatialConfig {
+  cellSize?: number;
+  spatialTag?: string;
+}
 
 export class EntityRegistry {
   private entities: Set<Entity> = new Set();
   private typeIndex: Map<string, Set<Entity>> = new Map();
   private tagIndex: Map<string, Set<Entity>> = new Map();
   private componentIndex: Map<string, Set<Entity>> = new Map();
+  private spatialHash: SpatialHash<Entity> | null = null;
+  private spatialTag = 'spatial';
 
   register(entity: Entity): void {
     this.entities.add(entity);
@@ -31,6 +39,7 @@ export class EntityRegistry {
     for (const name of entity.getComponentNames()) {
       this.removeFromIndex(this.componentIndex, name, entity);
     }
+    this.spatialHash?.remove(entity);
     entity.setRegistry(null);
   }
 
@@ -54,11 +63,71 @@ export class EntityRegistry {
     this.removeFromIndex(this.componentIndex, name, entity);
   }
 
-  /** Update all registered entity components */
+  /**
+   * Enable spatial indexing for proximity queries.
+   * Only entities tagged with the spatial tag (default: 'spatial') are tracked.
+   */
+  enableSpatial(config?: SpatialConfig): this {
+    this.spatialHash = new SpatialHash<Entity>(config?.cellSize ?? 64);
+    if (config?.spatialTag !== undefined) {
+      this.spatialTag = config.spatialTag;
+    }
+    return this;
+  }
+
+  /** Whether spatial indexing is enabled */
+  get isSpatialEnabled(): boolean {
+    return this.spatialHash !== null;
+  }
+
+  /** Query entities near a point within a radius. Requires enableSpatial(). */
+  getNearby(x: number, y: number, radius: number): Entity[] {
+    if (!this.spatialHash) return [];
+    const candidates = this.spatialHash.queryNear(x, y);
+    const r2 = radius * radius;
+    const results: Entity[] = [];
+    for (const entity of candidates) {
+      if (!entity.active) continue;
+      const dx = entity.x - x;
+      const dy = entity.y - y;
+      if (dx * dx + dy * dy <= r2) {
+        results.push(entity);
+      }
+    }
+    return results;
+  }
+
+  /** Query entities within a rectangular area. Requires enableSpatial(). */
+  getInRect(x: number, y: number, width: number, height: number): Entity[] {
+    if (!this.spatialHash) return [];
+    const candidates = this.spatialHash.queryRect(x, y, width, height);
+    const results: Entity[] = [];
+    for (const entity of candidates) {
+      if (!entity.active) continue;
+      if (entity.x >= x && entity.x <= x + width && entity.y >= y && entity.y <= y + height) {
+        results.push(entity);
+      }
+    }
+    return results;
+  }
+
+  /** Update all registered entity components, then refresh spatial positions */
   updateAll(delta: number): void {
     for (const entity of this.entities) {
       if (entity.active) {
         entity.updateComponents(delta);
+      }
+    }
+
+    // Update spatial hash for tracked entities
+    if (this.spatialHash) {
+      const tracked = this.tagIndex.get(this.spatialTag);
+      if (tracked) {
+        for (const entity of tracked) {
+          if (entity.active) {
+            this.spatialHash.insert(entity, entity.x, entity.y);
+          }
+        }
       }
     }
   }
@@ -125,6 +194,7 @@ export class EntityRegistry {
     this.typeIndex.clear();
     this.tagIndex.clear();
     this.componentIndex.clear();
+    this.spatialHash?.clear();
   }
 
   /** Remove destroyed entities from the registry */

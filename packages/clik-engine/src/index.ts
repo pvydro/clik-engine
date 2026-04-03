@@ -192,6 +192,7 @@ export type { TilemapConfig, SpawnPoint } from './tilemap/TilemapManager';
 export { Entity } from './entity/Entity';
 export { Component } from './entity/Component';
 export { EntityRegistry } from './entity/EntityRegistry';
+export type { SpatialConfig } from './entity/EntityRegistry';
 export { EntityFactory } from './entity/EntityFactory';
 export type { EntityBuilder } from './entity/EntityFactory';
 export { EntityPool } from './entity/EntityPool';
