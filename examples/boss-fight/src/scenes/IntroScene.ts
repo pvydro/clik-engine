@@ -67,13 +67,14 @@ export class IntroScene extends BaseScene {
       this.tweens.add({ targets: this.subtitleText, alpha: 1, duration: 800, delay: 400, ease: 'Sine.easeIn' });
     });
 
-    // Transition to game after 4s
+    // Transition to game after 4s — stop orbital first so fadeOut works
     this.time.delayedCall(4000, () => {
       if (!this.transitioned) {
         this.transitioned = true;
+        this.orbital.stop();
         this.cameras.main.fadeOut(500, 0, 0, 0);
-        this.cameras.main.once('camerafadeoutcomplete', () => {
-          this.director.go('intro', 'game');
+        this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+          this.scene.start('game');
         });
       }
     });

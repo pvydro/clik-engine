@@ -822,8 +822,8 @@ export class GameScene extends BaseScene {
 
   private onPlayerHit(event: DamageEvent): void {
     if (this.locoFSM.hasTag('invincible')) return;
+    if (this.isGameOver) return;
     const health = this.player.getComponent<Health>('health')!;
-    if (health.isDead) return;
 
     const hurtbox = this.player.getComponent<Hurtbox>('hurtbox')!;
     hurtbox.triggerIframes(1000);

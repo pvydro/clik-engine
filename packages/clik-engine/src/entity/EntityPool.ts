@@ -30,6 +30,7 @@ export class EntityPool {
   private prefabName: string;
   private maxSize: number;
   private registry: EntityRegistry | null = null;
+  private prefabTags: string[] | null = null;
 
   constructor(factory: EntityFactory, scene: Phaser.Scene, config: EntityPoolConfig) {
     this.factory = factory;
@@ -73,6 +74,14 @@ export class EntityPool {
     }
 
     entity.activate(x, y);
+
+    // Re-apply prefab tags that were cleared by activate()
+    if (this.prefabTags) {
+      for (const tag of this.prefabTags) {
+        entity.addTag(tag);
+      }
+    }
+
     this.activeEntities.add(entity);
 
     if (this.registry) {
@@ -133,6 +142,12 @@ export class EntityPool {
     const entity = this.factory.create(this.prefabName, this.scene, -9999, -9999);
     if (entity) {
       entity._poolPrefab = this.prefabName;
+
+      // Capture prefab tags on first creation so acquire() can restore them
+      if (this.prefabTags === null) {
+        this.prefabTags = entity.getTags();
+      }
+
       // Unregister immediately — factory may auto-register, but pool manages registration
       if (entity.getRegistry()) {
         entity.getRegistry()!.unregister(entity);

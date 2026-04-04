@@ -98,7 +98,7 @@ export class Entity extends Phaser.GameObjects.Container {
     this.visible = true;
     this.setAlpha(1);
 
-    // Clear tags (notifying registry)
+    // Clear runtime tags (notifying registry)
     for (const tag of Array.from(this.tags)) {
       this.removeTag(tag);
     }

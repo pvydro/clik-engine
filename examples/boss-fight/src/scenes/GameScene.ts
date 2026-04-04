@@ -724,8 +724,8 @@ export class GameScene extends BaseScene {
 
   private onPlayerHit(event: DamageEvent): void {
     if (this.isDodging) return;
+    if (this.isGameOver) return;
     const health = this.player.getComponent<Health>('health')!;
-    if (health.isDead) return;
 
     if (event.source?.entityType === 'boss-bullet') {
       this.bulletPool.release(event.source);

@@ -65,7 +65,7 @@ export class GameScene extends BaseScene {
   // Systems
   private combat!: CombatManager;
   private waveManager!: WaveManager;
-  private director!: DirectorAI;
+  private directorAI!: DirectorAI;
   private dynamicZoom!: DynamicZoom;
   private effectComposer!: EffectComposer;
   private timeEffects!: TimeEffects;
@@ -104,7 +104,7 @@ export class GameScene extends BaseScene {
     this.comboDisplay = new ComboDisplay(this, { particles: this.particles, y: 60 });
     this.entities.enableSpatial({ cellSize: 64 });
 
-    this.director = new DirectorAI({ targetIntensity: 0.6 });
+    this.directorAI = new DirectorAI({ targetIntensity: 0.6 });
     this.dynamicZoom = new DynamicZoom(this, { minZoom: 0.6, maxZoom: 1.2, padding: 150, smoothing: 0.04 });
     this.effectComposer = new EffectComposer(this);
     this.timeEffects = new TimeEffects(this);
@@ -200,7 +200,7 @@ export class GameScene extends BaseScene {
       enemies: this.waveManager.enemiesRemaining,
       weapon: WEAPONS[this.weaponIndex].name,
       combo: this.combo,
-      intensity: Math.round(this.director.getIntensity() * 100),
+      intensity: Math.round(this.directorAI.getIntensity() * 100),
     }));
 
     ConsoleReporter.scene('Twin-Stick Shooter ready');
@@ -265,12 +265,24 @@ export class GameScene extends BaseScene {
     // ── Systems update ──────────────────────────────────────────
     this.combat.update();
     this.waveManager.update(delta);
-    this.director.update(delta);
+    this.directorAI.update(delta);
+
+    // Refresh zoom targets each frame: player + up to 3 nearest enemies
+    this.dynamicZoom.clearTargets();
+    this.dynamicZoom.addTarget(this.player, 2);
+    const nearby = this.entities.getNearby(this.player.x, this.player.y, 400);
+    let added = 0;
+    for (const e of nearby) {
+      if (e !== this.player && e.active && e.entityType !== 'bullet' && e.entityType !== 'enemy-bullet' && added < 3) {
+        this.dynamicZoom.addTarget(e, 0.5);
+        added++;
+      }
+    }
     this.dynamicZoom.update();
     this.gpuParticles.update(delta);
 
     // ── Music intensity ─────────────────────────────────────────
-    this.audio.proceduralMusic.setIntensity(Math.min(1, 0.3 + this.director.getIntensity() * 0.7));
+    this.audio.proceduralMusic.setIntensity(Math.min(1, 0.3 + this.directorAI.getIntensity() * 0.7));
   }
 
   // ── Arena ──────────────────────────────────────────────────────
@@ -496,9 +508,6 @@ export class GameScene extends BaseScene {
 
       entity.addTag('spatial');
       GameFeelPresets.spawnIn(this, entity, { duration: 200 });
-
-      // Add to dynamic zoom briefly
-      this.dynamicZoom.addTarget(entity, 0.3);
     });
 
     this.waveManager.onAllComplete(() => {
@@ -509,7 +518,7 @@ export class GameScene extends BaseScene {
   }
 
   private configureEnemy(entity: Entity, waveIdx: number): void {
-    const healthMod = this.director.getModifier('enemyHealth');
+    const healthMod = this.directorAI.getModifier('enemyHealth');
     const health = entity.getComponent<Health>('health')!;
     const movement = entity.getComponent<Movement>('movement')!;
 
@@ -553,7 +562,9 @@ export class GameScene extends BaseScene {
   // ── Enemy AI ───────────────────────────────────────────────────
 
   private updateEnemies(dt: number): void {
-    const enemies = this.entities.getByTag('spatial').filter(e => e !== this.player && e.entityType !== 'bullet' && e.entityType !== 'enemy-bullet' && e.active);
+    const enemies = this.entities.getByType('chaser')
+      .concat(this.entities.getByType('shooter'), this.entities.getByType('tank'), this.entities.getByType('swarm'), this.entities.getByType('enemy'))
+      .filter(e => e.active);
 
     for (const enemy of enemies) {
       const movement = enemy.getComponent<Movement>('movement');
@@ -579,13 +590,9 @@ export class GameScene extends BaseScene {
           const bullet = this.enemyBulletPool.acquire(enemy.x, enemy.y);
           if (bullet) {
             bullet.addTag('spatial');
-            const angle = Math.atan2(dy, dx);
+            const aimAngle = Math.atan2(this.player.y - enemy.y, this.player.x - enemy.x);
             const mov = bullet.getComponent<Movement>('movement')!;
-            // Aim at player — bullet goes from enemy toward player
-            mov.setVelocity(-Math.cos(angle) * 250, -Math.sin(angle) * 250);
-            // Fix: aim from enemy to player, not the reverse
-            mov.setVelocity(Math.cos(Math.atan2(this.player.y - enemy.y, this.player.x - enemy.x)) * 250,
-                            Math.sin(Math.atan2(this.player.y - enemy.y, this.player.x - enemy.x)) * 250);
+            mov.setVelocity(Math.cos(aimAngle) * 250, Math.sin(aimAngle) * 250);
           }
         }
       } else {
@@ -639,16 +646,16 @@ export class GameScene extends BaseScene {
     }
 
     // Director
-    this.director.recordEvent('kill');
-    if (this.combo >= 3) this.director.recordEvent('combo');
+    this.directorAI.recordEvent('kill');
+    if (this.combo >= 3) this.directorAI.recordEvent('combo');
 
     this.hud.updateCounter('score', this.score);
     ConsoleReporter.state(`kill, score: ${this.score}, combo: ${this.combo}`);
   }
 
   private onPlayerHit(event: DamageEvent): void {
+    if (this.isGameOver) return;
     const health = this.player.getComponent<Health>('health')!;
-    if (health.isDead) return;
 
     // Release attacker
     if (event.source) {
@@ -669,12 +676,12 @@ export class GameScene extends BaseScene {
     SceneUtils.hitStop(this, 40);
     this.audio.procedural.explosion();
 
-    this.director.recordEvent('damage_taken');
+    this.directorAI.recordEvent('damage_taken');
     this.hud.updateCounter('hp', health.current);
 
     if (health.isDead) {
       this.isGameOver = true;
-      this.director.recordEvent('death');
+      this.directorAI.recordEvent('death');
       this.effectComposer.play('death');
       this.audio.proceduralMusic.stop(1000);
       this.audio.procedural.gameOver();
