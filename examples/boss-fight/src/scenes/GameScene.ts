@@ -311,7 +311,7 @@ export class GameScene extends BaseScene {
     ]));
     // Hitbox only active during attack
     this.player.addComponent('hitbox', new Hitbox([
-      { offsetX: -20, offsetY: -20, width: 40, height: 40, damageAmount: 15, damageType: 'physical', tag: 'attack' },
+      { offsetX: -36, offsetY: -36, width: 72, height: 72, damageAmount: 15, damageType: 'physical', tag: 'attack' },
     ]));
     this.player.getComponent<Hitbox>('hitbox')!.disableByTag('attack');
     this.player.addTag('spatial');
@@ -744,10 +744,13 @@ export class GameScene extends BaseScene {
 
     if (health.isDead) {
       this.isGameOver = true;
+      this.boss.getComponent<Movement>('movement')?.stop();
+      this.beatSync.stop();
       this.effectComposer.play('death');
       this.audio.proceduralMusic.stop(1000);
       this.audio.procedural.gameOver();
-      Toast.show(this, { message: 'DEFEATED', position: 'center', duration: 5000 });
+      Toast.show(this, { message: 'DEFEATED — Press R to retry', position: 'center', duration: 99999 });
+      this.input.keyboard!.once('keydown-R', () => this.scene.restart());
     }
   }
 
@@ -766,6 +769,7 @@ export class GameScene extends BaseScene {
 
   private onBossDefeated(): void {
     this.isGameOver = true;
+    this.beatSync.stop();
     this.effectComposer.play('death');
     this.gpuParticles.burst(100, this.boss.x, this.boss.y);
     this.particles.explode(this.boss.x, this.boss.y, this.phaseColors[this.bossPhase - 1], { count: 30 });
@@ -775,7 +779,8 @@ export class GameScene extends BaseScene {
     this.audio.procedural.chain(10);
 
     this.time.delayedCall(1000, () => {
-      Toast.show(this, { message: 'VICTORY!', position: 'center', duration: 5000 });
+      Toast.show(this, { message: 'VICTORY! — Press R to replay', position: 'center', duration: 99999 });
+      this.input.keyboard!.once('keydown-R', () => this.scene.restart());
     });
     ConsoleReporter.state('Boss defeated! Victory!');
   }
