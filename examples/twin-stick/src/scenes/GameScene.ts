@@ -267,17 +267,6 @@ export class GameScene extends BaseScene {
     this.waveManager.update(delta);
     this.directorAI.update(delta);
 
-    // Refresh zoom targets each frame: player + up to 3 nearest enemies
-    this.dynamicZoom.clearTargets();
-    this.dynamicZoom.addTarget(this.player, 2);
-    const nearby = this.entities.getNearby(this.player.x, this.player.y, 400);
-    let added = 0;
-    for (const e of nearby) {
-      if (e !== this.player && e.active && e.entityType !== 'bullet' && e.entityType !== 'enemy-bullet' && added < 3) {
-        this.dynamicZoom.addTarget(e, 0.5);
-        added++;
-      }
-    }
     this.dynamicZoom.update();
     this.gpuParticles.update(delta);
 
@@ -618,11 +607,12 @@ export class GameScene extends BaseScene {
     const ex = event.target.x;
     const ey = event.target.y;
 
-    // Release entities
+    // Release bullet back to pool, destroy enemy (WaveManager-created, not pooled)
     if (event.source && event.source.entityType === 'bullet') {
       this.bulletPool.release(event.source);
     }
-    this.enemyPool.release(event.target);
+    this.entities.unregister(event.target);
+    event.target.destroy();
 
     // Combo
     this.combo++;
