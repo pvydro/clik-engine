@@ -360,21 +360,23 @@ export class GameScene extends BaseScene {
   }
 
   private performAttack(): void {
-    this.attackCooldown = 300;
+    this.attackCooldown = 400;
     const hitbox = this.player.getComponent<Hitbox>('hitbox')!;
     hitbox.enableByTag('attack');
 
-    // Brief flash of attack area
+    // Disable hitbox after one frame so it only hits once per attack
+    this.time.delayedCall(32, () => {
+      hitbox.disableByTag('attack');
+    });
+
+    // Brief flash of attack area (visual only)
     const atkGfx = this.add.graphics();
     atkGfx.fillStyle(0x00ffcc, 0.2);
     atkGfx.fillCircle(this.player.x, this.player.y, 20);
     atkGfx.setDepth(9);
     this.tweens.add({
       targets: atkGfx, alpha: 0, duration: 150,
-      onComplete: () => {
-        atkGfx.destroy();
-        hitbox.disableByTag('attack');
-      },
+      onComplete: () => atkGfx.destroy(),
     });
     this.audio.procedural.tone({ frequency: 500, type: 'square', duration: 0.04, volume: 0.06 });
   }
@@ -750,7 +752,10 @@ export class GameScene extends BaseScene {
   }
 
   private onBossHit(event: DamageEvent): void {
-    const health = this.boss.getComponent<Health>('health')!;
+    // Disable player hitbox immediately so one attack = one hit
+    const playerHitbox = this.player.getComponent<Hitbox>('hitbox');
+    if (playerHitbox) playerHitbox.disableByTag('attack');
+
     this.gpuParticles.burst(10, this.boss.x, this.boss.y);
     ScorePopup.score(this, this.boss.x, this.boss.y - 40, event.amount);
     this.audio.procedural.tone({ frequency: 150, type: 'sine', duration: 0.06, volume: 0.08 });
