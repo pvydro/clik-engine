@@ -1,4 +1,5 @@
 import { Component } from '../Component';
+import type { EntityPool } from '../EntityPool';
 import { ConsoleReporter } from '../../debug/ConsoleReporter';
 
 export class Lifetime extends Component {
@@ -6,12 +7,19 @@ export class Lifetime extends Component {
   private duration: number;
   private onExpireCallback?: () => void;
   private fadeOut: boolean;
+  private pool: EntityPool | null = null;
 
   constructor(durationMs: number, fadeOut = false) {
     super();
     this.duration = durationMs;
     this.remaining = durationMs;
     this.fadeOut = fadeOut;
+  }
+
+  /** Return to pool on expire instead of destroying */
+  usePool(pool: EntityPool): this {
+    this.pool = pool;
+    return this;
   }
 
   onExpire(callback: () => void): this {
@@ -30,7 +38,11 @@ export class Lifetime extends Component {
     if (this.remaining <= 0) {
       ConsoleReporter.state(`lifetime expired: ${this.entity.entityType}`);
       this.onExpireCallback?.();
-      this.entity.destroy();
+      if (this.pool) {
+        this.pool.release(this.entity);
+      } else {
+        this.entity.destroy();
+      }
     }
   }
 

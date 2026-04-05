@@ -250,7 +250,13 @@ export class GameScene extends BaseScene {
       this.player = this.add.circle(px, py, TILE_SIZE / 2.5, 0x00ff88);
       this.physics.add.existing(this.player);
       this.playerBody = this.player.body as Phaser.Physics.Arcade.Body;
-      this.playerBody.setCircle(TILE_SIZE / 2.5);
+      // Use a smaller square body instead of circle to prevent catching on tile corners
+      const bodySize = TILE_SIZE * 0.55;
+      this.playerBody.setSize(bodySize, bodySize);
+      this.playerBody.setOffset(
+        this.player.radius - bodySize / 2,
+        this.player.radius - bodySize / 2,
+      );
       this.playerBody.setCollideWorldBounds(false);
     }
 

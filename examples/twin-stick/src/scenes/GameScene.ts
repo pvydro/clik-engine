@@ -107,6 +107,14 @@ export class GameScene extends BaseScene {
     this.directorAI = new DirectorAI({ targetIntensity: 0.6 });
     this.dynamicZoom = new DynamicZoom(this, { minZoom: 0.6, maxZoom: 1.2, padding: 150, smoothing: 0.04 });
     this.effectComposer = new EffectComposer(this);
+    this.effectComposer.register({
+      name: 'comboKill',
+      steps: [
+        { type: 'hitstop', frames: 2 },
+        { type: 'chromatic', config: { intensity: 0.3, duration: 80 } },
+        { type: 'distortion', config: { intensity: 0.1, duration: 100 } },
+      ],
+    });
     this.timeEffects = new TimeEffects(this);
     this.spatialAudio = new SpatialAudio(this, { maxDistance: 600 });
 
@@ -299,16 +307,13 @@ export class GameScene extends BaseScene {
       );
     }
 
-    // Obstacles (rectangles inside arena)
-    const obstacles = [
-      { x: ARENA_CX - 120, y: ARENA_CY - 80, w: 30, h: 60 },
-      { x: ARENA_CX + 90, y: ARENA_CY + 60, w: 60, h: 30 },
-      { x: ARENA_CX - 40, y: ARENA_CY + 150, w: 40, h: 40 },
-      { x: ARENA_CX + 160, y: ARENA_CY - 140, w: 30, h: 50 },
-    ];
-    g.fillStyle(0x223344, 0.8);
-    for (const ob of obstacles) {
-      g.fillRect(ob.x, ob.y, ob.w, ob.h);
+    // Corner markers
+    for (let i = 0; i < 4; i++) {
+      const angle = (Math.PI * 2 * i) / 4 + Math.PI / 4;
+      const mx = ARENA_CX + Math.cos(angle) * ARENA_RADIUS * 0.7;
+      const my = ARENA_CY + Math.sin(angle) * ARENA_RADIUS * 0.7;
+      g.fillStyle(0x1a2233, 0.4);
+      g.fillCircle(mx, my, 6);
     }
   }
 
@@ -326,7 +331,7 @@ export class GameScene extends BaseScene {
         { offsetX: -2, offsetY: -2, width: 4, height: 4, damageAmount: 10, damageType: 'physical' },
       ]));
       e.addComponent('cull', new CullOffscreen(80).usePool(this.bulletPool));
-      e.addComponent('lifetime', new Lifetime(2000));
+      e.addComponent('lifetime', new Lifetime(2000).usePool(this.bulletPool));
       e.addTag('spatial');
       return e;
     });
@@ -342,7 +347,7 @@ export class GameScene extends BaseScene {
         { offsetX: -2, offsetY: -2, width: 5, height: 5, damageAmount: 1, damageType: 'physical' },
       ]));
       e.addComponent('cull', new CullOffscreen(80).usePool(this.enemyBulletPool));
-      e.addComponent('lifetime', new Lifetime(3000));
+      e.addComponent('lifetime', new Lifetime(3000).usePool(this.enemyBulletPool));
       e.addTag('spatial');
       return e;
     });
@@ -629,7 +634,7 @@ export class GameScene extends BaseScene {
     if (this.combo >= 3) {
       this.comboDisplay.show(this.combo, { color: 0xff8800 });
       SceneUtils.comboShake(this, this.combo);
-      this.effectComposer.play('criticalHit', ex, ey);
+      this.effectComposer.play('comboKill', ex, ey);
     }
     if (this.combo >= 5) {
       SceneUtils.screenFlashColor(this, { color: 0xffffff, alpha: 0.08 });
