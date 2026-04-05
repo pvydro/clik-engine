@@ -76,6 +76,19 @@ export class GameScene extends BaseScene {
   create(): void {
     super.create();
     const { width, height } = this.scale;
+
+    // Reset state for scene restart
+    this.isGameOver = false;
+    this.bossPhase = 1;
+    this.dodgeCooldown = 0;
+    this.isDodging = false;
+    this.dodgeTimer = 0;
+    this.attackCooldown = 0;
+    this.floorTiles = [];
+
+    // Force input system initialization (needed after scene restart)
+    void this.actions;
+
     this.cameras.main.setBackgroundColor('#0a0008');
     this.cameras.main.fadeIn(500);
 
@@ -248,16 +261,23 @@ export class GameScene extends BaseScene {
     this.beatSync.update(delta);
     this.gpuParticles.update(delta);
 
-    // ── Force field (phase 3 only) ──────────────────────────────
+    // ── Force field (phase 3 only) — pull player toward boss ────
     if (this.bossPhase === 3 && this.forceField.enabled) {
       this.forceField.setPosition(this.boss.x, this.boss.y);
-      const mov = this.player.getComponent<Movement>('movement');
-      if (mov) {
-        const vel = mov.getVelocity();
-        const target = { x: this.player.x, y: this.player.y, vx: vel.x, vy: vel.y };
-        this.forceField.apply(target, delta);
-        mov.setVelocity(target.vx, target.vy);
-      }
+      const target = { x: this.player.x, y: this.player.y, vx: 0, vy: 0 };
+      this.forceField.apply(target, delta);
+      this.player.x += target.vx * dt;
+      this.player.y += target.vy * dt;
+    }
+
+    // Clamp boss to arena
+    const bdx = this.boss.x - ARENA_CX;
+    const bdy = this.boss.y - ARENA_CY;
+    const bdist = Math.sqrt(bdx * bdx + bdy * bdy);
+    if (bdist > ARENA_RADIUS - 34) {
+      const ba = Math.atan2(bdy, bdx);
+      this.boss.x = ARENA_CX + Math.cos(ba) * (ARENA_RADIUS - 34);
+      this.boss.y = ARENA_CY + Math.sin(ba) * (ARENA_RADIUS - 34);
     }
 
     this.drawBossHpBar();
@@ -631,6 +651,7 @@ export class GameScene extends BaseScene {
       hooks: {
         enter: () => {
           this.bossPhase = 3;
+          this.boss.getComponent<Movement>('movement')?.stop();
           this.beatSync.setBPM(150);
           this.colorGrading.transitionTo(ColorGradingPresets.toxic, 500);
           this.triggerPhaseTransition();
@@ -686,6 +707,8 @@ export class GameScene extends BaseScene {
   }
 
   private triggerPhaseTransition(): void {
+    const playerHealth = this.player.getComponent<Health>('health');
+    if (this.isGameOver || playerHealth?.isDead) return;
     this.effectComposer.play('heavyImpact', this.boss.x, this.boss.y);
     this.gpuParticles.burst(50, this.boss.x, this.boss.y);
     Toast.show(this, { message: `Phase ${this.bossPhase}`, position: 'center', duration: 1500 });
@@ -749,8 +772,9 @@ export class GameScene extends BaseScene {
       this.effectComposer.play('death');
       this.audio.proceduralMusic.stop(1000);
       this.audio.procedural.gameOver();
+      Toast.dismissAll(this);
       Toast.show(this, { message: 'DEFEATED — Press R to retry', position: 'center', duration: 99999 });
-      this.input.keyboard!.once('keydown-R', () => this.scene.restart());
+      this.input.keyboard!.once('keydown-R', () => this.scene.start('game'));
     }
   }
 
@@ -779,8 +803,9 @@ export class GameScene extends BaseScene {
     this.audio.procedural.chain(10);
 
     this.time.delayedCall(1000, () => {
+      Toast.dismissAll(this);
       Toast.show(this, { message: 'VICTORY! — Press R to replay', position: 'center', duration: 99999 });
-      this.input.keyboard!.once('keydown-R', () => this.scene.restart());
+      this.input.keyboard!.once('keydown-R', () => this.scene.start('game'));
     });
     ConsoleReporter.state('Boss defeated! Victory!');
   }
