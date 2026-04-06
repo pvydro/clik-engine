@@ -5,6 +5,27 @@ All notable changes to `clik-engine` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-04-05
+
+### Changed — Centralized Input Architecture
+
+- **InputManager is now game-level**: created once at boot and stored in `game.registry` as `__clikInputManager`. Survives scene transitions and restarts. Previously it was per-scene, which broke input on `scene.restart()` because keyboard/pointer listeners got destroyed mid-frame.
+- **Provider lazy init**: `KeyboardProvider`, `TouchProvider`, and `GamepadProvider` now use `initFromScene(scene)` to bind to scene input plugins. Can be called multiple times to rebind on scene restart.
+- **BaseScene.actions**: getter now reads from registry instead of creating a new InputManager. `shutdown()` no longer destroys the InputManager.
+
+### Fixed
+
+- **SceneUtils.hitStop / slowMotion**: were using `scene.time.delayedCall` which respects `timeScale` — when `timeScale` was set to 0, the restore callback never fired, permanently freezing the scene. Now uses `setTimeout` (real time).
+- **TimeEffects.slowMo**: same bug — both instant and gradual modes now use `setTimeout`/`setInterval` instead of scene timers.
+- **CullOffscreen spatial tag**: `EntityPool.acquire()` now re-applies prefab tags (like `'spatial'`) after `activate()` clears them. Fixes pooled bullets/enemies losing their spatial tag and becoming invisible to `CombatManager` spatial queries.
+- **Lifetime pool support**: `Lifetime.usePool()` releases entities to pool on expire instead of destroying them. Prevents crashes when pool reacquires entities with cleared components.
+- **Toast.dismissAll()**: added static method to clear active toasts; toasts now use `setScrollFactor(0)` so they stay fixed on screen during camera shake/zoom.
+
+### Breaking
+
+- `InputManager` constructor signature changed from `(scene, config)` to `(config)`. Scenes using `BaseScene.actions` are unaffected. Games instantiating `InputManager` directly need to update.
+- `KeyboardProvider`, `TouchProvider`, `GamepadProvider` constructors changed from `(scene, actionMap, ...)` to `(actionMap, ...)` with a new `initFromScene(scene)` method.
+
 ## [2.1.0] - 2026-04-03
 
 ### Added
