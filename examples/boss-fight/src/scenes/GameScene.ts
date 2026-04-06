@@ -224,7 +224,12 @@ export class GameScene extends BaseScene {
 
   update(time: number, delta: number): void {
     super.update(time, delta);
-    if (this.isGameOver) return;
+    if (this.isGameOver) {
+      if (this.actions.justPressed('attack')) {
+        this.scene.restart();
+      }
+      return;
+    }
 
     const dt = delta / 1000;
 
@@ -773,8 +778,7 @@ export class GameScene extends BaseScene {
       this.audio.proceduralMusic.stop(1000);
       this.audio.procedural.gameOver();
       Toast.dismissAll(this);
-      Toast.show(this, { message: 'DEFEATED — Press R to retry', position: 'center', duration: 99999 });
-      this.input.keyboard!.once('keydown-R', () => this.scene.start('game'));
+      Toast.show(this, { message: 'DEFEATED — Click to retry', position: 'center', duration: 99999 });
     }
   }
 
@@ -804,8 +808,7 @@ export class GameScene extends BaseScene {
 
     this.time.delayedCall(1000, () => {
       Toast.dismissAll(this);
-      Toast.show(this, { message: 'VICTORY! — Press R to replay', position: 'center', duration: 99999 });
-      this.input.keyboard!.once('keydown-R', () => this.scene.start('game'));
+      Toast.show(this, { message: 'VICTORY! — Click to replay', position: 'center', duration: 99999 });
     });
     ConsoleReporter.state('Boss defeated! Victory!');
   }
