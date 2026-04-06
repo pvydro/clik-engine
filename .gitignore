@@ -4,3 +4,4 @@ dist/
 .DS_Store
 *.local
 packages/clik-engine/docs/
+packages/clik-engine/coverage/
