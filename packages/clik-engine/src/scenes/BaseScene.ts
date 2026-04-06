@@ -29,11 +29,10 @@ export class BaseScene extends Phaser.Scene {
   private _shuttingDown = false;
   private _hasError = false;
 
-  /** Input manager — created on first access */
+  /** Input manager — game-level singleton, retrieved from registry on first access */
   protected get actions(): InputManager {
-    if (this._shuttingDown) throw new Error('Cannot access actions after scene shutdown');
     if (!this._actions) {
-      this._actions = new InputManager(this, this._clikConfig?.input);
+      this._actions = this.game.registry.get('__clikInputManager') as InputManager;
     }
     return this._actions;
   }
@@ -194,14 +193,13 @@ export class BaseScene extends Phaser.Scene {
     // Notify plugins
     const pm = this.game?.registry?.get('__clikPluginManager') as PluginManager | undefined;
     pm?.onSceneShutdown(this);
-    // Don't destroy actions — Phaser handles keyboard cleanup on restart.
-    // Destroying key objects here conflicts with Phaser's own shutdown sequence.
+    // InputManager is game-level — don't destroy or clear it on scene shutdown.
+    // It survives scene transitions and restarts.
     this._audio?.destroy();
     this._entities?.clear();
     this._lobby?.destroy();
     this._room?.destroy();
     this._network?.destroy();
-    this._actions = undefined;
     this._director = undefined;
     this._audio = undefined;
     this._save = undefined;

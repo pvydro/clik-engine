@@ -13,9 +13,10 @@ interface SwipeState {
 /**
  * Touch/swipe input provider — detects tap and swipe gestures
  * and maps them to actions via ActionMap touch bindings.
+ * Binds to game.input so gestures survive scene transitions.
  */
 export class TouchProvider implements InputProvider {
-  private scene: Phaser.Scene;
+  private game: Phaser.Game;
   private actionMap: ActionMap;
   private swipeState: SwipeState = { startX: 0, startY: 0, startTime: 0, active: false };
   private lastSwipe: string | null = null;
@@ -29,8 +30,8 @@ export class TouchProvider implements InputProvider {
   private swipeThreshold: number;
   private swipeMaxTime: number;
 
-  constructor(scene: Phaser.Scene, actionMap: ActionMap, swipeThreshold = 50, swipeMaxTime = 300) {
-    this.scene = scene;
+  constructor(game: Phaser.Game, actionMap: ActionMap, swipeThreshold = 50, swipeMaxTime = 300) {
+    this.game = game;
     this.actionMap = actionMap;
     this.swipeThreshold = swipeThreshold;
     this.swipeMaxTime = swipeMaxTime;
@@ -47,7 +48,7 @@ export class TouchProvider implements InputProvider {
       this.lastSwipe = null;
       this.swipeConsumed = false;
     };
-    scene.input.on('pointerdown', this.pointerDownHandler);
+    game.input.on('pointerdown', this.pointerDownHandler);
 
     this.pointerUpHandler = (pointer: Phaser.Input.Pointer) => {
       this.pointerIsDown = false;
@@ -80,12 +81,11 @@ export class TouchProvider implements InputProvider {
       this.swipeConsumed = false;
       ConsoleReporter.input(`gesture: ${this.lastSwipe}`);
     };
-    scene.input.on('pointerup', this.pointerUpHandler);
+    game.input.on('pointerup', this.pointerUpHandler);
   }
 
   update(): void {
     // No-op: state managed via event handlers.
-    // pointerDownThisFrame is cleared after isActionDown reads it.
   }
 
   isActionDown(action: string): boolean {
@@ -104,12 +104,12 @@ export class TouchProvider implements InputProvider {
     const touchBinding = this.actionMap.getTouch(action);
     if (touchBinding && this.lastSwipe === touchBinding && !this.swipeConsumed) {
       this.swipeConsumed = true;
-      // Clear swipe on next frame
-      this.scene.time.delayedCall(0, () => {
+      // Clear swipe on next frame via setTimeout (not affected by scene timeScale)
+      setTimeout(() => {
         if (this.lastSwipe === touchBinding) {
           this.lastSwipe = null;
         }
-      });
+      }, 0);
       return true;
     }
     return false;
@@ -122,10 +122,10 @@ export class TouchProvider implements InputProvider {
 
   destroy(): void {
     if (this.pointerDownHandler) {
-      this.scene.input.off('pointerdown', this.pointerDownHandler);
+      this.game.input.off('pointerdown', this.pointerDownHandler);
     }
     if (this.pointerUpHandler) {
-      this.scene.input.off('pointerup', this.pointerUpHandler);
+      this.game.input.off('pointerup', this.pointerUpHandler);
     }
   }
 }

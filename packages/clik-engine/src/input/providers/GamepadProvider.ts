@@ -6,27 +6,28 @@ import type { InputProvider } from './InputProvider';
 /**
  * Gamepad input provider — detects gamepad connection
  * and maps buttons to actions via ActionMap gamepad bindings.
+ * Binds to game.input.gamepad so state survives scene transitions.
  */
 export class GamepadProvider implements InputProvider {
-  private scene: Phaser.Scene;
+  private game: Phaser.Game;
   private actionMap: ActionMap;
   private gamepadIndex: number | null = null;
   private connectedHandler: ((pad: Phaser.Input.Gamepad.Gamepad) => void) | null = null;
   private disconnectedHandler: ((pad: Phaser.Input.Gamepad.Gamepad) => void) | null = null;
   private deadzone: number;
 
-  constructor(scene: Phaser.Scene, actionMap: ActionMap, deadzone = 0.15) {
-    this.scene = scene;
+  constructor(game: Phaser.Game, actionMap: ActionMap, deadzone = 0.15) {
+    this.game = game;
     this.actionMap = actionMap;
     this.deadzone = deadzone;
 
-    if (!scene.input.gamepad) return;
+    if (!game.input.gamepad) return;
 
     this.connectedHandler = (pad: Phaser.Input.Gamepad.Gamepad) => {
       this.gamepadIndex = pad.index;
       ConsoleReporter.input(`Gamepad connected: ${pad.id}`);
     };
-    scene.input.gamepad.on('connected', this.connectedHandler);
+    game.input.gamepad.on('connected', this.connectedHandler);
 
     this.disconnectedHandler = (pad: Phaser.Input.Gamepad.Gamepad) => {
       if (this.gamepadIndex === pad.index) {
@@ -34,11 +35,11 @@ export class GamepadProvider implements InputProvider {
         ConsoleReporter.input(`Gamepad disconnected: ${pad.id}`);
       }
     };
-    scene.input.gamepad.on('disconnected', this.disconnectedHandler);
+    game.input.gamepad.on('disconnected', this.disconnectedHandler);
 
     // Check for already-connected gamepads
-    if (scene.input.gamepad.total > 0) {
-      this.gamepadIndex = scene.input.gamepad.pad1?.index ?? null;
+    if (game.input.gamepad.total > 0) {
+      this.gamepadIndex = game.input.gamepad.pad1?.index ?? null;
     }
   }
 
@@ -48,7 +49,7 @@ export class GamepadProvider implements InputProvider {
 
   isActionDown(action: string): boolean {
     if (this.gamepadIndex === null) return false;
-    const gamepad = this.scene.input.gamepad?.getPad(this.gamepadIndex);
+    const gamepad = this.game.input.gamepad?.getPad(this.gamepadIndex);
     if (!gamepad) return false;
 
     const binding = this.actionMap.getGamepad(action);
@@ -65,7 +66,7 @@ export class GamepadProvider implements InputProvider {
   /** Get analog stick values with deadzone */
   getAxis(): { x: number; y: number } {
     if (this.gamepadIndex === null) return { x: 0, y: 0 };
-    const gamepad = this.scene.input.gamepad?.getPad(this.gamepadIndex);
+    const gamepad = this.game.input.gamepad?.getPad(this.gamepadIndex);
     if (!gamepad) return { x: 0, y: 0 };
 
     const stickX = gamepad.leftStick.x;
@@ -81,12 +82,12 @@ export class GamepadProvider implements InputProvider {
   }
 
   destroy(): void {
-    if (this.scene.input.gamepad) {
+    if (this.game.input.gamepad) {
       if (this.connectedHandler) {
-        this.scene.input.gamepad.off('connected', this.connectedHandler);
+        this.game.input.gamepad.off('connected', this.connectedHandler);
       }
       if (this.disconnectedHandler) {
-        this.scene.input.gamepad.off('disconnected', this.disconnectedHandler);
+        this.game.input.gamepad.off('disconnected', this.disconnectedHandler);
       }
     }
   }

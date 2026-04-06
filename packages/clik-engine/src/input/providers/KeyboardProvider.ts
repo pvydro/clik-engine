@@ -4,23 +4,24 @@ import type { InputProvider } from './InputProvider';
 
 /**
  * Keyboard input provider — maps Phaser keyboard keys to actions.
+ * Binds to game.input.keyboard so keys survive scene transitions.
  */
 export class KeyboardProvider implements InputProvider {
-  private scene: Phaser.Scene;
+  private game: Phaser.Game;
   private actionMap: ActionMap;
   private keyObjects: Map<string, Phaser.Input.Keyboard.Key[]> = new Map();
   private actions: string[];
 
-  constructor(scene: Phaser.Scene, actionMap: ActionMap) {
-    this.scene = scene;
+  constructor(game: Phaser.Game, actionMap: ActionMap) {
+    this.game = game;
     this.actionMap = actionMap;
     this.actions = actionMap.allActions();
 
     for (const action of this.actions) {
       const keys = actionMap.getKeys(action);
-      if (keys.length > 0 && scene.input.keyboard) {
+      if (keys.length > 0 && game.input.keyboard) {
         const keyObjs = keys.map(k =>
-          scene.input.keyboard!.addKey(
+          game.input.keyboard!.addKey(
             Phaser.Input.Keyboard.KeyCodes[k as keyof typeof Phaser.Input.Keyboard.KeyCodes] ?? k
           )
         );
@@ -43,10 +44,10 @@ export class KeyboardProvider implements InputProvider {
   }
 
   destroy(): void {
-    if (this.scene.input.keyboard) {
+    if (this.game.input.keyboard) {
       for (const keys of this.keyObjects.values()) {
         for (const key of keys) {
-          this.scene.input.keyboard.removeKey(key, true);
+          this.game.input.keyboard.removeKey(key, true);
         }
       }
     }

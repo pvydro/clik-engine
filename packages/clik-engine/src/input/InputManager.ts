@@ -11,8 +11,12 @@ interface ActionState {
   wasDown: boolean;
 }
 
+/**
+ * Game-level input manager. Created once at boot and shared across all scenes.
+ * Survives scene transitions and restarts.
+ */
 export class InputManager {
-  private scene: Phaser.Scene;
+  private game: Phaser.Game;
   private actionMap: ActionMap;
   private states: Map<string, ActionState> = new Map();
   private cachedActions: string[] = [];
@@ -22,8 +26,8 @@ export class InputManager {
   private touch: TouchProvider;
   private gamepad: GamepadProvider;
 
-  constructor(scene: Phaser.Scene, config?: InputConfig) {
-    this.scene = scene;
+  constructor(game: Phaser.Game, config?: InputConfig) {
+    this.game = game;
     this.actionMap = new ActionMap(config);
     this.cachedActions = this.actionMap.allActions();
 
@@ -31,10 +35,10 @@ export class InputManager {
       this.states.set(action, { isDown: false, wasDown: false });
     }
 
-    // Initialize providers
-    this.keyboard = new KeyboardProvider(scene, this.actionMap);
-    this.touch = new TouchProvider(scene, this.actionMap);
-    this.gamepad = new GamepadProvider(scene, this.actionMap);
+    // Initialize providers — all bind to game.input, not scene.input
+    this.keyboard = new KeyboardProvider(game, this.actionMap);
+    this.touch = new TouchProvider(game, this.actionMap);
+    this.gamepad = new GamepadProvider(game, this.actionMap);
   }
 
   update(): void {
@@ -103,10 +107,10 @@ export class InputManager {
     return { x, y };
   }
 
-  /** Get the raw pointer position in game coordinates */
+  /** Get the raw pointer position in screen coordinates */
   getPointer(): { x: number; y: number; isDown: boolean } {
-    const pointer = this.scene.input.activePointer;
-    return { x: pointer.worldX, y: pointer.worldY, isDown: pointer.isDown };
+    const pointer = this.game.input.activePointer;
+    return { x: pointer.x, y: pointer.y, isDown: pointer.isDown };
   }
 
   /** Check if a gamepad is connected */

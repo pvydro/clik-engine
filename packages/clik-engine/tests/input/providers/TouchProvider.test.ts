@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { makeTestScene } from '../../helpers/TestScene';
 
 vi.mock('../../../src/debug/ConsoleReporter', () => ({
   ConsoleReporter: { engine: vi.fn(), error: vi.fn(), input: vi.fn(), log: vi.fn() },
@@ -8,13 +7,23 @@ vi.mock('../../../src/debug/ConsoleReporter', () => ({
 import { TouchProvider } from '../../../src/input/providers/TouchProvider';
 import { ActionMap } from '../../../src/input/ActionMap';
 
+function makeTestGame() {
+  return {
+    input: {
+      keyboard: null,
+      on: vi.fn(),
+      off: vi.fn(),
+    },
+  };
+}
+
 describe('TouchProvider', () => {
-  let scene: ReturnType<typeof makeTestScene>;
+  let game: ReturnType<typeof makeTestGame>;
   let actionMap: ActionMap;
   let provider: TouchProvider;
 
   beforeEach(() => {
-    scene = makeTestScene();
+    game = makeTestGame();
     actionMap = new ActionMap({
       actions: {
         swipeRight: { touch: 'swipe_right' },
@@ -22,18 +31,18 @@ describe('TouchProvider', () => {
         tap: { touch: 'tap' },
       },
     });
-    provider = new TouchProvider(scene as any, actionMap);
+    provider = new TouchProvider(game as any, actionMap);
   });
 
-  it('registers pointerdown and pointerup handlers on scene.input', () => {
+  it('registers pointerdown and pointerup handlers on game.input', () => {
     // Two on() calls: one for pointerdown, one for pointerup
-    expect(scene.input.on).toHaveBeenCalledWith('pointerdown', expect.any(Function));
-    expect(scene.input.on).toHaveBeenCalledWith('pointerup', expect.any(Function));
+    expect(game.input.on).toHaveBeenCalledWith('pointerdown', expect.any(Function));
+    expect(game.input.on).toHaveBeenCalledWith('pointerup', expect.any(Function));
   });
 
   it('consumeAction detects swipe_right gesture', () => {
     // Extract the registered handlers
-    const calls = (scene.input.on as ReturnType<typeof vi.fn>).mock.calls;
+    const calls = (game.input.on as ReturnType<typeof vi.fn>).mock.calls;
     const pointerDownHandler = calls.find((c: any[]) => c[0] === 'pointerdown')![1];
     const pointerUpHandler = calls.find((c: any[]) => c[0] === 'pointerup')![1];
 
@@ -47,7 +56,7 @@ describe('TouchProvider', () => {
   });
 
   it('consumeAction detects swipe_left gesture', () => {
-    const calls = (scene.input.on as ReturnType<typeof vi.fn>).mock.calls;
+    const calls = (game.input.on as ReturnType<typeof vi.fn>).mock.calls;
     const pointerDownHandler = calls.find((c: any[]) => c[0] === 'pointerdown')![1];
     const pointerUpHandler = calls.find((c: any[]) => c[0] === 'pointerup')![1];
 
@@ -63,7 +72,7 @@ describe('TouchProvider', () => {
   });
 
   it('does not detect swipe if time exceeds swipeMaxTime', () => {
-    const calls = (scene.input.on as ReturnType<typeof vi.fn>).mock.calls;
+    const calls = (game.input.on as ReturnType<typeof vi.fn>).mock.calls;
     const pointerDownHandler = calls.find((c: any[]) => c[0] === 'pointerdown')![1];
     const pointerUpHandler = calls.find((c: any[]) => c[0] === 'pointerup')![1];
 
@@ -77,7 +86,7 @@ describe('TouchProvider', () => {
   it('setSwipeThreshold changes detection thresholds', () => {
     provider.setSwipeThreshold(200, 500);
 
-    const calls = (scene.input.on as ReturnType<typeof vi.fn>).mock.calls;
+    const calls = (game.input.on as ReturnType<typeof vi.fn>).mock.calls;
     const pointerDownHandler = calls.find((c: any[]) => c[0] === 'pointerdown')![1];
     const pointerUpHandler = calls.find((c: any[]) => c[0] === 'pointerup')![1];
 
@@ -94,7 +103,7 @@ describe('TouchProvider', () => {
 
   it('destroy removes pointerdown and pointerup handlers', () => {
     provider.destroy();
-    expect(scene.input.off).toHaveBeenCalledWith('pointerdown', expect.any(Function));
-    expect(scene.input.off).toHaveBeenCalledWith('pointerup', expect.any(Function));
+    expect(game.input.off).toHaveBeenCalledWith('pointerdown', expect.any(Function));
+    expect(game.input.off).toHaveBeenCalledWith('pointerup', expect.any(Function));
   });
 });

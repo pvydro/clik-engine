@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { makeTestScene } from '../../helpers/TestScene';
 
 vi.mock('phaser', () => ({
   default: {
@@ -15,24 +14,40 @@ vi.mock('../../../src/debug/ConsoleReporter', () => ({
 import { KeyboardProvider } from '../../../src/input/providers/KeyboardProvider';
 import { ActionMap } from '../../../src/input/ActionMap';
 
+function makeTestGame() {
+  return {
+    input: {
+      keyboard: {
+        on: vi.fn(),
+        off: vi.fn(),
+        addKey: vi.fn(() => ({ isDown: false })),
+        removeKey: vi.fn(),
+        createCursorKeys: vi.fn(() => ({})),
+      },
+      on: vi.fn(),
+      off: vi.fn(),
+    },
+  };
+}
+
 describe('KeyboardProvider', () => {
-  let scene: ReturnType<typeof makeTestScene>;
+  let game: ReturnType<typeof makeTestGame>;
   let actionMap: ActionMap;
   let provider: KeyboardProvider;
 
   beforeEach(() => {
-    scene = makeTestScene();
+    game = makeTestGame();
     actionMap = new ActionMap({
       actions: {
         jump: { keys: ['SPACE'] },
         fire: { keys: ['Z', 'X'] },
       },
     });
-    provider = new KeyboardProvider(scene as any, actionMap);
+    provider = new KeyboardProvider(game as any, actionMap);
   });
 
   it('registers keyboard keys via addKey for each action binding', () => {
-    const addKey = scene.input.keyboard!.addKey;
+    const addKey = game.input.keyboard.addKey;
     // jump has 1 key, fire has 2 keys → 3 addKey calls
     expect(addKey).toHaveBeenCalledTimes(3);
   });
@@ -44,11 +59,11 @@ describe('KeyboardProvider', () => {
 
   it('isActionDown returns true when key.isDown is true', () => {
     const keyObj = { isDown: true };
-    const addKeyMock = scene.input.keyboard!.addKey as ReturnType<typeof vi.fn>;
+    const addKeyMock = game.input.keyboard.addKey as ReturnType<typeof vi.fn>;
     addKeyMock.mockReturnValue(keyObj);
 
     // Recreate to capture the new key stubs
-    provider = new KeyboardProvider(scene as any, actionMap);
+    provider = new KeyboardProvider(game as any, actionMap);
     expect(provider.isActionDown('jump')).toBe(true);
   });
 
@@ -62,9 +77,7 @@ describe('KeyboardProvider', () => {
   });
 
   it('destroy removes keys and clears internal map', () => {
-    // Add removeKey to the keyboard stub
-    (scene.input.keyboard as any).removeKey = vi.fn();
     provider.destroy();
-    expect((scene.input.keyboard as any).removeKey).toHaveBeenCalledTimes(3);
+    expect(game.input.keyboard.removeKey).toHaveBeenCalledTimes(3);
   });
 });

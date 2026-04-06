@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { makeTestScene } from '../helpers/TestScene';
 
 vi.mock('phaser', () => ({
   default: {
@@ -25,23 +24,37 @@ const baseConfig: InputConfig = {
   },
 };
 
+function makeTestGame() {
+  return {
+    input: {
+      keyboard: {
+        on: vi.fn(),
+        off: vi.fn(),
+        addKey: vi.fn(() => ({ isDown: false })),
+        removeKey: vi.fn(),
+        createCursorKeys: vi.fn(() => ({})),
+      },
+      on: vi.fn(),
+      off: vi.fn(),
+      gamepad: {
+        on: vi.fn(),
+        off: vi.fn(),
+        total: 0,
+        pad1: null,
+        getPad: vi.fn(() => null),
+      },
+      activePointer: { x: 10, y: 20, isDown: true },
+    },
+  };
+}
+
 describe('InputManager', () => {
-  let scene: ReturnType<typeof makeTestScene>;
+  let game: ReturnType<typeof makeTestGame>;
   let mgr: InputManager;
 
   beforeEach(() => {
-    scene = makeTestScene();
-    // Provide a gamepad stub so GamepadProvider can initialise
-    (scene.input as any).gamepad = {
-      on: vi.fn(),
-      off: vi.fn(),
-      total: 0,
-      pad1: null,
-      getPad: vi.fn(() => null),
-    };
-    // Provide activePointer for getPointer()
-    (scene.input as any).activePointer = { worldX: 10, worldY: 20, isDown: true };
-    mgr = new InputManager(scene as any, baseConfig);
+    game = makeTestGame();
+    mgr = new InputManager(game as any, baseConfig);
   });
 
   it('constructs and initialises action states', () => {
@@ -52,22 +65,22 @@ describe('InputManager', () => {
 
   it('isDown returns true when keyboard key is pressed', () => {
     // The addKey mock returns an object with isDown
-    const addKeyMock = scene.input.keyboard!.addKey as ReturnType<typeof vi.fn>;
+    const addKeyMock = game.input.keyboard.addKey as ReturnType<typeof vi.fn>;
     const keyObj = { isDown: true };
     addKeyMock.mockReturnValue(keyObj);
 
     // Recreate manager so the new key stub is captured
-    mgr = new InputManager(scene as any, baseConfig);
+    mgr = new InputManager(game as any, baseConfig);
     mgr.update();
 
     expect(mgr.isDown('jump')).toBe(true);
   });
 
   it('justPressed is true only on the frame the action goes down', () => {
-    const addKeyMock = scene.input.keyboard!.addKey as ReturnType<typeof vi.fn>;
+    const addKeyMock = game.input.keyboard.addKey as ReturnType<typeof vi.fn>;
     const keyObj = { isDown: false };
     addKeyMock.mockReturnValue(keyObj);
-    mgr = new InputManager(scene as any, baseConfig);
+    mgr = new InputManager(game as any, baseConfig);
 
     mgr.update();
     expect(mgr.justPressed('jump')).toBe(false);
@@ -82,10 +95,10 @@ describe('InputManager', () => {
   });
 
   it('justReleased is true only on the frame the action goes up', () => {
-    const addKeyMock = scene.input.keyboard!.addKey as ReturnType<typeof vi.fn>;
+    const addKeyMock = game.input.keyboard.addKey as ReturnType<typeof vi.fn>;
     const keyObj = { isDown: true };
     addKeyMock.mockReturnValue(keyObj);
-    mgr = new InputManager(scene as any, baseConfig);
+    mgr = new InputManager(game as any, baseConfig);
 
     mgr.update();
     expect(mgr.justReleased('jump')).toBe(false);
@@ -100,7 +113,7 @@ describe('InputManager', () => {
   });
 
   it('axis returns digital values from key states', () => {
-    const addKeyMock = scene.input.keyboard!.addKey as ReturnType<typeof vi.fn>;
+    const addKeyMock = game.input.keyboard.addKey as ReturnType<typeof vi.fn>;
     const leftKey = { isDown: true };
     const rightKey = { isDown: false };
     const upKey = { isDown: false };
@@ -119,7 +132,7 @@ describe('InputManager', () => {
       return { isDown: false };
     });
 
-    mgr = new InputManager(scene as any, baseConfig);
+    mgr = new InputManager(game as any, baseConfig);
     mgr.update();
 
     const result = mgr.axis('left', 'right', 'up', 'down');
@@ -156,8 +169,6 @@ describe('InputManager', () => {
   });
 
   it('destroy clears states and does not throw', () => {
-    // Ensure removeKey exists on keyboard stub so KeyboardProvider.destroy works
-    (scene.input.keyboard as any).removeKey = vi.fn();
     mgr.destroy();
     // After destroy, isDown should still return false (states cleared)
     expect(mgr.isDown('jump')).toBe(false);

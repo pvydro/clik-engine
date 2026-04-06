@@ -60,7 +60,6 @@ export class GameScene extends BaseScene {
   // State
   private bossPhase = 1;
   private isGameOver = false;
-  private restartPending = false;
   private dodgeCooldown = 0;
   private isDodging = false;
   private dodgeTimer = 0;
@@ -80,7 +79,6 @@ export class GameScene extends BaseScene {
 
     // Reset state for scene restart
     this.isGameOver = false;
-    this.restartPending = false;
     this.bossPhase = 1;
     this.dodgeCooldown = 0;
     this.isDodging = false;
@@ -227,11 +225,10 @@ export class GameScene extends BaseScene {
   update(time: number, delta: number): void {
     super.update(time, delta);
     if (this.isGameOver) {
-      if (this.restartPending) {
-        // Can't use scene.restart() — Phaser silently fails when timeScale is modified.
-        // Reload the page instead.
-        window.location.reload();
-        return;
+      if (this.actions.justPressed('attack') || this.actions.justPressed('dodge')) {
+        this.time.timeScale = 1;
+        this.physics?.world?.resume?.();
+        this.scene.restart();
       }
       return;
     }
@@ -783,11 +780,7 @@ export class GameScene extends BaseScene {
       this.audio.proceduralMusic.stop(1000);
       this.audio.procedural.gameOver();
       Toast.dismissAll(this);
-      Toast.show(this, { message: 'DEFEATED — Press any key to retry', position: 'center', duration: 99999 });
-      setTimeout(() => {
-        this.game.canvas.addEventListener('pointerdown', () => { this.restartPending = true; }, { once: true });
-        document.addEventListener('keydown', () => { this.restartPending = true; }, { once: true });
-      }, 500);
+      Toast.show(this, { message: 'DEFEATED — Click or Space to retry', position: 'center', duration: 99999 });
     }
   }
 
@@ -817,9 +810,7 @@ export class GameScene extends BaseScene {
 
     this.time.delayedCall(1000, () => {
       Toast.dismissAll(this);
-      Toast.show(this, { message: 'VICTORY! — Press any key to replay', position: 'center', duration: 99999 });
-      this.game.canvas.addEventListener('pointerdown', () => { this.restartPending = true; }, { once: true });
-      document.addEventListener('keydown', () => { this.restartPending = true; }, { once: true });
+      Toast.show(this, { message: 'VICTORY! — Click or Space to replay', position: 'center', duration: 99999 });
     });
     ConsoleReporter.state('Boss defeated! Victory!');
   }

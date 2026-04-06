@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { makeTestScene } from '../../helpers/TestScene';
 
 vi.mock('../../../src/debug/ConsoleReporter', () => ({
   ConsoleReporter: { engine: vi.fn(), error: vi.fn(), input: vi.fn(), log: vi.fn() },
@@ -18,15 +17,25 @@ function makeGamepadStub() {
   };
 }
 
+function makeTestGame(gamepadStub: ReturnType<typeof makeGamepadStub>) {
+  return {
+    input: {
+      keyboard: null,
+      on: vi.fn(),
+      off: vi.fn(),
+      gamepad: gamepadStub,
+    },
+  };
+}
+
 describe('GamepadProvider', () => {
-  let scene: ReturnType<typeof makeTestScene>;
+  let game: ReturnType<typeof makeTestGame>;
   let actionMap: ActionMap;
   let gamepadStub: ReturnType<typeof makeGamepadStub>;
 
   beforeEach(() => {
-    scene = makeTestScene();
     gamepadStub = makeGamepadStub();
-    (scene.input as any).gamepad = gamepadStub;
+    game = makeTestGame(gamepadStub);
     actionMap = new ActionMap({
       actions: {
         jump: { gamepad: '0' },
@@ -36,18 +45,18 @@ describe('GamepadProvider', () => {
   });
 
   it('registers connected and disconnected handlers', () => {
-    new GamepadProvider(scene as any, actionMap);
+    new GamepadProvider(game as any, actionMap);
     expect(gamepadStub.on).toHaveBeenCalledWith('connected', expect.any(Function));
     expect(gamepadStub.on).toHaveBeenCalledWith('disconnected', expect.any(Function));
   });
 
   it('hasGamepad returns false initially', () => {
-    const provider = new GamepadProvider(scene as any, actionMap);
+    const provider = new GamepadProvider(game as any, actionMap);
     expect(provider.hasGamepad()).toBe(false);
   });
 
   it('hasGamepad returns true after gamepad connects', () => {
-    const provider = new GamepadProvider(scene as any, actionMap);
+    const provider = new GamepadProvider(game as any, actionMap);
     // Simulate gamepad connection
     const connectedHandler = gamepadStub.on.mock.calls.find(
       (c: any[]) => c[0] === 'connected',
@@ -58,7 +67,7 @@ describe('GamepadProvider', () => {
   });
 
   it('hasGamepad returns false after gamepad disconnects', () => {
-    const provider = new GamepadProvider(scene as any, actionMap);
+    const provider = new GamepadProvider(game as any, actionMap);
     const connectedHandler = gamepadStub.on.mock.calls.find(
       (c: any[]) => c[0] === 'connected',
     )![1];
@@ -73,7 +82,7 @@ describe('GamepadProvider', () => {
   });
 
   it('isActionDown checks the correct button', () => {
-    const provider = new GamepadProvider(scene as any, actionMap);
+    const provider = new GamepadProvider(game as any, actionMap);
     // Connect gamepad
     const connectedHandler = gamepadStub.on.mock.calls.find(
       (c: any[]) => c[0] === 'connected',
@@ -96,12 +105,12 @@ describe('GamepadProvider', () => {
   });
 
   it('isActionDown returns false when no gamepad connected', () => {
-    const provider = new GamepadProvider(scene as any, actionMap);
+    const provider = new GamepadProvider(game as any, actionMap);
     expect(provider.isActionDown('jump')).toBe(false);
   });
 
   it('getAxis returns stick values with deadzone applied', () => {
-    const provider = new GamepadProvider(scene as any, actionMap);
+    const provider = new GamepadProvider(game as any, actionMap);
     const connectedHandler = gamepadStub.on.mock.calls.find(
       (c: any[]) => c[0] === 'connected',
     )![1];
@@ -119,7 +128,7 @@ describe('GamepadProvider', () => {
   });
 
   it('getAxis applies deadzone — small values become 0', () => {
-    const provider = new GamepadProvider(scene as any, actionMap, 0.2);
+    const provider = new GamepadProvider(game as any, actionMap, 0.2);
     const connectedHandler = gamepadStub.on.mock.calls.find(
       (c: any[]) => c[0] === 'connected',
     )![1];
@@ -137,13 +146,13 @@ describe('GamepadProvider', () => {
   });
 
   it('getAxis returns zero when no gamepad', () => {
-    const provider = new GamepadProvider(scene as any, actionMap);
+    const provider = new GamepadProvider(game as any, actionMap);
     const axis = provider.getAxis();
     expect(axis).toEqual({ x: 0, y: 0 });
   });
 
   it('destroy removes event handlers', () => {
-    const provider = new GamepadProvider(scene as any, actionMap);
+    const provider = new GamepadProvider(game as any, actionMap);
     provider.destroy();
     expect(gamepadStub.off).toHaveBeenCalledWith('connected', expect.any(Function));
     expect(gamepadStub.off).toHaveBeenCalledWith('disconnected', expect.any(Function));
@@ -152,7 +161,7 @@ describe('GamepadProvider', () => {
   it('detects already-connected gamepads', () => {
     gamepadStub.total = 1;
     gamepadStub.pad1 = { index: 0 };
-    const provider = new GamepadProvider(scene as any, actionMap);
+    const provider = new GamepadProvider(game as any, actionMap);
     expect(provider.hasGamepad()).toBe(true);
   });
 });

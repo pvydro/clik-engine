@@ -13,6 +13,7 @@ import {
   validateHexColor,
   validatePositiveInt,
 } from '../utils/validation';
+import { InputManager } from '../input/InputManager';
 import { PluginManager } from '../plugin/PluginManager';
 
 const VALID_SCALES: readonly ScalePresetType[] = ['mobile-portrait', 'mobile-landscape', 'desktop', 'auto'];
@@ -129,6 +130,10 @@ export function createGame(config: ClikGameConfig): Phaser.Game {
   }
 
   game.events.once(Phaser.Core.Events.READY, () => {
+    // Create game-level InputManager — survives scene transitions and restarts
+    const inputManager = new InputManager(game, config.input);
+    game.registry.set('__clikInputManager', inputManager);
+
     // Warn about Canvas renderer limitations
     if (game.renderer.type === Phaser.CANVAS) {
       ConsoleReporter.engine(
