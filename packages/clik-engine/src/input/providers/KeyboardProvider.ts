@@ -7,22 +7,29 @@ import type { InputProvider } from './InputProvider';
  * Binds to game.input.keyboard so keys survive scene transitions.
  */
 export class KeyboardProvider implements InputProvider {
-  private game: Phaser.Game;
   private actionMap: ActionMap;
   private keyObjects: Map<string, Phaser.Input.Keyboard.Key[]> = new Map();
   private actions: string[];
+  private initialized = false;
 
-  constructor(game: Phaser.Game, actionMap: ActionMap) {
-    this.game = game;
+  constructor(actionMap: ActionMap) {
     this.actionMap = actionMap;
     this.actions = actionMap.allActions();
+  }
+
+  /** Bind keys via a scene's keyboard plugin. Called once on first scene access. */
+  initFromScene(scene: Phaser.Scene): void {
+    if (this.initialized || !scene.input.keyboard) return;
+    this.initialized = true;
 
     for (const action of this.actions) {
-      const keys = actionMap.getKeys(action);
-      if (keys.length > 0 && game.input.keyboard) {
+      const keys = this.actionMap.getKeys(action);
+      if (keys.length > 0) {
         const keyObjs = keys.map(k =>
-          game.input.keyboard!.addKey(
-            Phaser.Input.Keyboard.KeyCodes[k as keyof typeof Phaser.Input.Keyboard.KeyCodes] ?? k
+          scene.input.keyboard!.addKey(
+            Phaser.Input.Keyboard.KeyCodes[k as keyof typeof Phaser.Input.Keyboard.KeyCodes] ?? k,
+            true,  // enableCapture
+            false, // emitOnRepeat
           )
         );
         this.keyObjects.set(action, keyObjs);
@@ -44,13 +51,7 @@ export class KeyboardProvider implements InputProvider {
   }
 
   destroy(): void {
-    if (this.game.input.keyboard) {
-      for (const keys of this.keyObjects.values()) {
-        for (const key of keys) {
-          this.game.input.keyboard.removeKey(key, true);
-        }
-      }
-    }
     this.keyObjects.clear();
+    this.initialized = false;
   }
 }

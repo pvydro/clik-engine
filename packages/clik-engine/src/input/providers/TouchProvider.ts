@@ -13,32 +13,42 @@ interface SwipeState {
 /**
  * Touch/swipe input provider — detects tap and swipe gestures
  * and maps them to actions via ActionMap touch bindings.
- * Binds to game.input so gestures survive scene transitions.
+ * Binds lazily via initFromScene() so it survives scene transitions.
  */
 export class TouchProvider implements InputProvider {
-  private game: Phaser.Game;
   private actionMap: ActionMap;
   private swipeState: SwipeState = { startX: 0, startY: 0, startTime: 0, active: false };
   private lastSwipe: string | null = null;
   private swipeConsumed = false;
   private pointerIsDown = false;
-  /** Latched flag: set on pointerdown, cleared after InputManager reads it */
   private pointerDownThisFrame = false;
+  private pointerX = 0;
+  private pointerY = 0;
+  private initialized = false;
+  private scene: Phaser.Scene | null = null;
   private pointerDownHandler: ((pointer: Phaser.Input.Pointer) => void) | null = null;
   private pointerUpHandler: ((pointer: Phaser.Input.Pointer) => void) | null = null;
 
   private swipeThreshold: number;
   private swipeMaxTime: number;
 
-  constructor(game: Phaser.Game, actionMap: ActionMap, swipeThreshold = 50, swipeMaxTime = 300) {
-    this.game = game;
+  constructor(actionMap: ActionMap, swipeThreshold = 50, swipeMaxTime = 300) {
     this.actionMap = actionMap;
     this.swipeThreshold = swipeThreshold;
     this.swipeMaxTime = swipeMaxTime;
+  }
+
+  /** Bind pointer events from a scene's input plugin. Called once. */
+  initFromScene(scene: Phaser.Scene): void {
+    if (this.initialized) return;
+    this.initialized = true;
+    this.scene = scene;
 
     this.pointerDownHandler = (pointer: Phaser.Input.Pointer) => {
       this.pointerIsDown = true;
       this.pointerDownThisFrame = true;
+      this.pointerX = pointer.x;
+      this.pointerY = pointer.y;
       this.swipeState = {
         startX: pointer.x,
         startY: pointer.y,
@@ -48,10 +58,12 @@ export class TouchProvider implements InputProvider {
       this.lastSwipe = null;
       this.swipeConsumed = false;
     };
-    game.input.on('pointerdown', this.pointerDownHandler);
+    scene.input.on('pointerdown', this.pointerDownHandler);
 
     this.pointerUpHandler = (pointer: Phaser.Input.Pointer) => {
       this.pointerIsDown = false;
+      this.pointerX = pointer.x;
+      this.pointerY = pointer.y;
       if (!this.swipeState.active) return;
       this.swipeState.active = false;
 
@@ -81,21 +93,17 @@ export class TouchProvider implements InputProvider {
       this.swipeConsumed = false;
       ConsoleReporter.input(`gesture: ${this.lastSwipe}`);
     };
-    game.input.on('pointerup', this.pointerUpHandler);
+    scene.input.on('pointerup', this.pointerUpHandler);
   }
 
-  update(): void {
-    // No-op: state managed via event handlers.
-  }
+  update(): void {}
 
   isActionDown(action: string): boolean {
-    // pointer: 'down' binding — true while held OR on the frame it was pressed
     const pointerBinding = this.actionMap.getPointer(action);
     if (pointerBinding === 'down' && (this.pointerIsDown || this.pointerDownThisFrame)) return true;
     return false;
   }
 
-  /** @internal Called by InputManager after all actions have been polled */
   endFrame(): void {
     this.pointerDownThisFrame = false;
   }
@@ -104,7 +112,6 @@ export class TouchProvider implements InputProvider {
     const touchBinding = this.actionMap.getTouch(action);
     if (touchBinding && this.lastSwipe === touchBinding && !this.swipeConsumed) {
       this.swipeConsumed = true;
-      // Clear swipe on next frame via setTimeout (not affected by scene timeScale)
       setTimeout(() => {
         if (this.lastSwipe === touchBinding) {
           this.lastSwipe = null;
@@ -115,17 +122,24 @@ export class TouchProvider implements InputProvider {
     return false;
   }
 
+  /** Get current pointer state */
+  getPointerState(): { x: number; y: number; isDown: boolean } {
+    return { x: this.pointerX, y: this.pointerY, isDown: this.pointerIsDown };
+  }
+
   setSwipeThreshold(distance: number, maxTime?: number): void {
     this.swipeThreshold = distance;
     if (maxTime !== undefined) this.swipeMaxTime = maxTime;
   }
 
   destroy(): void {
-    if (this.pointerDownHandler) {
-      this.game.input.off('pointerdown', this.pointerDownHandler);
+    if (this.scene && this.pointerDownHandler) {
+      this.scene.input.off('pointerdown', this.pointerDownHandler);
     }
-    if (this.pointerUpHandler) {
-      this.game.input.off('pointerup', this.pointerUpHandler);
+    if (this.scene && this.pointerUpHandler) {
+      this.scene.input.off('pointerup', this.pointerUpHandler);
     }
+    this.initialized = false;
+    this.scene = null;
   }
 }

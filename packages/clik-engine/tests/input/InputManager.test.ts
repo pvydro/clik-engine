@@ -54,7 +54,9 @@ describe('InputManager', () => {
 
   beforeEach(() => {
     game = makeTestGame();
-    mgr = new InputManager(game as any, baseConfig);
+    mgr = new InputManager(baseConfig);
+    // Initialize keyboard keys (normally done by BaseScene on first access)
+    mgr.initFromScene({ input: { keyboard: game.input.keyboard, on: vi.fn(), off: vi.fn(), gamepad: null } } as any);
   });
 
   it('constructs and initialises action states', () => {
@@ -70,7 +72,8 @@ describe('InputManager', () => {
     addKeyMock.mockReturnValue(keyObj);
 
     // Recreate manager so the new key stub is captured
-    mgr = new InputManager(game as any, baseConfig);
+    mgr = new InputManager(baseConfig);
+    mgr.initFromScene({ input: { keyboard: game.input.keyboard, on: vi.fn(), off: vi.fn(), gamepad: null } } as any);
     mgr.update();
 
     expect(mgr.isDown('jump')).toBe(true);
@@ -80,7 +83,8 @@ describe('InputManager', () => {
     const addKeyMock = game.input.keyboard.addKey as ReturnType<typeof vi.fn>;
     const keyObj = { isDown: false };
     addKeyMock.mockReturnValue(keyObj);
-    mgr = new InputManager(game as any, baseConfig);
+    mgr = new InputManager(baseConfig);
+    mgr.initFromScene({ input: { keyboard: game.input.keyboard, on: vi.fn(), off: vi.fn(), gamepad: null } } as any);
 
     mgr.update();
     expect(mgr.justPressed('jump')).toBe(false);
@@ -98,7 +102,8 @@ describe('InputManager', () => {
     const addKeyMock = game.input.keyboard.addKey as ReturnType<typeof vi.fn>;
     const keyObj = { isDown: true };
     addKeyMock.mockReturnValue(keyObj);
-    mgr = new InputManager(game as any, baseConfig);
+    mgr = new InputManager(baseConfig);
+    mgr.initFromScene({ input: { keyboard: game.input.keyboard, on: vi.fn(), off: vi.fn(), gamepad: null } } as any);
 
     mgr.update();
     expect(mgr.justReleased('jump')).toBe(false);
@@ -132,7 +137,8 @@ describe('InputManager', () => {
       return { isDown: false };
     });
 
-    mgr = new InputManager(game as any, baseConfig);
+    mgr = new InputManager(baseConfig);
+    mgr.initFromScene({ input: { keyboard: game.input.keyboard, on: vi.fn(), off: vi.fn(), gamepad: null } } as any);
     mgr.update();
 
     const result = mgr.axis('left', 'right', 'up', 'down');
@@ -147,11 +153,12 @@ describe('InputManager', () => {
     expect(result.y).toBe(0);
   });
 
-  it('getPointer returns active pointer data', () => {
+  it('getPointer returns pointer state', () => {
     const ptr = mgr.getPointer();
-    expect(ptr.x).toBe(10);
-    expect(ptr.y).toBe(20);
-    expect(ptr.isDown).toBe(true);
+    // Initial state before any pointer events
+    expect(ptr.x).toBe(0);
+    expect(ptr.y).toBe(0);
+    expect(ptr.isDown).toBe(false);
   });
 
   it('hasGamepad returns false when no gamepad', () => {

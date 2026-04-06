@@ -14,40 +14,36 @@ vi.mock('../../../src/debug/ConsoleReporter', () => ({
 import { KeyboardProvider } from '../../../src/input/providers/KeyboardProvider';
 import { ActionMap } from '../../../src/input/ActionMap';
 
-function makeTestGame() {
+function makeTestScene() {
   return {
     input: {
       keyboard: {
-        on: vi.fn(),
-        off: vi.fn(),
-        addKey: vi.fn(() => ({ isDown: false })),
+        addKey: vi.fn(() => ({ isDown: false, enabled: true })),
         removeKey: vi.fn(),
-        createCursorKeys: vi.fn(() => ({})),
       },
-      on: vi.fn(),
-      off: vi.fn(),
     },
   };
 }
 
 describe('KeyboardProvider', () => {
-  let game: ReturnType<typeof makeTestGame>;
+  let scene: ReturnType<typeof makeTestScene>;
   let actionMap: ActionMap;
   let provider: KeyboardProvider;
 
   beforeEach(() => {
-    game = makeTestGame();
+    scene = makeTestScene();
     actionMap = new ActionMap({
       actions: {
         jump: { keys: ['SPACE'] },
         fire: { keys: ['Z', 'X'] },
       },
     });
-    provider = new KeyboardProvider(game as any, actionMap);
+    provider = new KeyboardProvider(actionMap);
+    provider.initFromScene(scene as any);
   });
 
   it('registers keyboard keys via addKey for each action binding', () => {
-    const addKey = game.input.keyboard.addKey;
+    const addKey = scene.input.keyboard.addKey;
     // jump has 1 key, fire has 2 keys → 3 addKey calls
     expect(addKey).toHaveBeenCalledTimes(3);
   });
@@ -58,12 +54,13 @@ describe('KeyboardProvider', () => {
   });
 
   it('isActionDown returns true when key.isDown is true', () => {
-    const keyObj = { isDown: true };
-    const addKeyMock = game.input.keyboard.addKey as ReturnType<typeof vi.fn>;
+    const keyObj = { isDown: true, enabled: true };
+    const addKeyMock = scene.input.keyboard.addKey as ReturnType<typeof vi.fn>;
     addKeyMock.mockReturnValue(keyObj);
 
     // Recreate to capture the new key stubs
-    provider = new KeyboardProvider(game as any, actionMap);
+    provider = new KeyboardProvider(actionMap);
+    provider.initFromScene(scene as any);
     expect(provider.isActionDown('jump')).toBe(true);
   });
 
@@ -76,8 +73,15 @@ describe('KeyboardProvider', () => {
     expect(provider.consumeAction('fire')).toBe(false);
   });
 
-  it('destroy removes keys and clears internal map', () => {
+  it('initFromScene only runs once', () => {
+    const scene2 = makeTestScene();
+    provider.initFromScene(scene2 as any);
+    // Second call should be a no-op
+    expect(scene2.input.keyboard.addKey).not.toHaveBeenCalled();
+  });
+
+  it('destroy clears internal map', () => {
     provider.destroy();
-    expect(game.input.keyboard.removeKey).toHaveBeenCalledTimes(3);
+    expect(provider.isActionDown('jump')).toBe(false);
   });
 });

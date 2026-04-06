@@ -33,6 +33,8 @@ export class BaseScene extends Phaser.Scene {
   protected get actions(): InputManager {
     if (!this._actions) {
       this._actions = this.game.registry.get('__clikInputManager') as InputManager;
+      // Initialize providers from this scene's input plugins (only runs once)
+      this._actions?.initFromScene(this);
     }
     return this._actions;
   }

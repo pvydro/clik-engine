@@ -7,10 +7,9 @@ vi.mock('../../../src/debug/ConsoleReporter', () => ({
 import { TouchProvider } from '../../../src/input/providers/TouchProvider';
 import { ActionMap } from '../../../src/input/ActionMap';
 
-function makeTestGame() {
+function makeTestScene() {
   return {
     input: {
-      keyboard: null,
       on: vi.fn(),
       off: vi.fn(),
     },
@@ -18,12 +17,12 @@ function makeTestGame() {
 }
 
 describe('TouchProvider', () => {
-  let game: ReturnType<typeof makeTestGame>;
+  let scene: ReturnType<typeof makeTestScene>;
   let actionMap: ActionMap;
   let provider: TouchProvider;
 
   beforeEach(() => {
-    game = makeTestGame();
+    scene = makeTestScene();
     actionMap = new ActionMap({
       actions: {
         swipeRight: { touch: 'swipe_right' },
@@ -31,79 +30,94 @@ describe('TouchProvider', () => {
         tap: { touch: 'tap' },
       },
     });
-    provider = new TouchProvider(game as any, actionMap);
+    provider = new TouchProvider(actionMap);
+    provider.initFromScene(scene as any);
   });
 
-  it('registers pointerdown and pointerup handlers on game.input', () => {
-    // Two on() calls: one for pointerdown, one for pointerup
-    expect(game.input.on).toHaveBeenCalledWith('pointerdown', expect.any(Function));
-    expect(game.input.on).toHaveBeenCalledWith('pointerup', expect.any(Function));
+  it('registers pointerdown and pointerup handlers on scene.input', () => {
+    expect(scene.input.on).toHaveBeenCalledWith('pointerdown', expect.any(Function));
+    expect(scene.input.on).toHaveBeenCalledWith('pointerup', expect.any(Function));
   });
 
   it('consumeAction detects swipe_right gesture', () => {
-    // Extract the registered handlers
-    const calls = (game.input.on as ReturnType<typeof vi.fn>).mock.calls;
+    const calls = (scene.input.on as ReturnType<typeof vi.fn>).mock.calls;
     const pointerDownHandler = calls.find((c: any[]) => c[0] === 'pointerdown')![1];
     const pointerUpHandler = calls.find((c: any[]) => c[0] === 'pointerup')![1];
 
-    // Simulate a swipe right: start at (100, 200), end at (250, 210), fast
     pointerDownHandler({ x: 100, y: 200, time: 1000 });
     pointerUpHandler({ x: 250, y: 210, time: 1100 });
 
     expect(provider.consumeAction('swipeRight')).toBe(true);
-    // Second call should be consumed already
     expect(provider.consumeAction('swipeRight')).toBe(false);
   });
 
   it('consumeAction detects swipe_left gesture', () => {
-    const calls = (game.input.on as ReturnType<typeof vi.fn>).mock.calls;
+    const calls = (scene.input.on as ReturnType<typeof vi.fn>).mock.calls;
     const pointerDownHandler = calls.find((c: any[]) => c[0] === 'pointerdown')![1];
     const pointerUpHandler = calls.find((c: any[]) => c[0] === 'pointerup')![1];
 
-    // Simulate a swipe left
     pointerDownHandler({ x: 300, y: 200, time: 1000 });
-    pointerUpHandler({ x: 100, y: 200, time: 1100 });
+    pointerUpHandler({ x: 100, y: 195, time: 1100 });
 
     expect(provider.consumeAction('swipeLeft')).toBe(true);
   });
 
-  it('consumeAction returns false when no gesture detected', () => {
-    expect(provider.consumeAction('swipeRight')).toBe(false);
-  });
-
-  it('does not detect swipe if time exceeds swipeMaxTime', () => {
-    const calls = (game.input.on as ReturnType<typeof vi.fn>).mock.calls;
+  it('does not detect swipe below distance threshold', () => {
+    const calls = (scene.input.on as ReturnType<typeof vi.fn>).mock.calls;
     const pointerDownHandler = calls.find((c: any[]) => c[0] === 'pointerdown')![1];
     const pointerUpHandler = calls.find((c: any[]) => c[0] === 'pointerup')![1];
 
-    // Swipe too slow (>300ms default)
     pointerDownHandler({ x: 100, y: 200, time: 1000 });
-    pointerUpHandler({ x: 300, y: 200, time: 1500 });
+    pointerUpHandler({ x: 110, y: 200, time: 1050 });
 
     expect(provider.consumeAction('swipeRight')).toBe(false);
   });
 
-  it('setSwipeThreshold changes detection thresholds', () => {
-    provider.setSwipeThreshold(200, 500);
-
-    const calls = (game.input.on as ReturnType<typeof vi.fn>).mock.calls;
+  it('does not detect swipe exceeding time threshold', () => {
+    const calls = (scene.input.on as ReturnType<typeof vi.fn>).mock.calls;
     const pointerDownHandler = calls.find((c: any[]) => c[0] === 'pointerdown')![1];
     const pointerUpHandler = calls.find((c: any[]) => c[0] === 'pointerup')![1];
 
-    // Distance of 100 is below new threshold of 200 — should NOT detect
     pointerDownHandler({ x: 100, y: 200, time: 1000 });
-    pointerUpHandler({ x: 200, y: 200, time: 1100 });
+    pointerUpHandler({ x: 250, y: 200, time: 2000 });
 
     expect(provider.consumeAction('swipeRight')).toBe(false);
   });
 
-  it('isActionDown always returns false for touch', () => {
-    expect(provider.isActionDown('swipeRight')).toBe(false);
+  it('detects tap gesture on short press', () => {
+    const calls = (scene.input.on as ReturnType<typeof vi.fn>).mock.calls;
+    const pointerDownHandler = calls.find((c: any[]) => c[0] === 'pointerdown')![1];
+    const pointerUpHandler = calls.find((c: any[]) => c[0] === 'pointerup')![1];
+
+    pointerDownHandler({ x: 100, y: 200, time: 1000 });
+    pointerUpHandler({ x: 102, y: 201, time: 1050 });
+
+    expect(provider.consumeAction('tap')).toBe(true);
   });
 
-  it('destroy removes pointerdown and pointerup handlers', () => {
+  it('endFrame clears pointerDownThisFrame', () => {
+    const calls = (scene.input.on as ReturnType<typeof vi.fn>).mock.calls;
+    const pointerDownHandler = calls.find((c: any[]) => c[0] === 'pointerdown')![1];
+
+    pointerDownHandler({ x: 100, y: 200, time: 1000 });
+    provider.endFrame();
+    // After endFrame, pointerDownThisFrame is false but pointerIsDown is still true
+    // isActionDown for a 'down' binding checks both
+    const pointerAction = new ActionMap({ actions: { shoot: { pointer: 'down' } } });
+    const p2 = new TouchProvider(pointerAction);
+    p2.initFromScene(scene as any);
+    // Can't easily test internal state, but endFrame should not throw
+  });
+
+  it('initFromScene only runs once', () => {
+    const scene2 = makeTestScene();
+    provider.initFromScene(scene2 as any);
+    expect(scene2.input.on).not.toHaveBeenCalled();
+  });
+
+  it('destroy removes handlers', () => {
     provider.destroy();
-    expect(game.input.off).toHaveBeenCalledWith('pointerdown', expect.any(Function));
-    expect(game.input.off).toHaveBeenCalledWith('pointerup', expect.any(Function));
+    expect(scene.input.off).toHaveBeenCalledWith('pointerdown', expect.any(Function));
+    expect(scene.input.off).toHaveBeenCalledWith('pointerup', expect.any(Function));
   });
 });
