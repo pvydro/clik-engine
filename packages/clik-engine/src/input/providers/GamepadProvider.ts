@@ -22,9 +22,14 @@ export class GamepadProvider implements InputProvider {
     this.deadzone = deadzone;
   }
 
-  /** Bind gamepad events from a scene's input plugin. Called once. */
+  /** Bind gamepad events from a scene's input plugin. Rebinds if called with a different scene. */
   initFromScene(scene: Phaser.Scene): void {
-    if (this.initialized || !scene.input.gamepad) return;
+    if (!scene.input.gamepad) return;
+    // Unbind from previous scene if any
+    if (this.scene?.input.gamepad) {
+      if (this.connectedHandler) this.scene.input.gamepad.off('connected', this.connectedHandler);
+      if (this.disconnectedHandler) this.scene.input.gamepad.off('disconnected', this.disconnectedHandler);
+    }
     this.initialized = true;
     this.scene = scene;
 

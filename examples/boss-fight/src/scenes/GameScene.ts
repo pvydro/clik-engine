@@ -775,10 +775,15 @@ export class GameScene extends BaseScene {
     if (health.isDead) {
       this.isGameOver = true;
       this.boss.getComponent<Movement>('movement')?.stop();
+      this.player.getComponent<Movement>('movement')?.stop();
+      this.forceField.enabled = false;
       this.beatSync.stop();
-      this.effectComposer.play('death');
+      // Force normal time — avoid any hitstop/slowmo that could freeze update loop
+      this.time.timeScale = 1;
+      this.physics?.world?.resume?.();
       this.audio.proceduralMusic.stop(1000);
       this.audio.procedural.gameOver();
+      SceneUtils.screenFlash(this, 0xff0000, 400);
       Toast.dismissAll(this);
       Toast.show(this, { message: 'DEFEATED — Click or Space to retry', position: 'center', duration: 99999 });
     }

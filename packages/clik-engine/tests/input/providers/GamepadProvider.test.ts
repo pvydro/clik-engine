@@ -145,13 +145,13 @@ describe('GamepadProvider', () => {
     expect(provider.consumeAction('jump')).toBe(false);
   });
 
-  it('initFromScene only runs once', () => {
+  it('initFromScene re-binds when called with a new scene', () => {
     const scene1 = makeTestScene();
     const scene2 = makeTestScene();
     const provider = new GamepadProvider(actionMap);
     provider.initFromScene(scene1 as any);
     provider.initFromScene(scene2 as any);
-    expect(scene2.input.gamepad.on).not.toHaveBeenCalled();
+    expect(scene2.input.gamepad.on).toHaveBeenCalledWith('connected', expect.any(Function));
   });
 
   it('destroy removes handlers', () => {

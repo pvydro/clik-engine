@@ -34,13 +34,16 @@ export const SceneUtils = {
 
   /**
    * Freeze the scene for a duration (hit-stop / hit-lag effect).
+   * Uses setTimeout (real time) instead of scene.time.delayedCall because
+   * the latter respects timeScale and would never fire when timeScale is 0.
    */
-  async hitStop(scene: Phaser.Scene, durationMs = 50): Promise<void> {
+  hitStop(scene: Phaser.Scene, durationMs = 50): void {
     scene.time.timeScale = 0;
     scene.physics?.world?.pause();
-    await SceneUtils.wait(scene, durationMs);
-    scene.time.timeScale = 1;
-    scene.physics?.world?.resume();
+    setTimeout(() => {
+      scene.time.timeScale = 1;
+      scene.physics?.world?.resume();
+    }, durationMs);
   },
 
   /**
@@ -49,10 +52,11 @@ export const SceneUtils = {
   slowMotion(scene: Phaser.Scene, scale = 0.3, durationMs = 1000): void {
     scene.time.timeScale = scale;
     if (scene.physics?.world) scene.physics.world.timeScale = scale;
-    scene.time.delayedCall(durationMs * scale, () => {
+    // Use setTimeout — delayedCall respects timeScale
+    setTimeout(() => {
       scene.time.timeScale = 1;
       if (scene.physics?.world) scene.physics.world.timeScale = 1;
-    });
+    }, durationMs);
     ConsoleReporter.engine(`Slow motion: ${scale}x for ${durationMs}ms`);
   },
 

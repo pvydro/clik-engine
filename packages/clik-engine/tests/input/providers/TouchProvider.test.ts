@@ -109,10 +109,11 @@ describe('TouchProvider', () => {
     // Can't easily test internal state, but endFrame should not throw
   });
 
-  it('initFromScene only runs once', () => {
+  it('initFromScene re-binds when called with a new scene', () => {
     const scene2 = makeTestScene();
     provider.initFromScene(scene2 as any);
-    expect(scene2.input.on).not.toHaveBeenCalled();
+    expect(scene2.input.on).toHaveBeenCalledWith('pointerdown', expect.any(Function));
+    expect(scene2.input.on).toHaveBeenCalledWith('pointerup', expect.any(Function));
   });
 
   it('destroy removes handlers', () => {

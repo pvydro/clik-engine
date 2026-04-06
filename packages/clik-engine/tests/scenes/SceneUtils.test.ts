@@ -94,28 +94,21 @@ describe('SceneUtils', () => {
   // ── hitStop ───────────────────────────────────────────────────────
 
   describe('hitStop', () => {
-    it('sets timeScale to 0, pauses physics, then restores', async () => {
-      (scene.time.delayedCall as ReturnType<typeof vi.fn>).mockImplementation(
-        (_ms: number, cb: () => void) => { cb(); return { destroy: vi.fn(), remove: vi.fn(), elapsed: 0 }; },
-      );
+    it('sets timeScale to 0, pauses physics, then restores via setTimeout', async () => {
       (scene.physics.world as any).pause = vi.fn();
       (scene.physics.world as any).resume = vi.fn();
 
-      await SceneUtils.hitStop(scene, 50);
+      SceneUtils.hitStop(scene, 10);
 
-      expect(scene.time.delayedCall).toHaveBeenCalledWith(50, expect.any(Function));
+      // Immediately after call, timeScale is 0 and physics paused
+      expect(scene.time.timeScale).toBe(0);
+      expect((scene.physics.world as any).pause).toHaveBeenCalled();
+
+      // Wait for setTimeout to fire
+      await new Promise(r => setTimeout(r, 20));
+
       expect(scene.time.timeScale).toBe(1);
       expect((scene.physics.world as any).resume).toHaveBeenCalled();
-    });
-
-    it('returns a Promise', () => {
-      (scene.time.delayedCall as ReturnType<typeof vi.fn>).mockImplementation(
-        (_ms: number, cb: () => void) => { cb(); return { destroy: vi.fn(), remove: vi.fn(), elapsed: 0 }; },
-      );
-      (scene.physics.world as any).pause = vi.fn();
-      (scene.physics.world as any).resume = vi.fn();
-      const result = SceneUtils.hitStop(scene, 50);
-      expect(result).toBeInstanceOf(Promise);
     });
   });
 

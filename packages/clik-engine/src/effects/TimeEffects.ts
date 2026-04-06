@@ -47,29 +47,27 @@ export class TimeEffects {
     this.scene.time.timeScale = scale;
 
     if (resumeMode === 'instant') {
-      this.scene.time.delayedCall(duration * scale, () => {
+      // Use real-time setTimeout — scene.time.delayedCall respects timeScale
+      setTimeout(() => {
         this.scene.time.timeScale = this.originalTimeScale;
         this.slowMoActive = false;
-      });
+      }, duration);
     } else {
-      // Gradual resume: ramp from scale to 1 over the duration
+      // Gradual resume: ramp from scale to 1 over the duration using setInterval
       const startScale = scale;
       const rampStart = Date.now();
+      const originalScale = this.originalTimeScale;
 
-      const rampTimer = this.scene.time.addEvent({
-        delay: 16,
-        loop: true,
-        callback: () => {
-          const elapsed = Date.now() - rampStart;
-          const t = Math.min(1, elapsed / duration);
-          this.scene.time.timeScale = startScale + (this.originalTimeScale - startScale) * t;
+      const rampInterval = setInterval(() => {
+        const elapsed = Date.now() - rampStart;
+        const t = Math.min(1, elapsed / duration);
+        this.scene.time.timeScale = startScale + (originalScale - startScale) * t;
 
-          if (t >= 1) {
-            rampTimer.destroy();
-            this.slowMoActive = false;
-          }
-        },
-      });
+        if (t >= 1) {
+          clearInterval(rampInterval);
+          this.slowMoActive = false;
+        }
+      }, 16);
     }
   }
 

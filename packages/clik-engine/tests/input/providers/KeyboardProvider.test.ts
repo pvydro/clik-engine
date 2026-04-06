@@ -73,11 +73,11 @@ describe('KeyboardProvider', () => {
     expect(provider.consumeAction('fire')).toBe(false);
   });
 
-  it('initFromScene only runs once', () => {
+  it('initFromScene re-binds when called with a new scene', () => {
     const scene2 = makeTestScene();
     provider.initFromScene(scene2 as any);
-    // Second call should be a no-op
-    expect(scene2.input.keyboard.addKey).not.toHaveBeenCalled();
+    // Should rebind to the new scene
+    expect(scene2.input.keyboard.addKey).toHaveBeenCalledTimes(3);
   });
 
   it('destroy clears internal map', () => {

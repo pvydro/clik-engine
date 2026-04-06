@@ -38,9 +38,15 @@ export class TouchProvider implements InputProvider {
     this.swipeMaxTime = swipeMaxTime;
   }
 
-  /** Bind pointer events from a scene's input plugin. Called once. */
+  /** Bind pointer events from a scene's input plugin. Rebinds if called with a different scene. */
   initFromScene(scene: Phaser.Scene): void {
-    if (this.initialized) return;
+    // Unbind from previous scene if any
+    if (this.scene && this.pointerDownHandler) {
+      this.scene.input.off('pointerdown', this.pointerDownHandler);
+    }
+    if (this.scene && this.pointerUpHandler) {
+      this.scene.input.off('pointerup', this.pointerUpHandler);
+    }
     this.initialized = true;
     this.scene = scene;
 

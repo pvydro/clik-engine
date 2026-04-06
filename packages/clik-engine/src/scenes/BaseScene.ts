@@ -121,6 +121,9 @@ export class BaseScene extends Phaser.Scene {
 
   create(): void {
     ConsoleReporter.scene(`create: ${this.scene.key}`);
+    // Eagerly initialize InputManager from this scene's input plugins
+    const _actions = this.actions;
+    if (_actions) _actions.initFromScene(this);
     // Notify plugins
     const pm = this.game.registry.get('__clikPluginManager') as PluginManager | undefined;
     pm?.onSceneCreate(this);

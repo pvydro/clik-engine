@@ -43,11 +43,15 @@ describe('TimeEffects', () => {
     expect(te.isSlowMoActive).toBe(true);
   });
 
-  it('slowMo instant resumes via delayedCall', () => {
-    const scene = makeScene(true); // auto-fire delayed calls
+  it('slowMo instant resumes via setTimeout', async () => {
+    const scene = makeScene();
     const te = new TimeEffects(scene);
-    te.slowMo(0.3, 1000, 'instant');
-    // delayedCall mock fires immediately
+    te.slowMo(0.3, 10, 'instant');
+    // Immediately after call, slowmo is active and timeScale is 0.3
+    expect(scene.time.timeScale).toBe(0.3);
+    expect(te.isSlowMoActive).toBe(true);
+    // Wait for setTimeout to fire
+    await new Promise(r => setTimeout(r, 20));
     expect(scene.time.timeScale).toBe(1);
     expect(te.isSlowMoActive).toBe(false);
   });

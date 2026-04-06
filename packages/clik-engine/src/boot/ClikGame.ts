@@ -116,6 +116,10 @@ export function createGame(config: ClikGameConfig): Phaser.Game {
   // Store clik config in Phaser's registry for access from scenes
   game.registry.set('__clikConfig', config);
 
+  // Create game-level InputManager immediately (before any scene create)
+  const inputManager = new InputManager(config.input);
+  game.registry.set('__clikInputManager', inputManager);
+
   // Initialize plugin system
   const pluginManager = new PluginManager();
   if (config.plugins?.length) {
@@ -130,11 +134,6 @@ export function createGame(config: ClikGameConfig): Phaser.Game {
   }
 
   game.events.once(Phaser.Core.Events.READY, () => {
-    // Create game-level InputManager — survives scene transitions and restarts.
-    // Providers bind lazily via initFromScene() on first scene access.
-    const inputManager = new InputManager(config.input);
-    game.registry.set('__clikInputManager', inputManager);
-
     // Warn about Canvas renderer limitations
     if (game.renderer.type === Phaser.CANVAS) {
       ConsoleReporter.engine(

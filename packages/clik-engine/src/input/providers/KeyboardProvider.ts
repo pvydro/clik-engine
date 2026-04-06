@@ -17,9 +17,11 @@ export class KeyboardProvider implements InputProvider {
     this.actions = actionMap.allActions();
   }
 
-  /** Bind keys via a scene's keyboard plugin. Called once on first scene access. */
+  /** Bind keys via a scene's keyboard plugin. Rebinds if called with a different scene. */
   initFromScene(scene: Phaser.Scene): void {
-    if (this.initialized || !scene.input.keyboard) return;
+    if (!scene.input.keyboard) return;
+    // Clear previous bindings — scene may have been replaced by restart
+    this.keyObjects.clear();
     this.initialized = true;
 
     for (const action of this.actions) {
