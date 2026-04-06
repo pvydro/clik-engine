@@ -194,7 +194,8 @@ export class BaseScene extends Phaser.Scene {
     // Notify plugins
     const pm = this.game?.registry?.get('__clikPluginManager') as PluginManager | undefined;
     pm?.onSceneShutdown(this);
-    this._actions?.destroy();
+    // Don't destroy actions — Phaser handles keyboard cleanup on restart.
+    // Destroying key objects here conflicts with Phaser's own shutdown sequence.
     this._audio?.destroy();
     this._entities?.clear();
     this._lobby?.destroy();

@@ -228,7 +228,10 @@ export class GameScene extends BaseScene {
     super.update(time, delta);
     if (this.isGameOver) {
       if (this.restartPending) {
-        this.scene.restart();
+        // Can't use scene.restart() — Phaser silently fails when timeScale is modified.
+        // Reload the page instead.
+        window.location.reload();
+        return;
       }
       return;
     }

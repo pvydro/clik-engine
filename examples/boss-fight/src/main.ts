@@ -8,8 +8,7 @@ createGame({
   physics: 'arcade',
   debug: import.meta.env.DEV,
   scenes: [
-    { key: 'intro', class: IntroScene, default: true },
-    { key: 'game', class: GameScene },
+    { key: 'game', class: GameScene, default: true },
   ],
   input: {
     actions: {
