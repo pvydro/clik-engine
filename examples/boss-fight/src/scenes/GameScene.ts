@@ -60,6 +60,7 @@ export class GameScene extends BaseScene {
   // State
   private bossPhase = 1;
   private isGameOver = false;
+  private restartPending = false;
   private dodgeCooldown = 0;
   private isDodging = false;
   private dodgeTimer = 0;
@@ -79,6 +80,7 @@ export class GameScene extends BaseScene {
 
     // Reset state for scene restart
     this.isGameOver = false;
+    this.restartPending = false;
     this.bossPhase = 1;
     this.dodgeCooldown = 0;
     this.isDodging = false;
@@ -225,7 +227,7 @@ export class GameScene extends BaseScene {
   update(time: number, delta: number): void {
     super.update(time, delta);
     if (this.isGameOver) {
-      if (this.actions.justPressed('attack')) {
+      if (this.restartPending) {
         this.scene.restart();
       }
       return;
@@ -778,7 +780,11 @@ export class GameScene extends BaseScene {
       this.audio.proceduralMusic.stop(1000);
       this.audio.procedural.gameOver();
       Toast.dismissAll(this);
-      Toast.show(this, { message: 'DEFEATED — Click to retry', position: 'center', duration: 99999 });
+      Toast.show(this, { message: 'DEFEATED — Press any key to retry', position: 'center', duration: 99999 });
+      setTimeout(() => {
+        this.game.canvas.addEventListener('pointerdown', () => { this.restartPending = true; }, { once: true });
+        document.addEventListener('keydown', () => { this.restartPending = true; }, { once: true });
+      }, 500);
     }
   }
 
@@ -808,7 +814,9 @@ export class GameScene extends BaseScene {
 
     this.time.delayedCall(1000, () => {
       Toast.dismissAll(this);
-      Toast.show(this, { message: 'VICTORY! — Click to replay', position: 'center', duration: 99999 });
+      Toast.show(this, { message: 'VICTORY! — Press any key to replay', position: 'center', duration: 99999 });
+      this.game.canvas.addEventListener('pointerdown', () => { this.restartPending = true; }, { once: true });
+      document.addEventListener('keydown', () => { this.restartPending = true; }, { once: true });
     });
     ConsoleReporter.state('Boss defeated! Victory!');
   }

@@ -17,6 +17,7 @@ export class IntroScene extends BaseScene {
 
   create(): void {
     super.create();
+    this.transitioned = false;
     const { width, height } = this.scale;
     this.cameras.main.setBackgroundColor('#0a0008');
 
@@ -67,15 +68,12 @@ export class IntroScene extends BaseScene {
       this.tweens.add({ targets: this.subtitleText, alpha: 1, duration: 800, delay: 400, ease: 'Sine.easeIn' });
     });
 
-    // Transition to game after 4s — stop orbital first so fadeOut works
+    // Transition to game after 4s
     this.time.delayedCall(4000, () => {
       if (!this.transitioned) {
         this.transitioned = true;
         this.orbital.stop();
-        this.cameras.main.fadeOut(500, 0, 0, 0);
-        this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-          this.scene.start('game');
-        });
+        this.scene.start('game');
       }
     });
 
