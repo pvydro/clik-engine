@@ -10,5 +10,32 @@
   "theme": "default",
   "navigationLinks": {
     "GitHub": "https://github.com/pvydro/clik-engine"
-  }
+  },
+  "categorizeByGroup": true,
+  "categoryOrder": [
+    "Boot",
+    "Scenes",
+    "Input",
+    "Harness",
+    "Entity",
+    "Physics",
+    "Camera",
+    "Animation",
+    "FSM",
+    "Tween",
+    "UI",
+    "Particles",
+    "Effects",
+    "Audio",
+    "Tilemap",
+    "PCG",
+    "AI",
+    "Save",
+    "Network",
+    "Playtest",
+    "Plugin",
+    "Debug",
+    "Utils",
+    "*"
+  ]
 }

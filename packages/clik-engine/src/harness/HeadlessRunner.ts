@@ -19,8 +19,30 @@ export interface HeadlessRunnerOpts {
 }
 
 /**
- * Runs one headless game instance under a scenario. Drives the Phaser loop
- * manually so it advances at synthetic time and never blocks on RAF.
+ * Runs one headless clik-engine game instance under a {@link Scenario}. Drives
+ * the Phaser loop manually via `game.headlessStep(time, delta)` at a fixed
+ * delta so runs fast-forward and never block on RAF.
+ *
+ * You rarely use this directly — prefer {@link HarnessRunner.run} which boots
+ * and pools many instances at once. Use `HeadlessRunner` directly when you
+ * need frame-level control (`stepFrame`) or a single-instance repro.
+ *
+ * The runner forces `headless: true`, `debug: false`, and appends a
+ * {@link ScriptedProvider} to any configured `inputProviders` so scenarios
+ * can press actions without real DOM events.
+ *
+ * @example
+ * ```ts
+ * const runner = new HeadlessRunner({
+ *   config: myGameConfig,
+ *   seed: 42,
+ *   scenario: { strategy: new ScriptedStrategy([...]), maxFrames: 600 },
+ * });
+ * const result = await runner.runUntilDone();
+ * runner.destroy();
+ * ```
+ *
+ * @category Harness
  */
 export class HeadlessRunner {
   readonly seed: number;

@@ -1,15 +1,30 @@
 import type { InputProvider } from './InputProvider';
 
 /**
- * Programmatic input provider — actions are driven by direct method calls
- * instead of real keyboard / touch / gamepad events.
+ * Programmatic {@link InputProvider} — actions are driven by direct method
+ * calls instead of real keyboard / touch / gamepad events.
  *
- * Used by the headless test harness so scenarios can simulate inputs without
- * a DOM. Add to an InputManager via `inputManager.addProvider(scripted)`.
+ * Used by the multi-instance test harness so scenarios can simulate inputs
+ * without a DOM. Add to any `InputManager` via
+ * `inputManager.addProvider(scripted)` — the whole pipeline (action map,
+ * `InputBuffer`, combo detector, `BaseScene.actions`) works exactly as it
+ * does for real input.
  *
  * Two modes:
  *  - `set(action, true|false)` — sticky: stays in that state until changed
- *  - `pulse(action, frames)`   — held down for the next N polled frames
+ *  - `pulse(action, frames)` — held down for the next N polled frames
+ *  - `apply(state)` — bulk set from a `{ action: boolean }` map
+ *  - `clear()` — release everything
+ *
+ * @example
+ * ```ts
+ * const scripted = new ScriptedProvider();
+ * inputManager.addProvider(scripted);
+ * scripted.set('jump', true);
+ * scripted.pulse('attack', 3);
+ * ```
+ *
+ * @category Harness
  */
 export class ScriptedProvider implements InputProvider {
   private sticky: Map<string, boolean> = new Map();

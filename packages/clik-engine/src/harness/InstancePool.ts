@@ -10,11 +10,17 @@ export interface PoolOpts {
 }
 
 /**
- * Boots and runs a batch of HeadlessRunners with bounded concurrency.
+ * Runs a batch of {@link HeadlessRunner}s with bounded concurrency.
  *
  * Each runner is created lazily inside its slot, run to completion, then
- * destroyed before the next one starts in that slot. This caps memory at
- * `concurrency` games at a time, regardless of total batch size.
+ * destroyed before the next one reuses that slot. Memory stays capped at
+ * `concurrency × one-game`, regardless of total batch size — you can sweep
+ * thousands of seeds without OOMing.
+ *
+ * Normally called via {@link HarnessRunner.run}; use directly only if you
+ * need to build runners from non-seed factories.
+ *
+ * @category Harness
  */
 export class InstancePool {
   static async runAll(

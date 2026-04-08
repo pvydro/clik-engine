@@ -1,5 +1,10 @@
 import type { ScenarioContext, ScenarioStrategy } from '../Scenario';
 
+/**
+ * Options for {@link RandomFuzzStrategy}.
+ *
+ * @category Harness
+ */
 export interface FuzzOpts {
   /** Action names to fuzz. Required — the strategy doesn't reach into the action map. */
   actions: string[];
@@ -10,11 +15,24 @@ export interface FuzzOpts {
 }
 
 /**
- * Picks random actions to press/release each frame, using the runner's seeded
- * RNG so each instance reproduces its inputs from its seed.
+ * Picks random actions to press/release each frame, using the runner's
+ * per-instance seeded RNG so each instance reproduces its inputs from its
+ * seed.
  *
- * Used for stability fuzzing: smash inputs and watch for crashes / unhandled
- * errors. Each instance with seed N will always produce the same input stream.
+ * Used for stability fuzzing: smash inputs and watch for crashes, softlocks,
+ * or unhandled errors. Because the RNG is seeded, a failing seed will
+ * *always* reproduce the same input stream — drop the failing seed into a
+ * `HarnessRunner.run({ seeds: [47], concurrency: 1 })` sweep to debug.
+ *
+ * @example
+ * ```ts
+ * new RandomFuzzStrategy({
+ *   actions: ['left', 'right', 'jump', 'attack'],
+ *   toggleChance: 0.3,
+ * });
+ * ```
+ *
+ * @category Harness
  */
 export class RandomFuzzStrategy implements ScenarioStrategy {
   private actions: string[];

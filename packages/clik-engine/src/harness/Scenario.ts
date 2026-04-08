@@ -3,8 +3,11 @@ import type { ScriptedProvider } from '../input/providers/ScriptedProvider';
 import type { SeededRandom } from '../utils/random';
 
 /**
- * Live context handed to a strategy on every frame and to abort/metrics
- * callbacks. The runner builds and updates this in-place per instance.
+ * Live context handed to a {@link ScenarioStrategy} on every frame and to
+ * `shouldAbort` / `collectMetrics` callbacks. The runner builds and mutates
+ * this in-place per instance.
+ *
+ * @category Harness
  */
 export interface ScenarioContext {
   /** The headless Phaser game. */
@@ -27,10 +30,14 @@ export interface ScenarioContext {
 }
 
 /**
- * Strategy decides which actions to press each frame.
+ * Decides which actions to press each frame under the harness. Implemented
+ * by {@link ScriptedStrategy}, {@link RandomFuzzStrategy},
+ * {@link PolicyStrategy}, or your own class.
  *
- * `beforeFrame` runs *before* `game.loop.step()`. Write to `ctx.scripted` to
- * apply inputs for this frame. Strategies may be async — the runner awaits.
+ * `beforeFrame` runs *before* the game step — write to `ctx.scripted` to
+ * apply inputs for this frame. Strategies may be async (the runner awaits).
+ *
+ * @category Harness
  */
 export interface ScenarioStrategy {
   /** Optional one-time setup at boot, e.g. seed randomization. */
@@ -41,6 +48,12 @@ export interface ScenarioStrategy {
   done?(ctx: ScenarioContext): void;
 }
 
+/**
+ * Describes one harness run: the {@link ScenarioStrategy} driving inputs,
+ * a hard frame cap, plus optional abort, metrics, and tagging hooks.
+ *
+ * @category Harness
+ */
 export interface Scenario {
   /** Strategy that drives inputs. Required. */
   strategy: ScenarioStrategy;
@@ -64,7 +77,12 @@ export interface Scenario {
   tags?: string[];
 }
 
-/** Result of running a single instance. */
+/**
+ * Result of running a single harness instance. Collected into
+ * {@link HarnessReport.runs}.
+ *
+ * @category Harness
+ */
 export interface RunResult {
   ok: boolean;
   seed: number;
@@ -77,7 +95,12 @@ export interface RunResult {
   tags?: string[];
 }
 
-/** Aggregated report of a multi-instance run. */
+/**
+ * Aggregated report of a multi-instance harness run. Returned by
+ * {@link HarnessRunner.run} and stored on {@link HarnessReporter.lastReport}.
+ *
+ * @category Harness
+ */
 export interface HarnessReport {
   total: number;
   passed: number;

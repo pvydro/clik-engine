@@ -127,6 +127,7 @@ export class GameScene extends BaseScene {
 | **PCG** | `PCGRegistry` (strategy pattern), 3 generators (`DungeonGenerator`, `PlatformerGenerator`, `ArenaGenerator`), 3 constraints (`ReachabilityConstraint`, `EntityDensityConstraint`, `DifficultyConstraint`), `LevelApplier` (Phaser bridge), `PCGPlugin` |
 | **Debug** | `DebugConsole` (Quake-style command console, 15 commands), `DebugOverlay`, `StateInspector`, `ProfilerDashboard` (FPS graph), `ConsoleReporter`, `Profiler`, `SceneInspector`, `HotState`, `LeakDetector`, `GridOverlay`, `VisualTest` |
 | **Playtest** | `PlaytestReporter` (session recording, input/scene/entity/performance metrics, structured reports for AI analysis) |
+| **Harness** | Multi-instance headless test harness: `HeadlessRunner`, `InstancePool`, `HarnessRunner`, `HarnessReporter`, `ScriptedStrategy`, `RandomFuzzStrategy`, `PolicyStrategy`, `ScriptedProvider`, per-instance seeded RNG. Runs N games at once for bulk seed sweeps, scripted regression tests, and input fuzzing |
 | **Utils** | `Vector2`, `Color`, `SeededRandom`, `ObjectPool`, `Grid2D`, `PriorityQueue`, `SpatialHash`, `findPath` (A*), `GameTimer`, `Cooldown`, `EventBus`, format helpers, validation utilities |
 
 ## Multiplayer
@@ -193,6 +194,59 @@ Register custom generators and constraints via `registry.registerGenerator()` / 
 
 Debug console: `generate dungeon 50 40 --difficulty 5 --seed 42`
 
+## Multi-Instance Test Harness
+
+Run many headless clik-engine game instances in parallel — for bulk seed sweeps, scripted regression tests, random-input fuzzing, and Claude-driven policy exploration. No canvas, no RAF, no DOM. One call boots N games, runs them to completion, and returns a structured report.
+
+```typescript
+import { HarnessRunner, RandomFuzzStrategy } from 'clik-engine';
+
+const report = await HarnessRunner.run({
+  config,                                     // your normal createGame() config
+  scenario: {
+    strategy: new RandomFuzzStrategy({
+      actions: ['left', 'right', 'jump', 'attack'],
+      toggleChance: 0.3,
+    }),
+    maxFrames: 600,
+    collectMetrics: ctx => ctx.snapshot(),    // scene state via inspectState()
+    shouldAbort: ctx => (ctx.snapshot() as any).main?.gameOver && 'died',
+    tags: ['fuzz'],
+  },
+  seeds: { count: 100 },
+  concurrency: 8,
+});
+
+report.passed;          // 94
+report.failed;          // 6
+report.runs[0].metrics; // whatever collectMetrics returned
+```
+
+Or drive it from the browser via the installed singleton:
+
+```typescript
+HarnessReporter.install();   // mounts window.__CLIK_HARNESS
+
+await window.__CLIK_HARNESS.run({ config, scenario, seeds: { count: 25 } });
+window.__CLIK_HARNESS.summary();   // { passed, failed, avgFrames, durationMs }
+window.__CLIK_HARNESS.failures();  // seeds that crashed or aborted
+window.__CLIK_HARNESS.bySeed(42);  // drill into one
+```
+
+Three strategies ship out of the box:
+
+| Strategy | Purpose |
+|---|---|
+| `ScriptedStrategy` | Deterministic `{ frame, action, value }` timeline. Reproducible regression tests. |
+| `RandomFuzzStrategy` | Seeded per-frame toggles. Same seed → same inputs; reproducible crashes. |
+| `PolicyStrategy` | Async `(ctx) => actions`. Claude-driven or heuristic-AI playthroughs. |
+
+Per-instance determinism comes via `getRandom(scene)` — scenes opt in without affecting production gameplay. Scene state snapshots come via the existing `BaseScene.inspectState()` hook, mirrored into a registry-backed store so they work with no debug overlay running.
+
+A reference demo lives at [`dev-harness/multi.html`](dev-harness/multi.html). Claude drives the whole thing via the [`/clik-bulk-test`](.claude/skills/clik-bulk-test/SKILL.md) skill.
+
+Full docs: **[docs/systems/harness.md](docs/systems/harness.md)**.
+
 ## Example Games
 
 | Game | What it demonstrates |
@@ -222,7 +276,7 @@ clik/
 ├── docs/                     # System guides
 │   ├── getting-started.md
 │   ├── migration.md
-│   └── systems/              # network, ai, entity, plugins, ui
+│   └── systems/              # network, ai, entity, plugins, ui, harness
 └── .claude/
     ├── launch.json           # Preview MCP configs
     └── skills/               # Claude skills
@@ -243,12 +297,13 @@ npm run test:coverage           # Coverage report with thresholds
 | `/clik-playtest` | Boot, play-test, find and fix bugs autonomously |
 | `/clik-build` | Production build, bundle size check, release |
 | `/clik-debug` | Diagnose via console logs, screenshots, state inspection |
+| `/clik-bulk-test` | Run many headless instances at once for seed sweeps, scripted regression, fuzzing |
 
 ## Documentation
 
 - [Getting Started](docs/getting-started.md)
 - [Migration Guide](docs/migration.md)
-- System Guides: [Network](docs/systems/network.md) | [AI](docs/systems/ai.md) | [Entity](docs/systems/entity.md) | [Plugins](docs/systems/plugins.md) | [UI](docs/systems/ui.md)
+- System Guides: [Network](docs/systems/network.md) | [AI](docs/systems/ai.md) | [Entity](docs/systems/entity.md) | [Plugins](docs/systems/plugins.md) | [UI](docs/systems/ui.md) | [Harness](docs/systems/harness.md)
 - [API Reference](packages/clik-engine/docs/index.html) (TypeDoc)
 - [Changelog](CHANGELOG.md)
 

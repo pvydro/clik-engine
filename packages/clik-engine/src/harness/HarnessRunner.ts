@@ -17,16 +17,37 @@ export interface RunOpts {
 }
 
 /**
- * Top-level orchestrator. One call → N headless instances → one HarnessReport.
+ * Top-level orchestrator for the multi-instance test harness. One call boots
+ * N headless game instances, runs each through its scenario, and returns a
+ * single {@link HarnessReport} summarising results.
  *
+ * The runner forces `headless: true` and `debug: false`, injects a
+ * {@link ScriptedProvider} into each game's `InputManager`, and installs a
+ * per-instance seeded RNG on `game.registry` at `__clikHarnessRandom` so
+ * scenes can opt into determinism via {@link getRandom}.
+ *
+ * @example Bulk fuzz sweep
  * ```ts
+ * import { HarnessRunner, RandomFuzzStrategy } from 'clik-engine';
+ *
  * const report = await HarnessRunner.run({
- *   config,
- *   scenario: { strategy, maxFrames: 600 },
+ *   config: myGameConfig,
+ *   scenario: {
+ *     strategy: new RandomFuzzStrategy({ actions: ['left', 'right', 'jump'] }),
+ *     maxFrames: 600,
+ *     collectMetrics: ctx => ctx.snapshot(),
+ *   },
  *   seeds: { count: 100 },
  *   concurrency: 8,
+ *   onProgress: (done, total) => console.log(`${done}/${total}`),
  * });
+ *
+ * report.passed;          // 94
+ * report.runs[0].metrics; // per-run metrics
  * ```
+ *
+ * @see [docs/systems/harness.md](../../../../docs/systems/harness.md)
+ * @category Harness
  */
 export class HarnessRunner {
   static async run(opts: RunOpts): Promise<HarnessReport> {

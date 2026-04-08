@@ -10,18 +10,34 @@ interface ProgressState {
 }
 
 /**
- * Singleton mounted on `window.__CLIK_HARNESS` so Claude (or any browser
- * console user) can launch sweeps and read results via `preview_eval`.
+ * Browser-side singleton mounted on `window.__CLIK_HARNESS` so Claude (or any
+ * browser console user) can launch sweeps and read results via `preview_eval`
+ * or DevTools, without needing to import anything.
  *
- * Example:
+ * Call {@link HarnessReporter.install} once at app startup (typically from a
+ * dedicated `multi.html` entry like `dev-harness/multi.html`). Then drive
+ * runs and inspect results entirely through the installed global:
  *
- *   await window.__CLIK_HARNESS.run({
- *     config: myGameConfig,
- *     scenario: { strategy: new RandomFuzzStrategy({ actions: ['jump','left','right'] }), maxFrames: 600 },
- *     seeds: { count: 25 },
- *   });
- *   window.__CLIK_HARNESS.lastReport.summary();
- *   window.__CLIK_HARNESS.failures();
+ * @example
+ * ```ts
+ * HarnessReporter.install();
+ *
+ * // From a browser console or Claude preview_eval:
+ * await window.__CLIK_HARNESS.run({
+ *   config: myGameConfig,
+ *   scenario: {
+ *     strategy: new RandomFuzzStrategy({ actions: ['left','right','jump'] }),
+ *     maxFrames: 600,
+ *   },
+ *   seeds: { count: 25 },
+ * });
+ *
+ * window.__CLIK_HARNESS.summary();    // { passed, failed, durationMs, avgFrames }
+ * window.__CLIK_HARNESS.failures();   // crashed or aborted runs
+ * window.__CLIK_HARNESS.bySeed(42);   // drill into a single run
+ * ```
+ *
+ * @category Harness
  */
 export class HarnessReporter {
   status: Status = 'idle';
