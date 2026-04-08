@@ -45,6 +45,7 @@ export type { InputProvider } from './input/providers/InputProvider';
 export { KeyboardProvider } from './input/providers/KeyboardProvider';
 export { TouchProvider } from './input/providers/TouchProvider';
 export { GamepadProvider } from './input/providers/GamepadProvider';
+export { ScriptedProvider } from './input/providers/ScriptedProvider';
 
 // UI
 export { UIScene } from './ui/UIScene';
@@ -391,6 +392,35 @@ export type {
   EntityStateSnapshot,
   ErrorData,
 } from './network/protocol';
+
+// Harness — multi-instance headless test harness
+export {
+  HeadlessRunner,
+  InstancePool,
+  HarnessRunner,
+  HarnessReporter,
+  ScriptedStrategy,
+  RandomFuzzStrategy,
+  PolicyStrategy,
+  installRandom,
+  getRandom,
+  getSeed,
+  HARNESS_RANDOM_KEY,
+  HARNESS_SEED_KEY,
+} from './harness/index';
+export type {
+  HeadlessRunnerOpts,
+  PoolOpts,
+  RunOpts,
+  Scenario,
+  ScenarioContext,
+  ScenarioStrategy,
+  RunResult,
+  HarnessReport,
+  ScriptStep,
+  FuzzOpts,
+  PolicyFn,
+} from './harness/index';
 
 // Playtest
 export { PlaytestReporter } from './playtest/PlaytestReporter';

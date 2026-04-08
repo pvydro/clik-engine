@@ -5,6 +5,34 @@ All notable changes to `clik-engine` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-04-07
+
+### Added — Multi-Instance Headless Test Harness
+
+New top-level `harness/` system for running many clik-engine game instances in parallel against scripted, fuzz, or Claude-driven scenarios. Designed for bulk seed sweeps, scripted regression tests, random-input fuzzing, and policy-driven exploration — all without rendering.
+
+- **`HeadlessRunner`**: boots one headless Phaser game (no canvas, no audio, no RAF), drives the loop manually via `game.loop.step()` at a fixed delta, and collects metrics + a final snapshot. Forces `headless: true`, `debug: false`, and injects a `ScriptedProvider` so scenarios can press actions without touching the DOM.
+- **`InstancePool`**: runs batches of runners with bounded concurrency (default 8), destroying each game between slot reuses so memory stays capped regardless of total batch size.
+- **`HarnessRunner.run({ config, scenario, seeds, concurrency })`**: top-level orchestrator. Returns a `HarnessReport` with per-run results, pass/fail counts, average frames, and total duration.
+- **`HarnessReporter.install()`**: mounts a singleton on `window.__CLIK_HARNESS` with `run()`, `summary()`, `failures()`, `bySeed()`, `byTag()`, and `abort()` — the surface Claude drives via `preview_eval`.
+- **Strategies**:
+  - `ScriptedStrategy` — deterministic `{ frame, action, value }` timeline
+  - `RandomFuzzStrategy` — per-frame random toggles seeded from the run's RNG (reproducible per seed)
+  - `PolicyStrategy` — async `(ctx) => actions`, for external policy control
+- **`RandomService`**: per-instance `SeededRandom` installed on `game.registry` under `__clikHarnessRandom`. Scenes opt into determinism via `getRandom(this)` — production gameplay is unaffected.
+- **`ScriptedProvider`** (new `InputProvider`): `set(action, pressed)` / `pulse(action, frames)` / `apply(state)`. Added to `InputManager` via new `addProvider()` / `removeProvider()` methods.
+- **`headless` + `inputProviders` config**: new `ClikGameConfig` fields. In headless mode Phaser boots with `type: Phaser.HEADLESS`, no parent/scale, `audio.noAudio`, and `autoFocus: false`; debug overlay scenes are skipped.
+- **Multi-game registry**: `__CLIK_GAMES: Phaser.Game[]` on `globalThis` now tracks all created games (in addition to the legacy `__CLIK_GAME` pointer for back-compat). Cleaned up on game destroy.
+- **New log channel**: `[CLIK:HARNESS]` via `ConsoleReporter.harness(...)` — filter with `preview_console_logs(search: "[CLIK:HARNESS]")`.
+- **dev-harness `multi.html`**: a second Vite entry that boots a tiny `HarnessDemoScene` across 25 seeds (fuzz or scripted) and surfaces the report in the page and on `window.__CLIK_HARNESS`.
+- **New skill**: `/clik-bulk-test` — guides Claude through booting a multi.html page, launching a sweep, and drilling into failing seeds.
+- **Tests**: `tests/input/ScriptedProvider.test.ts`, `tests/harness/HeadlessRunner.test.ts`, `tests/harness/strategies.test.ts`. Total 1809 / 1809 passing.
+
+### Changed
+
+- `InputManager` now supports arbitrary extra `InputProvider`s via `addProvider(provider)` / `removeProvider(provider)` / `getExtraProviders()`, polled after the built-in keyboard/touch/gamepad providers.
+- `createGame()` now accepts `config.inputProviders` and hands them to the `InputManager` at boot.
+
 ## [2.2.0] - 2026-04-05
 
 ### Changed — Centralized Input Architecture

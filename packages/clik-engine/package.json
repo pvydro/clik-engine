@@ -4,7 +4,7 @@
     "type": "git",
     "url": "https://github.com/pvydro/clik-engine.git"
   },
-  "version": "2.2.0",
+  "version": "2.3.0",
   "type": "module",
   "main": "dist/clik-engine.js",
   "types": "dist/index.d.ts",

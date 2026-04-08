@@ -4,6 +4,7 @@ import { ConsoleReporter } from '../debug/ConsoleReporter';
 import { KeyboardProvider } from './providers/KeyboardProvider';
 import { TouchProvider } from './providers/TouchProvider';
 import { GamepadProvider } from './providers/GamepadProvider';
+import type { InputProvider } from './providers/InputProvider';
 import type { InputConfig } from '../utils/types';
 
 interface ActionState {
@@ -24,6 +25,7 @@ export class InputManager {
   private keyboard: KeyboardProvider;
   private touch: TouchProvider;
   private gamepad: GamepadProvider;
+  private extraProviders: InputProvider[] = [];
 
   constructor(config?: InputConfig) {
     this.actionMap = new ActionMap(config);
@@ -50,6 +52,7 @@ export class InputManager {
     this.keyboard.update();
     this.touch.update();
     this.gamepad.update();
+    for (const p of this.extraProviders) p.update();
 
     for (const action of this.cachedActions) {
       const state = this.states.get(action)!;
@@ -62,6 +65,12 @@ export class InputManager {
       if (this.touch.isActionDown(action)) down = true;
       if (this.touch.consumeAction(action)) down = true;
       if (this.gamepad.isActionDown(action)) down = true;
+      if (!down) {
+        for (const p of this.extraProviders) {
+          if (p.isActionDown(action)) { down = true; break; }
+          if (p.consumeAction(action)) { down = true; break; }
+        }
+      }
 
       state.isDown = down;
 
@@ -72,6 +81,24 @@ export class InputManager {
 
     // Clear latched pointer state after all actions polled
     this.touch.endFrame();
+  }
+
+  /** Append an extra input provider (e.g. ScriptedProvider for the harness). */
+  addProvider(provider: InputProvider): void {
+    this.extraProviders.push(provider);
+  }
+
+  /** Remove a previously-added extra provider. Returns true if it was found. */
+  removeProvider(provider: InputProvider): boolean {
+    const i = this.extraProviders.indexOf(provider);
+    if (i < 0) return false;
+    this.extraProviders.splice(i, 1);
+    return true;
+  }
+
+  /** All extra providers added via addProvider() */
+  getExtraProviders(): readonly InputProvider[] {
+    return this.extraProviders;
   }
 
   isDown(action: string): boolean {
@@ -151,6 +178,8 @@ export class InputManager {
     this.keyboard.destroy();
     this.touch.destroy();
     this.gamepad.destroy();
+    for (const p of this.extraProviders) p.destroy();
+    this.extraProviders = [];
     this.states.clear();
     this.cachedActions = [];
   }

@@ -74,8 +74,8 @@ export function createGame(config: ClikGameConfig): Phaser.Game {
   // boundary cast is intentional and the only place we bridge clik → Phaser types.
   const scenes = config.scenes.map(entry => entry.class) as unknown as Phaser.Types.Scenes.SceneType[];
 
-  // Add debug scenes when debug mode is on
-  if (debug) {
+  // Add debug scenes when debug mode is on (skipped in headless — no rendering)
+  if (debug && !config.headless) {
     (scenes as unknown[]).push(DebugOverlay, StateInspector, GridOverlay, DebugConsole);
   }
 
@@ -94,21 +94,27 @@ export function createGame(config: ClikGameConfig): Phaser.Game {
     };
   }
 
+  const headless = config.headless ?? false;
   const phaserConfig: Phaser.Types.Core.GameConfig = {
-    type: Phaser.AUTO,
-    parent: config.parent ?? 'game',
+    type: headless ? Phaser.HEADLESS : Phaser.AUTO,
+    parent: headless ? undefined : (config.parent ?? 'game'),
     width: config.width ?? scaleConfig.width,
     height: config.height ?? scaleConfig.height,
     backgroundColor: config.backgroundColor ?? '#000000',
-    scale: {
-      mode: scaleConfig.mode,
-      autoCenter: scaleConfig.autoCenter,
-      expandParent: true,
-      parent: config.parent ?? 'game',
-    },
+    scale: headless
+      ? undefined
+      : {
+          mode: scaleConfig.mode,
+          autoCenter: scaleConfig.autoCenter,
+          expandParent: true,
+          parent: config.parent ?? 'game',
+        },
     physics: physicsConfig,
     scene: scenes,
     pixelArt: config.pixelArt ?? false,
+    audio: headless ? { noAudio: true } : undefined,
+    banner: headless ? false : undefined,
+    autoFocus: headless ? false : true,
   };
 
   const game = new Phaser.Game(phaserConfig);
@@ -118,6 +124,9 @@ export function createGame(config: ClikGameConfig): Phaser.Game {
 
   // Create game-level InputManager immediately (before any scene create)
   const inputManager = new InputManager(config.input);
+  if (config.inputProviders?.length) {
+    for (const p of config.inputProviders) inputManager.addProvider(p);
+  }
   game.registry.set('__clikInputManager', inputManager);
 
   // Initialize plugin system
@@ -128,9 +137,21 @@ export function createGame(config: ClikGameConfig): Phaser.Game {
   }
   game.registry.set('__clikPluginManager', pluginManager);
 
-  // Expose game globally in dev for debugging
-  if (debug) {
-    (globalThis as Record<string, unknown>).__CLIK_GAME = game;
+  // Expose game globally in dev for debugging.
+  // Maintain a registry so multiple instances (e.g. test harness) can co-exist;
+  // __CLIK_GAME points at the most-recently-created game for back-compat.
+  if (debug || headless) {
+    const g = globalThis as Record<string, unknown>;
+    g.__CLIK_GAME = game;
+    const list = (g.__CLIK_GAMES as Phaser.Game[] | undefined) ?? [];
+    list.push(game);
+    g.__CLIK_GAMES = list;
+    game.events.once('destroy', () => {
+      const arr = (g.__CLIK_GAMES as Phaser.Game[] | undefined) ?? [];
+      const i = arr.indexOf(game);
+      if (i >= 0) arr.splice(i, 1);
+      if (g.__CLIK_GAME === game) g.__CLIK_GAME = arr[arr.length - 1];
+    });
   }
 
   game.events.once(Phaser.Core.Events.READY, () => {
@@ -143,7 +164,7 @@ export function createGame(config: ClikGameConfig): Phaser.Game {
     }
 
     // Launch debug overlay scenes in parallel (they render on top)
-    if (debug) {
+    if (debug && !config.headless) {
       game.scene.start('__clik_debug_overlay');
       game.scene.start('__clik_state_inspector');
       game.scene.start('__clik_grid_overlay');

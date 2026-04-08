@@ -9,6 +9,7 @@ export enum ClikLogChannel {
   ENGINE = 'CLIK:ENGINE',
   CONSOLE = 'CLIK:CONSOLE',
   PLAYTEST = 'CLIK:PLAYTEST',
+  HARNESS = 'CLIK:HARNESS',
 }
 
 export type ErrorListener = (message: string, suggestion?: string) => void;
@@ -113,5 +114,9 @@ export const ConsoleReporter = {
 
   playtest(message: string, data?: unknown): void {
     this.log(ClikLogChannel.PLAYTEST, message, data);
+  },
+
+  harness(message: string, data?: unknown): void {
+    this.log(ClikLogChannel.HARNESS, message, data);
   },
 };

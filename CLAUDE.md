@@ -122,7 +122,11 @@ Extensible via `ClikPlugin` interface (init/destroy lifecycle) and `ClikScenePlu
 
 ### Input Provider Architecture
 
-`InputManager` delegates to three providers: `KeyboardProvider`, `TouchProvider`, `GamepadProvider`. Each implements `InputProvider` interface. `InputBuffer` for fighting-game input sequences. `RemapHelper` for settings menu key rebinding. Action bindings support `keys`, `touch` (tap/swipe gestures), `pointer: 'down'` (mouse click, fires immediately and stays active while held), and `gamepad`.
+`InputManager` delegates to three providers: `KeyboardProvider`, `TouchProvider`, `GamepadProvider`. Each implements `InputProvider` interface. `InputBuffer` for fighting-game input sequences. `RemapHelper` for settings menu key rebinding. Action bindings support `keys`, `touch` (tap/swipe gestures), `pointer: 'down'` (mouse click, fires immediately and stays active while held), and `gamepad`. Additional providers can be added at runtime via `inputManager.addProvider(provider)`.
+
+### Multi-Instance Headless Test Harness
+
+`harness/` boots many headless game instances in parallel for bulk seed sweeps, scripted regression tests, random-input fuzzing, and Claude-driven exploration. `HeadlessRunner` drives one game via `game.loop.step()` at fixed delta, forcing `headless: true` and injecting a `ScriptedProvider` so scenarios press actions without touching the DOM. `InstancePool` caps memory with bounded concurrency. `HarnessRunner.run({ config, scenario, seeds, concurrency })` is the one-call entry point; `HarnessReporter.install()` mounts a singleton on `window.__CLIK_HARNESS` so Claude can launch sweeps and read summaries via `preview_eval`. Strategies: `ScriptedStrategy` (deterministic timeline), `RandomFuzzStrategy` (seeded toggles), `PolicyStrategy` (async `(ctx) => actions`). Scenes opt into determinism via `getRandom(this)` from `RandomService`. Use the `/clik-bulk-test` skill to drive it.
 
 ## Key Conventions
 
@@ -153,6 +157,7 @@ Structured logging with `ConsoleReporter` — filter with `preview_console_logs(
 | `[CLIK:ASSET]` | Asset loading progress |
 | `[CLIK:AUDIO]` | Music/SFX events |
 | `[CLIK:SAVE]` | Save/load operations |
+| `[CLIK:HARNESS]` | Multi-instance test harness boot/step/summary |
 
 Channels can be individually disabled: `ConsoleReporter.disableChannel(ClikLogChannel.INPUT)`
 
@@ -164,3 +169,4 @@ Debug overlay (when `debug: true`): FPS/scene/entities in top-left, state inspec
 - `/clik-playtest` — boot game via Preview, play-test, find bugs, fix, verify
 - `/clik-build` — production build, bundle size check, release bundle
 - `/clik-debug` — diagnose issues via console logs, screenshots, state inspection
+- `/clik-bulk-test` — run many headless game instances in parallel for bulk seed sweeps, scripted regression tests, and input fuzzing

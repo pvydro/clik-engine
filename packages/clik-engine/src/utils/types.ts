@@ -2,6 +2,7 @@ import type Phaser from 'phaser';
 import type { ClikPluginConfig } from '../plugin/ClikPlugin';
 import type { NetworkConfig } from '../network/protocol';
 import type { A11yConfig } from '../accessibility/A11yManager';
+import type { InputProvider } from '../input/providers/InputProvider';
 
 export interface SceneEntry {
   key: string;
@@ -62,4 +63,16 @@ export interface ClikGameConfig {
   plugins?: ClikPluginConfig[];
   network?: NetworkConfig;
   accessibility?: A11yConfig;
+  /**
+   * Boot in headless mode (Phaser.HEADLESS): no canvas, no audio, no rendering.
+   * Used by the test harness to run many game instances simultaneously for
+   * automated testing, bulk seed sweeps, and input fuzzing.
+   */
+  headless?: boolean;
+  /**
+   * Extra input providers added to the InputManager at boot. Used by the test
+   * harness to inject a `ScriptedProvider` so scenarios can drive gameplay
+   * without real keyboard / touch / gamepad events.
+   */
+  inputProviders?: InputProvider[];
 }

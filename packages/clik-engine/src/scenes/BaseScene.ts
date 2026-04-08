@@ -185,11 +185,27 @@ export class BaseScene extends Phaser.Scene {
   inspectState(label: string, getter: () => Record<string, unknown>): void {
     const inspector = this.game.scene.getScene('__clik_state_inspector') as StateInspector | null;
     inspector?.inspect(label, getter);
+    // Also mirror into a registry-backed store so the headless harness can
+    // read state without the StateInspector scene being active.
+    const reg = this.game.registry;
+    let map = reg.get('__clikHarnessInspectors') as Map<string, Map<string, () => Record<string, unknown>>> | undefined;
+    if (!map) {
+      map = new Map();
+      reg.set('__clikHarnessInspectors', map);
+    }
+    let sceneMap = map.get(this.scene.key);
+    if (!sceneMap) {
+      sceneMap = new Map();
+      map.set(this.scene.key, sceneMap);
+    }
+    sceneMap.set(label, getter);
   }
 
   uninspectState(label: string): void {
     const inspector = this.game.scene.getScene('__clik_state_inspector') as StateInspector | null;
     inspector?.uninspect(label);
+    const map = this.game.registry.get('__clikHarnessInspectors') as Map<string, Map<string, unknown>> | undefined;
+    map?.get(this.scene.key)?.delete(label);
   }
 
   shutdown(): void {

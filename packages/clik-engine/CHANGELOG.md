@@ -5,6 +5,18 @@ All notable changes to `clik-engine` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-04-07
+
+### Added — Multi-Instance Headless Test Harness
+
+New top-level `harness/` module: `HeadlessRunner`, `InstancePool`, `HarnessRunner`, `HarnessReporter`, `ScriptedStrategy`, `RandomFuzzStrategy`, `PolicyStrategy`, `RandomService`. Boots many headless game instances in parallel for bulk seed sweeps, scripted regression tests, input fuzzing, and Claude-driven policy exploration. See root `CHANGELOG.md` for full details.
+
+- New `ScriptedProvider` input provider + `InputManager.addProvider()` / `removeProvider()`
+- `ClikGameConfig.headless` + `ClikGameConfig.inputProviders`
+- `window.__CLIK_GAMES` multi-game registry
+- New `[CLIK:HARNESS]` log channel
+- New skill `/clik-bulk-test`
+
 ## [2.2.0] - 2026-04-05
 
 ### Changed — Centralized Input Architecture
