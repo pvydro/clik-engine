@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import type Phaser from 'phaser';
 import { ConsoleReporter } from '../debug/ConsoleReporter';
 import type { PositionLike, VisibilityLike, SpawnableLike } from '../utils/interfaces';
 

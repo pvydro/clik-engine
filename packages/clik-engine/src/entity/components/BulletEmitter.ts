@@ -1,7 +1,7 @@
 import { Component } from '../Component';
-import { Entity } from '../Entity';
-import { EntityPool } from '../EntityPool';
-import { Movement } from './Movement';
+import type { Entity } from '../Entity';
+import type { EntityPool } from '../EntityPool';
+import type { Movement } from './Movement';
 import { Cooldown } from '../../utils/Cooldown';
 import type { PositionLike } from '../../utils/interfaces';
 import type { PatternConfig, BulletConfig } from '../combat/BulletPattern';

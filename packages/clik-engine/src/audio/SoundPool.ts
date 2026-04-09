@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import type Phaser from 'phaser';
 
 export interface SoundPoolConfig {
   /** Number of pre-allocated instances per key */

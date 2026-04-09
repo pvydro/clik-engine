@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import type Phaser from 'phaser';
 import type { BaseScene } from '../scenes/BaseScene';
 import { Entity } from '../entity/Entity';
 import { TileType } from './PCGTypes';

@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import type Phaser from 'phaser';
 
 /**
  * Time manipulation effects: hitstop, slow-motion, and gradual resume.

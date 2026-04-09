@@ -1,4 +1,4 @@
-import { Entity } from './Entity';
+import type { Entity } from './Entity';
 import { SpatialHash } from '../utils/spatial';
 
 export interface SpatialConfig {

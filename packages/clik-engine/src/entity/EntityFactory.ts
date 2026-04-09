@@ -1,7 +1,8 @@
-import Phaser from 'phaser';
-import { Entity } from './Entity';
-import { EntityRegistry } from './EntityRegistry';
-import { EntityPool, EntityPoolConfig } from './EntityPool';
+import type Phaser from 'phaser';
+import type { Entity } from './Entity';
+import type { EntityRegistry } from './EntityRegistry';
+import type { EntityPoolConfig } from './EntityPool';
+import { EntityPool } from './EntityPool';
 import { ConsoleReporter } from '../debug/ConsoleReporter';
 
 export type EntityBuilder = (scene: Phaser.Scene, x: number, y: number) => Entity;

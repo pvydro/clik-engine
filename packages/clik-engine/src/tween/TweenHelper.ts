@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import type Phaser from 'phaser';
 import type { EaseName } from './easings';
 import type { TweenableLike, PositionLike } from '../utils/interfaces';
 

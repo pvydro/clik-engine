@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import type Phaser from 'phaser';
 import type { PositionLike } from '../utils/interfaces';
 
 export interface RaycastHit {

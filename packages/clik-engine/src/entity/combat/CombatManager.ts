@@ -1,8 +1,8 @@
 import type { Entity } from '../Entity';
-import { EntityRegistry } from '../EntityRegistry';
-import { Hitbox } from '../components/Hitbox';
-import { Hurtbox } from '../components/Hurtbox';
-import { Health } from '../components/Health';
+import type { EntityRegistry } from '../EntityRegistry';
+import type { Hitbox } from '../components/Hitbox';
+import type { Hurtbox } from '../components/Hurtbox';
+import type { Health } from '../components/Health';
 import type { DamageEvent, WorldBox } from './DamageTypes';
 
 let nextEntityId = 1;

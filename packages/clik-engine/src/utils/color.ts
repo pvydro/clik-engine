@@ -9,7 +9,7 @@ export const Color = {
   },
 
   rgbToHex(r: number, g: number, b: number): string {
-    return '#' + [r, g, b].map(v => Math.round(v).toString(16).padStart(2, '0')).join('');
+    return `#${  [r, g, b].map(v => Math.round(v).toString(16).padStart(2, '0')).join('')}`;
   },
 
   rgbToNumber(r: number, g: number, b: number): number {
@@ -43,6 +43,6 @@ export const Color = {
   },
 
   numberToHex(color: number): string {
-    return '#' + (color & 0xffffff).toString(16).padStart(6, '0');
+    return `#${  (color & 0xffffff).toString(16).padStart(6, '0')}`;
   },
 };

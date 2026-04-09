@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import type Phaser from 'phaser';
 
 export interface TrailConfig {
   /** Maximum number of trail points (default: 20) */

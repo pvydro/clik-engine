@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import type Phaser from 'phaser';
 
 type PhysicsTarget = Phaser.GameObjects.GameObject | Phaser.GameObjects.Group;
 

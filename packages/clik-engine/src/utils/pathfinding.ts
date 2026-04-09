@@ -1,4 +1,5 @@
-import { Grid2D, PriorityQueue } from './structures';
+import type { Grid2D} from './structures';
+import { PriorityQueue } from './structures';
 
 export interface PathNode {
   x: number;

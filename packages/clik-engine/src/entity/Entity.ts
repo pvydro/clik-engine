@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { Component } from './Component';
+import type { Component } from './Component';
 import type { EntityRegistry } from './EntityRegistry';
 
 export class Entity extends Phaser.GameObjects.Container {

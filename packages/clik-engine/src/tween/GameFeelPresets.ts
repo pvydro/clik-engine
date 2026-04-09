@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import type Phaser from 'phaser';
 import { tween, tweenSequence } from './TweenHelper';
 import { Color } from '../utils/color';
 

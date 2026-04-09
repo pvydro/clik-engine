@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import type Phaser from 'phaser';
 import { ConsoleReporter } from '../debug/ConsoleReporter';
 import { PhysicsBody, type PhysicsBodyConfig } from './PhysicsBody';
 import { CollisionBuilder } from './CollisionBuilder';

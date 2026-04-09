@@ -1,5 +1,5 @@
-import Phaser from 'phaser';
-import { ShaderManager } from './ShaderManager';
+import type Phaser from 'phaser';
+import type { ShaderManager } from './ShaderManager';
 
 /**
  * Pre-built visual effect combinations for common game scenarios.

@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import type Phaser from 'phaser';
 
 export interface ToastConfig {
   message: string;
@@ -46,7 +46,7 @@ export class Toast {
     // Slide up and fade in
     scene.tweens.add({
       targets: text,
-      y: y,
+      y,
       alpha: 1,
       duration: 200,
       ease: 'Back.easeOut',

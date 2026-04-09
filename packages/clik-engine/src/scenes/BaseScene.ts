@@ -1,11 +1,11 @@
 import Phaser from 'phaser';
 import { ConsoleReporter } from '../debug/ConsoleReporter';
-import { InputManager } from '../input/InputManager';
+import type { InputManager } from '../input/InputManager';
 import { SceneDirector } from './SceneDirector';
 import { AudioManager } from '../audio/AudioManager';
 import { SaveManager } from '../save/SaveManager';
 import { EntityRegistry } from '../entity/EntityRegistry';
-import { StateInspector } from '../debug/StateInspector';
+import type { StateInspector } from '../debug/StateInspector';
 import type { ClikGameConfig } from '../utils/types';
 import type { PluginManager } from '../plugin/PluginManager';
 import { NetworkManager } from '../network/NetworkManager';

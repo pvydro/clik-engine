@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import type Phaser from 'phaser';
 import { ConsoleReporter } from '../../debug/ConsoleReporter';
 import type { ActionMap } from '../ActionMap';
 import type { InputProvider } from './InputProvider';

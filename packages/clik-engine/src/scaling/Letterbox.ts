@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import type Phaser from 'phaser';
 
 /**
  * Letterbox/pillarbox bars for maintaining aspect ratio.

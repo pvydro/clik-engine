@@ -1,6 +1,6 @@
-import Phaser from 'phaser';
+import type Phaser from 'phaser';
 import { Component } from '../Component';
-import { Entity } from '../Entity';
+import type { Entity } from '../Entity';
 import { ConsoleReporter } from '../../debug/ConsoleReporter';
 
 export class Spawner extends Component {

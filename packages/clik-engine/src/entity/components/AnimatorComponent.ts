@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import type Phaser from 'phaser';
 import { Component } from '../Component';
 import { AnimationStateMachine } from '../../animation/AnimationStateMachine';
 import type { AnimStateConfig, AnimTransitionConfig } from '../../animation/AnimationStateMachine';

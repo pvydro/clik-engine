@@ -321,7 +321,7 @@ export class PlaytestReporter implements ClikScenePlugin {
       `Idle periods: ${report.input.idlePeriods.length} (${report.input.idlePeriods.map(p => `${(p.duration / 1000).toFixed(1)}s`).join(', ') || 'none'})`,
       `Entities: peak ${report.entities.peakCount} (${entityPeaks || 'none'})`,
       `Events: ${eventSummary || 'none'}`,
-      `Errors: ${report.errors.length}${report.errors.length > 0 ? ' — ' + report.errors.map(e => e.message).join('; ') : ''}`,
+      `Errors: ${report.errors.length}${report.errors.length > 0 ? ` — ${  report.errors.map(e => e.message).join('; ')}` : ''}`,
     ];
 
     return lines.join('\n');

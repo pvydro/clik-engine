@@ -1,6 +1,6 @@
 import { Component } from '../Component';
-import { BehaviorTree, Blackboard } from '../../ai/BehaviorTree';
-import type { BTNode } from '../../ai/BehaviorTree';
+import { BehaviorTree } from '../../ai/BehaviorTree';
+import type { BTNode , Blackboard } from '../../ai/BehaviorTree';
 
 /**
  * Entity component that runs a BehaviorTree each frame.

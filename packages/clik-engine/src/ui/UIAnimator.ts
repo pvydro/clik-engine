@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import type Phaser from 'phaser';
 import type { TweenableLike } from '../utils/interfaces';
 import type { A11yManager } from '../accessibility/A11yManager';
 

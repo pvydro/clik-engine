@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import type Phaser from 'phaser';
 import { Component } from '../Component';
 import { ConsoleReporter } from '../../debug/ConsoleReporter';
 

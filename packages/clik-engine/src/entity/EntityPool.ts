@@ -1,7 +1,7 @@
-import Phaser from 'phaser';
-import { Entity } from './Entity';
-import { EntityFactory } from './EntityFactory';
-import { EntityRegistry } from './EntityRegistry';
+import type Phaser from 'phaser';
+import type { Entity } from './Entity';
+import type { EntityFactory } from './EntityFactory';
+import type { EntityRegistry } from './EntityRegistry';
 import { ConsoleReporter } from '../debug/ConsoleReporter';
 
 export interface EntityPoolConfig {

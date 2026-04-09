@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import type Phaser from 'phaser';
 
 export interface ImpactDistortionConfig {
   /** Maximum radius of the ripple in pixels */

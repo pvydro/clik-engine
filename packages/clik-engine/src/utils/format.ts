@@ -30,7 +30,7 @@ export function formatTimePrecise(ms: number): string {
 /** Truncate a string with ellipsis */
 export function truncate(str: string, maxLength: number): string {
   if (str.length <= maxLength) return str;
-  return str.slice(0, maxLength - 3) + '...';
+  return `${str.slice(0, maxLength - 3)  }...`;
 }
 
 /** Pad a string to a fixed width */
@@ -40,7 +40,7 @@ export function padRight(str: string, width: number, char = ' '): string {
 
 /** Simple pluralization */
 export function pluralize(count: number, singular: string, plural?: string): string {
-  return count === 1 ? singular : (plural ?? singular + 's');
+  return count === 1 ? singular : (plural ?? `${singular  }s`);
 }
 
 /** Ordinal suffix (1st, 2nd, 3rd, 4th...) */

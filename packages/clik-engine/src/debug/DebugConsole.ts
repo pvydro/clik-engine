@@ -346,7 +346,7 @@ export class DebugConsole extends Phaser.Scene {
     const prefix = this.inputValue.toLowerCase();
     const matches = [...this.commands.keys()].filter(k => k.startsWith(prefix));
     if (matches.length === 1) {
-      this.inputValue = matches[0] + ' ';
+      this.inputValue = `${matches[0]  } `;
     } else if (matches.length > 1) {
       this.log(matches.join('  '), '#888888');
     }

@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import type Phaser from 'phaser';
 import { Color } from '../utils/color';
 import type { GraphicsParticles } from '../particles/GraphicsParticles';
 

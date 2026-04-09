@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import type Phaser from 'phaser';
 import { themedTextColor, themedFont, themedFontSize } from './themed';
 import { getTheme } from './Theme';
 

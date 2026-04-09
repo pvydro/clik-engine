@@ -1,7 +1,7 @@
 import type { PositionLike } from '../../utils/interfaces';
-import { EntityFactory } from '../EntityFactory';
-import { EntityRegistry } from '../EntityRegistry';
-import { Entity } from '../Entity';
+import type { EntityFactory } from '../EntityFactory';
+import type { EntityRegistry } from '../EntityRegistry';
+import type { Entity } from '../Entity';
 
 export interface SpawnDef {
   prefab: string;
