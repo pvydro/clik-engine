@@ -90,6 +90,8 @@ export class Entity extends Phaser.GameObjects.Container {
   /**
    * Reactivate a pooled entity at a new position.
    * Resets position, visibility, alpha, clears tags, and calls reset() on all components.
+   * If a physics body is attached (Arcade or Static), it is re-enabled and
+   * snapped to (x, y) — this clears stale velocity/overlap state from the previous use.
    */
   activate(x: number, y: number): void {
     this.x = x;
@@ -97,6 +99,17 @@ export class Entity extends Phaser.GameObjects.Container {
     this.active = true;
     this.visible = true;
     this.setAlpha(1);
+
+    // Re-enable and reset physics body if one is attached. Using a narrow
+    // structural type so this is safe for entities without a body, Arcade
+    // bodies (which have reset()), and Static bodies (which don't).
+    const body = (this as unknown as {
+      body?: { enable?: boolean; reset?: (x: number, y: number) => void };
+    }).body;
+    if (body) {
+      body.enable = true;
+      body.reset?.(x, y);
+    }
 
     // Clear runtime tags (notifying registry)
     for (const tag of Array.from(this.tags)) {
@@ -113,12 +126,19 @@ export class Entity extends Phaser.GameObjects.Container {
   /**
    * Deactivate a pooled entity without destroying it.
    * Components remain attached but entity is hidden and inactive.
+   * If a physics body is attached, it is disabled so it no longer collides
+   * or consumes world iterations while parked at (-9999, -9999).
    */
   deactivate(): void {
     this.active = false;
     this.visible = false;
     this.x = -9999;
     this.y = -9999;
+
+    const body = (this as unknown as { body?: { enable?: boolean } }).body;
+    if (body) {
+      body.enable = false;
+    }
   }
 
   /** Get debug state for StateInspector */
