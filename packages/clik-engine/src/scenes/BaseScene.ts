@@ -29,18 +29,26 @@ export class BaseScene extends Phaser.Scene {
   private _shuttingDown = false;
   private _hasError = false;
 
-  /** Input manager — game-level singleton, retrieved from registry on first access */
+  /**
+   * Input manager — game-level singleton, retrieved from registry on first access.
+   * Survives scene transitions and restarts, but must not be re-bound to a dead
+   * scene: during shutdown we skip initFromScene and return the cached singleton.
+   */
   protected get actions(): InputManager {
     if (!this._actions) {
       this._actions = this.game.registry.get('__clikInputManager') as InputManager;
-      // Initialize providers from this scene's input plugins (only runs once)
-      this._actions?.initFromScene(this);
+      // Only bind providers to this scene when it is alive. initFromScene on a
+      // shutting-down scene would rewire keyboard/touch/gamepad to dead plugins.
+      if (!this._shuttingDown) {
+        this._actions?.initFromScene(this);
+      }
     }
     return this._actions;
   }
 
   /** Scene transition director — created on first access */
   protected get director(): SceneDirector {
+    if (this._shuttingDown) throw new Error('Cannot access director after scene shutdown');
     if (!this._director) {
       this._director = new SceneDirector(this);
     }
@@ -58,6 +66,7 @@ export class BaseScene extends Phaser.Scene {
 
   /** Save manager — created on first access */
   protected get save(): SaveManager {
+    if (this._shuttingDown) throw new Error('Cannot access save after scene shutdown');
     if (!this._save) {
       this._save = new SaveManager(this._clikConfig?.name ?? 'clik-game', this._clikConfig?.save);
     }
@@ -66,6 +75,7 @@ export class BaseScene extends Phaser.Scene {
 
   /** Entity registry — created on first access, auto-updates in update() */
   protected get entities(): EntityRegistry {
+    if (this._shuttingDown) throw new Error('Cannot access entities after scene shutdown');
     if (!this._entities) {
       this._entities = new EntityRegistry();
     }
@@ -87,6 +97,7 @@ export class BaseScene extends Phaser.Scene {
 
   /** Lobby client — created on first access, depends on network */
   protected get lobby(): Lobby {
+    if (this._shuttingDown) throw new Error('Cannot access lobby after scene shutdown');
     if (!this._lobby) {
       this._lobby = new Lobby(this.network);
     }
@@ -95,6 +106,7 @@ export class BaseScene extends Phaser.Scene {
 
   /** Room client — created on first access, depends on network */
   protected get room(): Room {
+    if (this._shuttingDown) throw new Error('Cannot access room after scene shutdown');
     if (!this._room) {
       this._room = new Room(this.network);
     }
@@ -103,6 +115,7 @@ export class BaseScene extends Phaser.Scene {
 
   /** Accessibility manager — created on first access */
   protected get a11y(): A11yManager {
+    if (this._shuttingDown) throw new Error('Cannot access a11y after scene shutdown');
     if (!this._a11y) {
       this._a11y = new A11yManager(this.game, this._clikConfig?.accessibility);
       // Store in registry so UI components (UIAnimator) can check reducedMotion
@@ -215,12 +228,15 @@ export class BaseScene extends Phaser.Scene {
     const pm = this.game?.registry?.get('__clikPluginManager') as PluginManager | undefined;
     pm?.onSceneShutdown(this);
     // InputManager is game-level — don't destroy or clear it on scene shutdown.
-    // It survives scene transitions and restarts.
+    // It survives scene transitions and restarts. We drop the local reference
+    // so the next init() re-resolves it from the registry (and re-runs
+    // initFromScene for the fresh scene's input plugins).
     this._audio?.destroy();
     this._entities?.clear();
     this._lobby?.destroy();
     this._room?.destroy();
     this._network?.destroy();
+    this._actions = undefined;
     this._director = undefined;
     this._audio = undefined;
     this._save = undefined;
